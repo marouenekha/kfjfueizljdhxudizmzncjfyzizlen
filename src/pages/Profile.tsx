@@ -1,0 +1,256 @@
+import { useState } from "react";
+import { Edit, Settings, Share, Star, MapPin, Calendar, Award, Users } from "lucide-react";
+import { Layout } from "@/components/Layout/Layout";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PostCard } from "@/components/Feed/PostCard";
+
+// Mock user data
+const mockUser = {
+  id: "1",
+  name: "Ahmed Al-Rashid",
+  avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+  coverImage: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&h=300&fit=crop",
+  bio: "Professional plumber with 8+ years of experience in Dubai. Specializing in modern installations and emergency repairs. Quick response guaranteed! 🔧",
+  location: "Dubai Marina, UAE",
+  joinedDate: "2020-03-15",
+  isProvider: true,
+  serviceTypes: ["Plumbing", "Electrical", "Maintenance"],
+  rating: 4.8,
+  reviewCount: 127,
+  completedJobs: 342,
+  followers: 1234,
+  following: 89,
+  priceRange: "AED 100-300 per hour",
+  responseTime: "Usually responds within 2 hours",
+  isOnline: true
+};
+
+// Mock posts
+const mockPosts = [
+  {
+    id: "1",
+    user: mockUser,
+    content: "Just finished installing a modern kitchen sink for a lovely family in Dubai Marina! 🔧✨",
+    images: [
+      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop"
+    ],
+    serviceCategory: "home",
+    location: "Dubai Marina, Dubai",
+    likes: 24,
+    comments: 8,
+    createdAt: "2024-01-15T10:30:00Z",
+    isLiked: false
+  }
+];
+
+const mockReviews = [
+  {
+    id: "1",
+    user: {
+      name: "Sarah Johnson",
+      avatar: "https://images.unsplash.com/photo-1494790108755-2616b2e2c8a6?w=50&h=50&fit=crop&crop=face"
+    },
+    rating: 5,
+    comment: "Ahmed was fantastic! Quick, professional, and solved our plumbing issue perfectly. Highly recommend!",
+    date: "2024-01-10",
+    projectType: "Kitchen Installation"
+  },
+  {
+    id: "2",
+    user: {
+      name: "Mike Chen",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face"
+    },
+    rating: 5,
+    comment: "Excellent service and very reasonable pricing. Ahmed explained everything clearly.",
+    date: "2024-01-05",
+    projectType: "Bathroom Repair"
+  }
+];
+
+export default function Profile() {
+  const [user] = useState(mockUser);
+  const [posts] = useState(mockPosts);
+  const [reviews] = useState(mockReviews);
+
+  return (
+    <Layout title="Profile">
+      <div className="container-mobile pb-4">
+        {/* Cover Image */}
+        <div className="relative -mx-4 -mt-0">
+          <div 
+            className="h-32 bg-gradient-to-r from-primary to-primary-dark"
+            style={{
+              backgroundImage: `url(${user.coverImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          />
+          
+          {/* Profile Picture */}
+          <div className="absolute -bottom-8 left-4">
+            <div className="relative">
+              <Avatar className="w-20 h-20 border-4 border-background">
+                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarFallback className="text-lg">{user.name[0]}</AvatarFallback>
+              </Avatar>
+              {user.isOnline && (
+                <div className="absolute bottom-1 right-1 w-6 h-6 bg-accent rounded-full border-3 border-background"></div>
+              )}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="absolute bottom-4 right-4 flex gap-2">
+            <Button variant="outline" size="sm" className="bg-background/90 backdrop-blur">
+              <Share className="w-4 h-4" />
+            </Button>
+            <Button variant="outline" size="sm" className="bg-background/90 backdrop-blur">
+              <Settings className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Profile Info */}
+        <div className="mt-12 space-y-4">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <h1 className="text-xl font-bold">{user.name}</h1>
+                {user.isProvider && (
+                  <Badge variant="secondary" className="text-xs">
+                    <Award className="w-3 h-3 mr-1" />
+                    Verified Provider
+                  </Badge>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  <span>{user.location}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-4 h-4" />
+                  <span>Joined {new Date(user.joinedDate).getFullYear()}</span>
+                </div>
+              </div>
+
+              <p className="text-sm leading-relaxed mb-4">{user.bio}</p>
+
+              {/* Service Types */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {user.serviceTypes.map((service) => (
+                  <Badge key={service} variant="outline" className="service-badge service-badge-home">
+                    {service}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <Button size="sm" className="ml-4">
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-4 gap-4 p-4 bg-muted/30 rounded-xl">
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                <span className="font-bold text-lg">{user.rating}</span>
+              </div>
+              <span className="text-xs text-muted-foreground">Rating</span>
+            </div>
+            <div className="text-center">
+              <div className="font-bold text-lg">{user.reviewCount}</div>
+              <span className="text-xs text-muted-foreground">Reviews</span>
+            </div>
+            <div className="text-center">
+              <div className="font-bold text-lg">{user.completedJobs}</div>
+              <span className="text-xs text-muted-foreground">Jobs</span>
+            </div>
+            <div className="text-center">
+              <div className="font-bold text-lg">{user.followers}</div>
+              <span className="text-xs text-muted-foreground">Followers</span>
+            </div>
+          </div>
+
+          {/* Provider Info */}
+          {user.isProvider && (
+            <div className="space-y-2 p-4 bg-primary/5 rounded-xl border border-primary/20">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Price Range:</span>
+                <span className="font-medium">{user.priceRange}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Response Time:</span>
+                <span className="font-medium text-accent">{user.responseTime}</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Tabs */}
+        <Tabs defaultValue="posts" className="mt-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="posts">Posts</TabsTrigger>
+            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+            <TabsTrigger value="reviews">Reviews</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="posts" className="mt-4 space-y-4">
+            {posts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
+          </TabsContent>
+          
+          <TabsContent value="portfolio" className="mt-4">
+            <div className="grid grid-cols-2 gap-2">
+              {[1, 2, 3, 4, 5, 6].map((item) => (
+                <div key={item} className="aspect-square bg-muted rounded-lg overflow-hidden">
+                  <img 
+                    src={`https://images.unsplash.com/photo-155690911${item}?w=200&h=200&fit=crop`}
+                    alt={`Portfolio ${item}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="reviews" className="mt-4 space-y-4">
+            {reviews.map((review) => (
+              <div key={review.id} className="post-card p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={review.user.avatar} alt={review.user.name} />
+                    <AvatarFallback>{review.user.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium text-sm">{review.user.name}</span>
+                      <div className="flex">
+                        {[...Array(review.rating)].map((_, i) => (
+                          <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {review.projectType} • {review.date}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm leading-relaxed">{review.comment}</p>
+              </div>
+            ))}
+          </TabsContent>
+        </Tabs>
+      </div>
+    </Layout>
+  );
+}
