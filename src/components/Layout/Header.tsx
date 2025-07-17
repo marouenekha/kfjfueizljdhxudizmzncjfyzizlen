@@ -1,5 +1,6 @@
-import { Bell, Menu } from "lucide-react";
+import { Bell, Menu, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   title: string;
@@ -14,6 +15,7 @@ export const Header = ({
   showNotifications = true,
   onMenuClick 
 }: HeaderProps) => {
+  const navigate = useNavigate();
   return (
     <header className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
       <div className="container-mobile">
@@ -35,6 +37,13 @@ export const Header = ({
           </div>
 
           <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => navigate('/settings')}
+            >
+              <Settings className="w-5 h-5" />
+            </Button>
             {showNotifications && (
               <Button variant="ghost" size="sm" className="relative">
                 <Bell className="w-5 h-5" />

@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from 'react-i18next';
+import { ReviewModal } from "@/components/ui/review-modal";
 
 // Mock conversations data
 const mockConversations = [
@@ -93,11 +95,14 @@ const mockMessages = [
 ];
 
 export default function Messages() {
+  const { t } = useTranslation();
   const [conversations] = useState(mockConversations);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages] = useState(mockMessages);
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [jobStatus, setJobStatus] = useState<"not_started" | "in_progress" | "completed">("not_started");
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
   const filteredConversations = conversations.filter(conversation =>
     conversation.user.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -135,12 +140,26 @@ export default function Messages() {
     }
   };
 
+  const handleJobAction = () => {
+    if (jobStatus === "not_started") {
+      setJobStatus("in_progress");
+    } else if (jobStatus === "in_progress") {
+      setJobStatus("completed");
+      setShowReviewModal(true);
+    }
+  };
+
+  const handleReviewSubmit = (rating: number, comment: string) => {
+    console.log("Review submitted:", { rating, comment });
+    // In real app, send review to API
+  };
+
   if (selectedConversation) {
     const conversation = conversations.find(c => c.id === selectedConversation);
     if (!conversation) return null;
 
     return (
-      <Layout title="Messages" showMobileNav={false}>
+      <Layout title={t('messages')} showMobileNav={false}>
         {/* Chat Header */}
         <div className="sticky top-0 z-40 bg-background border-b border-border">
           <div className="flex items-center justify-between p-4">
@@ -183,6 +202,27 @@ export default function Messages() {
               </Button>
             </div>
           </div>
+          
+          {/* Job Action Button */}
+          {conversation.isProvider && (
+            <div className="px-4 pb-3">
+              <Button 
+                onClick={handleJobAction}
+                className={`w-full ${
+                  jobStatus === "in_progress" 
+                    ? "bg-orange-500 hover:bg-orange-600" 
+                    : jobStatus === "completed"
+                    ? "bg-green-500 hover:bg-green-600"
+                    : ""
+                }`}
+                disabled={jobStatus === "completed"}
+              >
+                {jobStatus === "not_started" && t('startJob')}
+                {jobStatus === "in_progress" && t('jobInProgress')}
+                {jobStatus === "completed" && t('endJob')}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Messages */}
@@ -226,7 +266,7 @@ export default function Messages() {
               <Image className="w-4 h-4" />
             </Button>
             <Input
-              placeholder="Type a message..."
+              placeholder={t('typeMessage')}
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
@@ -241,18 +281,25 @@ export default function Messages() {
             </Button>
           </div>
         </div>
+
+        <ReviewModal
+          isOpen={showReviewModal}
+          onClose={() => setShowReviewModal(false)}
+          onSubmit={handleReviewSubmit}
+          providerName={conversation.user.name}
+        />
       </Layout>
     );
   }
 
   return (
-    <Layout title="Messages">
+    <Layout title={t('messages')}>
       <div className="container-mobile space-y-4 py-4">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
-            placeholder="Search conversations..."
+            placeholder={t('searchConversations')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 pr-4 h-12 rounded-xl"

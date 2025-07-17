@@ -7,8 +7,11 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, Mail, Lock, User, Chrome, Facebook } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
 
 const Auth = () => {
+  const { t } = useTranslation();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -121,15 +124,20 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20 p-4">
       <div className="w-full max-w-md">
+        {/* Language Switcher */}
+        <div className="flex justify-center mb-4">
+          <LanguageSwitcher variant="compact" />
+        </div>
+        
         <Card className="shadow-xl border-0 bg-card/95 backdrop-blur-sm">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-              {isLogin ? 'Connexion' : 'Créer un compte'}
+              {isLogin ? t('login') : t('signup')}
             </CardTitle>
             <CardDescription className="text-muted-foreground">
               {isLogin 
-                ? 'Connectez-vous à votre compte' 
-                : 'Créez votre compte en quelques secondes'
+                ? t('signInWith') + ' ' + t('email')
+                : t('signup') + ' ' + t('email')
               }
             </CardDescription>
           </CardHeader>
@@ -163,7 +171,7 @@ const Auth = () => {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-card px-2 text-muted-foreground">
-                  Ou continuer avec
+                  {t('orContinueWith')}
                 </span>
               </div>
             </div>
@@ -173,14 +181,14 @@ const Auth = () => {
               {!isLogin && (
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-medium">
-                    Nom complet
+                    {t('fullName')}
                   </Label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="name"
                       type="text"
-                      placeholder="Votre nom"
+                      placeholder={t('fullName')}
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
                       className="pl-9"
@@ -197,7 +205,7 @@ const Auth = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
-                  Email
+                  {t('email')}
                 </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -220,7 +228,7 @@ const Auth = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-sm font-medium">
-                  Mot de passe
+                  {t('password')}
                 </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -252,7 +260,7 @@ const Auth = () => {
               {!isLogin && (
                 <div className="space-y-2">
                   <Label htmlFor="confirmPassword" className="text-sm font-medium">
-                    Confirmer le mot de passe
+                    {t('confirmPassword')}
                   </Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -285,7 +293,7 @@ const Auth = () => {
                     <span>Chargement...</span>
                   </div>
                 ) : (
-                  isLogin ? 'Se connecter' : 'Créer le compte'
+                  isLogin ? t('login') : t('signup')
                 )}
               </Button>
             </form>
@@ -306,9 +314,9 @@ const Auth = () => {
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 disabled={loading}
               >
-                {isLogin 
-                  ? "Pas encore de compte ? S'inscrire" 
-                  : 'Déjà un compte ? Se connecter'
+               {isLogin 
+                  ? t('noAccount') 
+                  : t('hasAccount')
                 }
               </button>
             </div>
@@ -320,7 +328,7 @@ const Auth = () => {
                   className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                   disabled={loading}
                 >
-                  Mot de passe oublié ?
+                  {t('forgotPassword')}
                 </button>
               </div>
             )}

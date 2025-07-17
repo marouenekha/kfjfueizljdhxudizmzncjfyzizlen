@@ -6,6 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { useTranslation } from 'react-i18next';
 
 const serviceCategories = [
   { id: "home", label: "Home Services" },
@@ -22,6 +25,7 @@ const mockUser = {
 };
 
 export default function CreatePost() {
+  const { t } = useTranslation();
   const [content, setContent] = useState("");
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -29,6 +33,7 @@ export default function CreatePost() {
   const [hashtags, setHashtags] = useState<string[]>([]);
   const [newHashtag, setNewHashtag] = useState("");
   const [isPosting, setIsPosting] = useState(false);
+  const [userType, setUserType] = useState<"provider" | "seeker">("provider");
 
   const handleImageUpload = () => {
     // In real app, would open file picker and upload images
@@ -75,20 +80,43 @@ export default function CreatePost() {
   };
 
   return (
-    <Layout title="Create Post" showMobileNav={false}>
+    <Layout title={t('createPost')} showMobileNav={false}>
       <div className="container-mobile py-4 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <Button variant="ghost" onClick={() => window.history.back()}>
-            Cancel
+            {t('cancel')}
           </Button>
           <Button 
             onClick={handlePost}
             disabled={!content.trim() || isPosting}
             className="px-6"
           >
-            {isPosting ? "Posting..." : "Post"}
+            {isPosting ? t('posting') : t('post')}
           </Button>
+        </div>
+
+        {/* User Type Selection */}
+        <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
+          <Label className="text-sm font-medium">{t('userType')}</Label>
+          <RadioGroup 
+            value={userType} 
+            onValueChange={(value) => setUserType(value as "provider" | "seeker")}
+            className="grid grid-cols-2 gap-4"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="provider" id="provider" />
+              <Label htmlFor="provider" className="text-sm">
+                {t('serviceProvider')}
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="seeker" id="seeker" />
+              <Label htmlFor="seeker" className="text-sm">
+                {t('serviceSeeker')}
+              </Label>
+            </div>
+          </RadioGroup>
         </div>
 
         {/* User Info */}
@@ -109,7 +137,7 @@ export default function CreatePost() {
         {/* Content Input */}
         <div className="space-y-4">
           <Textarea
-            placeholder="What service did you complete today? Share your work with the community..."
+            placeholder={userType === "provider" ? t('whatServiceCompleted') : t('whatServiceNeeded')}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="min-h-32 border-0 text-base resize-none focus-visible:ring-0 p-0"
@@ -123,10 +151,10 @@ export default function CreatePost() {
 
         {/* Service Category */}
         <div className="space-y-2">
-          <label className="text-sm font-medium">Service Category</label>
+          <label className="text-sm font-medium">{t('serviceCategory')}</label>
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger>
-              <SelectValue placeholder="Select a service category" />
+              <SelectValue placeholder={t('selectCategory')} />
             </SelectTrigger>
             <SelectContent>
               {serviceCategories.map((category) => (
@@ -141,7 +169,7 @@ export default function CreatePost() {
         {/* Images */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">Photos</label>
+            <label className="text-sm font-medium">{t('photos')}</label>
             <Button 
               variant="outline" 
               size="sm" 
@@ -149,7 +177,7 @@ export default function CreatePost() {
               className="flex items-center gap-2"
             >
               <Camera className="w-4 h-4" />
-              Add Photo
+              {t('addPhoto')}
             </Button>
           </div>
           
@@ -178,14 +206,14 @@ export default function CreatePost() {
 
         {/* Hashtags */}
         <div className="space-y-3">
-          <label className="text-sm font-medium">Tags</label>
+          <label className="text-sm font-medium">{t('tags')}</label>
           
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <input
                 type="text"
-                placeholder="Add a tag"
+                placeholder={t('addTag')}
                 value={newHashtag}
                 onChange={(e) => setNewHashtag(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && addHashtag()}
@@ -217,25 +245,25 @@ export default function CreatePost() {
 
         {/* Location */}
         <div className="space-y-2">
-          <label className="text-sm font-medium">Location</label>
+          <label className="text-sm font-medium">{t('location')}</label>
           <div className="flex items-center gap-2 p-3 border border-border rounded-lg">
             <MapPin className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm">{location}</span>
             <Button variant="ghost" size="sm" className="ml-auto text-primary">
-              Change
+              {t('change')}
             </Button>
           </div>
         </div>
 
         {/* Privacy & Settings */}
         <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
-          <h4 className="font-medium text-sm">Post Settings</h4>
+          <h4 className="font-medium text-sm">{t('postSettings')}</h4>
           <div className="flex items-center justify-between">
-            <span className="text-sm">Allow comments</span>
+            <span className="text-sm">{t('allowComments')}</span>
             <input type="checkbox" defaultChecked className="accent-primary" />
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm">Show contact info</span>
+            <span className="text-sm">{t('showContactInfo')}</span>
             <input type="checkbox" defaultChecked className="accent-primary" />
           </div>
         </div>
