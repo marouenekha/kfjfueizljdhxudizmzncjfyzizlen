@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Layout } from "@/components/Layout/Layout";
 import { PostCard } from "@/components/Feed/PostCard";
 import { ServiceCategoryFilter } from "@/components/Feed/ServiceCategoryFilter";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 // Mock data for development
 const mockPosts = [
@@ -71,6 +73,7 @@ const mockPosts = [
 export default function Feed() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [posts] = useState(mockPosts);
+  const navigate = useNavigate();
 
   const filteredPosts = selectedCategory 
     ? posts.filter(post => post.serviceCategory === selectedCategory)
@@ -79,6 +82,18 @@ export default function Feed() {
   return (
     <Layout title="ServiceHub" showMenu={true}>
       <div className="container-mobile space-y-4 py-4">
+        {/* Demo Auth Button */}
+        <div className="bg-card rounded-lg p-4 border">
+          <p className="text-sm text-muted-foreground mb-2">Voir la page d'authentification :</p>
+          <Button 
+            onClick={() => navigate('/auth')} 
+            variant="outline" 
+            className="w-full"
+          >
+            🔐 Page d'Authentification
+          </Button>
+        </div>
+
         {/* Service Category Filter */}
         <ServiceCategoryFilter 
           selectedCategory={selectedCategory}
