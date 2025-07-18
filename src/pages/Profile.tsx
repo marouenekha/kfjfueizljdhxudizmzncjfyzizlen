@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PostCard } from "@/components/Feed/PostCard";
+import { RatingDisplay } from "@/components/ui/rating-display";
 
 // Mock user data
 const mockUser = {
@@ -32,7 +33,11 @@ const mockUser = {
 const mockPosts = [
   {
     id: "1",
-    user: mockUser,
+    user: {
+      ...mockUser,
+      rating: mockUser.rating,
+      totalReviews: mockUser.reviewCount
+    },
     content: "Just finished installing a modern kitchen sink for a lovely family in Dubai Marina! 🔧✨",
     images: [
       "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop"
@@ -160,10 +165,12 @@ export default function Profile() {
           {/* Stats */}
           <div className="grid grid-cols-4 gap-4 p-4 bg-muted/30 rounded-xl">
             <div className="text-center">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="font-bold text-lg">{user.rating}</span>
-              </div>
+              <RatingDisplay 
+                rating={user.rating} 
+                reviews={user.reviewCount} 
+                size="lg"
+                className="justify-center mb-1"
+              />
               <span className="text-xs text-muted-foreground">Rating</span>
             </div>
             <div className="text-center">

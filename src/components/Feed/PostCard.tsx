@@ -3,6 +3,7 @@ import { Heart, MessageCircle, Share, MapPin, MoreHorizontal } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { RatingDisplay } from "@/components/ui/rating-display";
 import { cn } from "@/lib/utils";
 
 interface Post {
@@ -13,6 +14,8 @@ interface Post {
     avatar: string;
     isProvider: boolean;
     serviceTypes: string[];
+    rating?: number;
+    totalReviews?: number;
   };
   content: string;
   images: string[];
@@ -76,11 +79,20 @@ export const PostCard = ({ post }: PostCardProps) => {
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <MapPin className="w-3 h-3" />
-              <span className="truncate">{post.location}</span>
-              <span>•</span>
-              <span>{formatTimeAgo(post.createdAt)}</span>
+            <div className="flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <MapPin className="w-3 h-3" />
+                <span className="truncate">{post.location}</span>
+                <span>•</span>
+                <span>{formatTimeAgo(post.createdAt)}</span>
+              </div>
+              {post.user.rating && post.user.totalReviews && (
+                <RatingDisplay 
+                  rating={post.user.rating} 
+                  reviews={post.user.totalReviews} 
+                  size="sm" 
+                />
+              )}
             </div>
           </div>
         </div>

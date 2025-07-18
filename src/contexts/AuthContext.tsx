@@ -47,23 +47,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate checking for existing session
+    // Check for existing session
     const checkSession = async () => {
       setIsLoading(true);
       try {
         // Simulate API call delay
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // For demo purposes, automatically set user as logged in
-        // In real app, this would check localStorage/sessionStorage or make API call
+        // Check if user is already logged in
         const savedUser = localStorage.getItem("servicehub_user");
         if (savedUser) {
           setUser(JSON.parse(savedUser));
-        } else {
-          // Auto-login for demo
-          setUser(mockUser);
-          localStorage.setItem("servicehub_user", JSON.stringify(mockUser));
         }
+        // No auto-login - user must authenticate
       } catch (error) {
         console.error("Session check failed:", error);
       } finally {

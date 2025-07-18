@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Search as SearchIcon, MapPin, Filter, Star } from "lucide-react";
+import { Search as SearchIcon, MapPin, Filter } from "lucide-react";
 import { Layout } from "@/components/Layout/Layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ServiceCategoryFilter } from "@/components/Feed/ServiceCategoryFilter";
+import { RatingDisplay } from "@/components/ui/rating-display";
 
 // Mock provider data
 const mockProviders = [
@@ -143,11 +144,11 @@ export default function Search() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-semibold truncate">{provider.name}</h3>
-                      <div className="flex items-center gap-1 text-sm">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="font-medium">{provider.rating}</span>
-                        <span className="text-muted-foreground">({provider.reviewCount})</span>
-                      </div>
+                      <RatingDisplay 
+                        rating={provider.rating} 
+                        reviews={provider.reviewCount} 
+                        size="sm"
+                      />
                     </div>
 
                     <div className="flex flex-wrap gap-1 mb-2">

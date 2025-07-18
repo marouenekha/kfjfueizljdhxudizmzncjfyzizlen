@@ -14,7 +14,9 @@ const mockPosts = [
       name: "Ahmed Al-Rashid",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
       isProvider: true,
-      serviceTypes: ["plumbing", "electrical"]
+      serviceTypes: ["plumbing", "electrical"],
+      rating: 4.8,
+      totalReviews: 127
     },
     content: "Just finished installing a modern kitchen sink for a lovely family in Dubai Marina! 🔧✨",
     images: [
@@ -34,7 +36,9 @@ const mockPosts = [
       name: "Sarah Johnson",
       avatar: "https://images.unsplash.com/photo-1494790108755-2616b2e2c8a6?w=150&h=150&fit=crop&crop=face",
       isProvider: true,
-      serviceTypes: ["graphic-design", "web-design"]
+      serviceTypes: ["graphic-design", "web-design"],
+      rating: 4.9,
+      totalReviews: 89
     },
     content: "New logo design for a tech startup! Clean, modern, and memorable. What do you think? 🎨",
     images: [
@@ -54,7 +58,9 @@ const mockPosts = [
       name: "Marie Dubois",
       avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
       isProvider: true,
-      serviceTypes: ["event-planning", "wedding-planning"]
+      serviceTypes: ["event-planning", "wedding-planning"],
+      rating: 4.7,
+      totalReviews: 203
     },
     content: "Successfully organized an amazing corporate event for 200+ guests! Every detail was perfect 💼🎉",
     images: [
@@ -82,17 +88,6 @@ export default function Feed() {
   return (
     <Layout title="ServiceHub" showMenu={true}>
       <div className="container-mobile space-y-4 py-4">
-        {/* Demo Auth Button */}
-        <div className="bg-card rounded-lg p-4 border">
-          <p className="text-sm text-muted-foreground mb-2">Voir la page d'authentification :</p>
-          <Button 
-            onClick={() => navigate('/auth')} 
-            variant="outline" 
-            className="w-full"
-          >
-            🔐 Page d'Authentification
-          </Button>
-        </div>
 
         {/* Service Category Filter */}
         <ServiceCategoryFilter 
