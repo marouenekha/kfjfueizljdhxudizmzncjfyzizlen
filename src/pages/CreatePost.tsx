@@ -82,19 +82,7 @@ export default function CreatePost() {
   return (
     <Layout title={t('createPost')} showMobileNav={false}>
       <div className="container-mobile py-4 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => window.history.back()}>
-            {t('cancel')}
-          </Button>
-          <Button 
-            onClick={handlePost}
-            disabled={!content.trim() || isPosting}
-            className="px-6"
-          >
-            {isPosting ? t('posting') : t('post')}
-          </Button>
-        </div>
+        {/* Header - removed buttons */}
 
         {/* User Type Selection */}
         <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
@@ -266,6 +254,24 @@ export default function CreatePost() {
             <span className="text-sm">{t('showContactInfo')}</span>
             <input type="checkbox" defaultChecked className="accent-primary" />
           </div>
+        </div>
+
+        {/* Action Buttons at Bottom */}
+        <div className="flex gap-3 pt-4">
+          <Button 
+            variant="outline" 
+            onClick={() => window.history.back()}
+            className="flex-1"
+          >
+            {t('cancel')}
+          </Button>
+          <Button 
+            onClick={handlePost}
+            disabled={!content.trim() || isPosting}
+            className="flex-1"
+          >
+            {isPosting ? t('posting') : t('post')}
+          </Button>
         </div>
       </div>
     </Layout>
