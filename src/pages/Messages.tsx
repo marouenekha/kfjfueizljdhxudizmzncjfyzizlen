@@ -162,39 +162,40 @@ export default function Messages() {
       <Layout title={t('messages')} showMobileNav={false}>
         {/* Chat Header */}
         <div className="sticky top-0 z-40 bg-background border-b border-border">
-          <div className="flex items-center justify-between p-4">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => setSelectedConversation(null)}
+                className="flex-shrink-0"
               >
                 ←
               </Button>
-              <Avatar className="w-10 h-10">
+              <Avatar className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
                 <AvatarImage src={conversation.user.avatar} alt={conversation.user.name} />
                 <AvatarFallback>{conversation.user.name[0]}</AvatarFallback>
               </Avatar>
-              <div>
-                <h3 className="font-semibold text-sm">{conversation.user.name}</h3>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-semibold text-sm truncate">{conversation.user.name}</h3>
                 <div className="flex items-center gap-2">
                   {conversation.user.isOnline && (
                     <>
-                      <div className="w-2 h-2 bg-accent rounded-full"></div>
+                      <div className="w-2 h-2 bg-accent rounded-full flex-shrink-0"></div>
                       <span className="text-xs text-muted-foreground">Online</span>
                     </>
                   )}
                   {conversation.isProvider && (
-                    <Badge variant="secondary" className="text-xs">Provider</Badge>
+                    <Badge variant="secondary" className="text-xs hidden sm:inline-flex">Provider</Badge>
                   )}
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Button variant="ghost" size="sm" className="hidden sm:flex">
                 <Phone className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="hidden sm:flex">
                 <Video className="w-4 h-4" />
               </Button>
               <Button variant="ghost" size="sm">
@@ -205,10 +206,10 @@ export default function Messages() {
           
           {/* Job Action Button */}
           {conversation.isProvider && (
-            <div className="px-4 pb-3">
+            <div className="px-3 sm:px-4 pb-3">
               <Button 
                 onClick={handleJobAction}
-                className={`w-full ${
+                className={`w-full text-sm sm:text-base ${
                   jobStatus === "in_progress" 
                     ? "bg-orange-500 hover:bg-orange-600" 
                     : jobStatus === "completed"
@@ -226,14 +227,14 @@ export default function Messages() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-20">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 pb-20">
           {messages.map((message) => (
             <div
               key={message.id}
               className={`flex ${message.senderId === "me" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-xs px-4 py-2 rounded-xl ${
+                className={`max-w-[280px] sm:max-w-xs px-3 sm:px-4 py-2 rounded-xl ${
                   message.senderId === "me"
                     ? "message-sent"
                     : "message-received"
@@ -246,7 +247,7 @@ export default function Messages() {
                     className="rounded-lg max-w-full h-auto"
                   />
                 ) : (
-                  <p className="text-sm">{message.content}</p>
+                  <p className="text-sm leading-relaxed">{message.content}</p>
                 )}
                 <p className={`text-xs mt-1 opacity-70`}>
                   {formatTime(message.timestamp)}
@@ -257,12 +258,12 @@ export default function Messages() {
         </div>
 
         {/* Message Input */}
-        <div className="sticky bottom-0 bg-background border-t border-border p-4">
+        <div className="sticky bottom-0 bg-background border-t border-border p-3 sm:p-4">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="hidden sm:flex">
               <Paperclip className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="hidden sm:flex">
               <Image className="w-4 h-4" />
             </Button>
             <Input
@@ -270,12 +271,13 @@ export default function Messages() {
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-              className="flex-1"
+              className="flex-1 text-sm sm:text-base"
             />
             <Button 
               size="sm"
               onClick={handleSendMessage}
               disabled={!newMessage.trim()}
+              className="flex-shrink-0"
             >
               <Send className="w-4 h-4" />
             </Button>

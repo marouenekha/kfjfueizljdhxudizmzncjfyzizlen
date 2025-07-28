@@ -99,11 +99,11 @@ export default function Search() {
 
         {/* Location & Filter */}
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="flex items-center gap-2 flex-1">
-            <MapPin className="w-4 h-4" />
-            <span className="truncate">Near Dubai Marina</span>
+          <Button variant="outline" size="sm" className="flex items-center gap-2 flex-1 min-w-0">
+            <MapPin className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate text-xs sm:text-sm">Near Dubai Marina</span>
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="flex-shrink-0">
             <Filter className="w-4 h-4" />
           </Button>
         </div>
@@ -117,10 +117,10 @@ export default function Search() {
         {/* Results */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">
+            <h2 className="text-base sm:text-lg font-semibold">
               {filteredProviders.length} providers found
             </h2>
-            <Button variant="ghost" size="sm" className="text-primary">
+            <Button variant="ghost" size="sm" className="text-primary text-xs sm:text-sm">
               Sort by rating
             </Button>
           </div>
@@ -185,10 +185,10 @@ export default function Search() {
 
                 {/* Actions */}
                 <div className="flex gap-2">
-                  <Button size="sm" className="flex-1">
+                  <Button size="sm" className="flex-1 text-xs sm:text-sm">
                     Contact
                   </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
+                  <Button variant="outline" size="sm" className="flex-1 text-xs sm:text-sm">
                     View Profile
                   </Button>
                 </div>

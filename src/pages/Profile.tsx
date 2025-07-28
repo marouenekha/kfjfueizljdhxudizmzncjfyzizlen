@@ -87,7 +87,7 @@ export default function Profile() {
         {/* Cover Image */}
         <div className="relative -mx-4 -mt-0">
           <div 
-            className="h-32 bg-gradient-to-r from-primary to-primary-dark"
+            className="h-24 sm:h-32 md:h-40 bg-gradient-to-r from-primary to-primary-dark"
             style={{
               backgroundImage: `url(${user.coverImage})`,
               backgroundSize: 'cover',
@@ -96,50 +96,50 @@ export default function Profile() {
           />
           
           {/* Profile Picture */}
-          <div className="absolute -bottom-8 left-4">
+          <div className="absolute -bottom-6 sm:-bottom-8 left-3 sm:left-4">
             <div className="relative">
-              <Avatar className="w-20 h-20 border-4 border-background">
+              <Avatar className="w-16 h-16 sm:w-20 sm:h-20 border-3 sm:border-4 border-background">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="text-lg">{user.name[0]}</AvatarFallback>
+                <AvatarFallback className="text-base sm:text-lg">{user.name[0]}</AvatarFallback>
               </Avatar>
               {user.isOnline && (
-                <div className="absolute bottom-1 right-1 w-6 h-6 bg-accent rounded-full border-3 border-background"></div>
+                <div className="absolute bottom-0 sm:bottom-1 right-0 sm:right-1 w-4 h-4 sm:w-6 sm:h-6 bg-accent rounded-full border-2 sm:border-3 border-background"></div>
               )}
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="absolute bottom-4 right-4 flex gap-2">
-            <Button variant="outline" size="sm" className="bg-background/90 backdrop-blur">
+          <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 flex gap-2">
+            <Button variant="outline" size="sm" className="bg-background/90 backdrop-blur p-2">
               <Share className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm" className="bg-background/90 backdrop-blur">
+            <Button variant="outline" size="sm" className="bg-background/90 backdrop-blur p-2">
               <Settings className="w-4 h-4" />
             </Button>
           </div>
         </div>
 
         {/* Profile Info */}
-        <div className="mt-12 space-y-4">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <h1 className="text-xl font-bold">{user.name}</h1>
+        <div className="mt-8 sm:mt-12 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                <h1 className="text-lg sm:text-xl font-bold truncate">{user.name}</h1>
                 {user.isProvider && (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="secondary" className="text-xs self-start sm:self-center">
                     <Award className="w-3 h-3 mr-1" />
                     Verified Provider
                   </Badge>
                 )}
               </div>
               
-              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground mb-3">
                 <div className="flex items-center gap-1">
-                  <MapPin className="w-4 h-4" />
-                  <span>{user.location}</span>
+                  <MapPin className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">{user.location}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
+                  <Calendar className="w-4 h-4 flex-shrink-0" />
                   <span>Joined {new Date(user.joinedDate).getFullYear()}</span>
                 </div>
               </div>
@@ -149,21 +149,21 @@ export default function Profile() {
               {/* Service Types */}
               <div className="flex flex-wrap gap-2 mb-4">
                 {user.serviceTypes.map((service) => (
-                  <Badge key={service} variant="outline" className="service-badge service-badge-home">
+                  <Badge key={service} variant="outline" className="service-badge service-badge-home text-xs">
                     {service}
                   </Badge>
                 ))}
               </div>
             </div>
 
-            <Button size="sm" className="ml-4">
+            <Button size="sm" className="self-start sm:ml-4">
               <Edit className="w-4 h-4 mr-2" />
               Edit
             </Button>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-4 p-4 bg-muted/30 rounded-xl">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 p-3 sm:p-4 bg-muted/30 rounded-xl">
             <div className="text-center">
               <RatingDisplay 
                 rating={user.rating} 
@@ -174,15 +174,15 @@ export default function Profile() {
               <span className="text-xs text-muted-foreground">Rating</span>
             </div>
             <div className="text-center">
-              <div className="font-bold text-lg">{user.reviewCount}</div>
+              <div className="font-bold text-base sm:text-lg">{user.reviewCount}</div>
               <span className="text-xs text-muted-foreground">Reviews</span>
             </div>
             <div className="text-center">
-              <div className="font-bold text-lg">{user.completedJobs}</div>
+              <div className="font-bold text-base sm:text-lg">{user.completedJobs}</div>
               <span className="text-xs text-muted-foreground">Jobs</span>
             </div>
             <div className="text-center">
-              <div className="font-bold text-lg">{user.followers}</div>
+              <div className="font-bold text-base sm:text-lg">{user.followers}</div>
               <span className="text-xs text-muted-foreground">Followers</span>
             </div>
           </div>

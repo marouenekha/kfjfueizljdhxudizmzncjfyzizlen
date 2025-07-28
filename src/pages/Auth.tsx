@@ -122,19 +122,19 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20 p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20 p-3 sm:p-4">
+      <div className="w-full max-w-sm sm:max-w-md">
         {/* Language Switcher */}
         <div className="flex justify-center mb-4">
           <LanguageSwitcher variant="compact" />
         </div>
         
         <Card className="shadow-xl border-0 bg-card/95 backdrop-blur-sm">
-          <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+          <CardHeader className="space-y-1 text-center px-4 sm:px-6">
+            <CardTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
               {isLogin ? t('login') : t('signup')}
             </CardTitle>
-            <CardDescription className="text-muted-foreground">
+            <CardDescription className="text-muted-foreground text-sm">
               {isLogin 
                 ? t('signInWith') + ' ' + t('email')
                 : t('signup') + ' ' + t('email')
@@ -142,7 +142,7 @@ const Auth = () => {
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 px-4 sm:px-6">
             {/* Connexion sociale */}
             <div className="grid grid-cols-2 gap-3">
               <Button
