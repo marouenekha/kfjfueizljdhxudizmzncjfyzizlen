@@ -78,7 +78,7 @@ const Auth = () => {
       });
       
       // Redirection vers la page d'accueil
-      window.location.href = '/';
+      window.location.href = '/feed';
     } catch (error) {
       toast({
         title: 'Erreur',
@@ -102,7 +102,7 @@ const Auth = () => {
         description: `Connecté avec ${provider === 'google' ? 'Google' : 'Facebook'}`,
       });
       
-      window.location.href = '/';
+      window.location.href = '/feed';
     } catch (error) {
       toast({
         title: 'Erreur',
