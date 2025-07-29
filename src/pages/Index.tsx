@@ -3,9 +3,11 @@ import { ArrowRight, Star, Users, Shield, Globe, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const navigate = useNavigate();
 
   const languages = [
     { code: "en", label: "English", flag: "🇺🇸" },
@@ -90,12 +92,12 @@ const Index = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <Button size="lg" className="group px-8 py-3 text-lg">
+              <Button size="lg" className="group px-8 py-3 text-lg" onClick={() => navigate('/auth')}>
                 Get Started
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
               
-              <Button variant="outline" size="lg" className="px-8 py-3 text-lg">
+              <Button variant="outline" size="lg" className="px-8 py-3 text-lg" onClick={() => navigate('/provider-signup')}>
                 I'm a Provider
               </Button>
             </div>
@@ -129,7 +131,7 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {serviceCategories.map((category) => (
-              <Card key={category.name} className="p-6 text-center hover:shadow-lg transition-all cursor-pointer group">
+              <Card key={category.name} className="p-6 text-center hover:shadow-lg transition-all cursor-pointer group" onClick={() => navigate(`/search?category=${encodeURIComponent(category.name)}`)}>
                 <div className={`w-16 h-16 ${category.color} rounded-xl mx-auto mb-4 flex items-center justify-center text-white text-2xl group-hover:scale-110 transition-transform`}>
                   📱
                 </div>
@@ -170,10 +172,10 @@ const Index = () => {
           <p className="text-muted-foreground mb-8">Join thousands of satisfied customers and providers</p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="px-8 py-3">
+            <Button size="lg" className="px-8 py-3" onClick={() => navigate('/search')}>
               Find Services
             </Button>
-            <Button variant="outline" size="lg" className="px-8 py-3">
+            <Button variant="outline" size="lg" className="px-8 py-3" onClick={() => navigate('/provider-signup')}>
               Become a Provider
             </Button>
           </div>

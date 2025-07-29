@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Search as SearchIcon, MapPin, Filter } from "lucide-react";
 import { Layout } from "@/components/Layout/Layout";
 import { Input } from "@/components/ui/input";
@@ -64,8 +65,16 @@ const mockProviders = [
 ];
 
 export default function Search() {
+  const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [searchParams]);
   const [providers] = useState(mockProviders);
 
   const filteredProviders = providers.filter(provider => {
