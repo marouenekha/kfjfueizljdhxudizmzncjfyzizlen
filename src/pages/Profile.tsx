@@ -82,8 +82,8 @@ export default function Profile() {
   const [reviews] = useState(mockReviews);
   const [isFollowing, setIsFollowing] = useState(false);
   
-  // For demo purposes, assume this is another person's profile (not your own)
-  const isOwnProfile = false;
+  // By default show own profile, but this could be dynamic based on URL params
+  const isOwnProfile = true; // Change this to false when viewing another person's profile
 
   return (
     <Layout title="Profile">
