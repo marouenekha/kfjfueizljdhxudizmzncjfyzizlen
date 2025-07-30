@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Edit, Settings, Share, Star, MapPin, Calendar, Award, Users } from "lucide-react";
+import { Edit, Settings, Share, Star, MapPin, Calendar, Award, Users, MessageCircle, UserPlus, Phone } from "lucide-react";
 import { Layout } from "@/components/Layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -80,6 +80,10 @@ export default function Profile() {
   const [user] = useState(mockUser);
   const [posts] = useState(mockPosts);
   const [reviews] = useState(mockReviews);
+  const [isFollowing, setIsFollowing] = useState(false);
+  
+  // For demo purposes, assume this is another person's profile (not your own)
+  const isOwnProfile = false;
 
   return (
     <Layout title="Profile">
@@ -113,9 +117,11 @@ export default function Profile() {
             <Button variant="outline" size="sm" className="bg-background/90 backdrop-blur p-2">
               <Share className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm" className="bg-background/90 backdrop-blur p-2">
-              <Settings className="w-4 h-4" />
-            </Button>
+            {isOwnProfile && (
+              <Button variant="outline" size="sm" className="bg-background/90 backdrop-blur p-2">
+                <Settings className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </div>
 
@@ -156,10 +162,34 @@ export default function Profile() {
               </div>
             </div>
 
-            <Button size="sm" className="self-start sm:ml-4">
-              <Edit className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
+            {isOwnProfile ? (
+              <Button size="sm" className="self-start sm:ml-4">
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            ) : (
+              <div className="flex gap-2 self-start sm:ml-4">
+                <Button 
+                  size="sm" 
+                  variant={isFollowing ? "outline" : "default"}
+                  onClick={() => setIsFollowing(!isFollowing)}
+                  className="flex-1 sm:flex-none"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  {isFollowing ? "Following" : "Follow"}
+                </Button>
+                <Button size="sm" variant="outline">
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Message
+                </Button>
+                {user.isProvider && (
+                  <Button size="sm" variant="secondary">
+                    <Phone className="w-4 h-4 mr-2" />
+                    Contact
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Stats */}
