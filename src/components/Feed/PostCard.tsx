@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Heart, MessageCircle, Share, MapPin, MoreHorizontal } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -43,10 +44,17 @@ export const PostCard = ({ post }: PostCardProps) => {
   const [isLiked, setIsLiked] = useState(post.isLiked);
   const [likes, setLikes] = useState(post.likes);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const navigate = useNavigate();
 
   const handleLike = () => {
     setIsLiked(!isLiked);
     setLikes(prev => isLiked ? prev - 1 : prev + 1);
+  };
+
+  const handleUserClick = () => {
+    if (post.user.name === "Sarah Johnson") {
+      navigate("/profile?user=sarah");
+    }
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -66,13 +74,21 @@ export const PostCard = ({ post }: PostCardProps) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Avatar className="w-10 h-10">
+          <Avatar 
+            className="w-10 h-10 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
+            onClick={handleUserClick}
+          >
             <AvatarImage src={post.user.avatar} alt={post.user.name} />
             <AvatarFallback>{post.user.name[0]}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-sm truncate">{post.user.name}</h3>
+              <h3 
+                className="font-semibold text-sm truncate cursor-pointer hover:text-primary transition-colors"
+                onClick={handleUserClick}
+              >
+                {post.user.name}
+              </h3>
               {post.user.isProvider && (
                 <Badge variant="secondary" className="text-xs px-2 py-0">
                   Provider

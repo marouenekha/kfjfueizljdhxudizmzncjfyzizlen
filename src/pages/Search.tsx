@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Search as SearchIcon, MapPin, Filter } from "lucide-react";
 import { Layout } from "@/components/Layout/Layout";
 import { Input } from "@/components/ui/input";
@@ -66,6 +66,7 @@ const mockProviders = [
 
 export default function Search() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
@@ -91,6 +92,12 @@ export default function Search() {
     
     return matchesSearch && matchesCategory;
   });
+
+  const handleProviderClick = (providerName: string) => {
+    if (providerName === "Sarah Johnson") {
+      navigate("/profile?user=sarah");
+    }
+  };
 
   return (
     <Layout title="Search Providers">
@@ -141,7 +148,10 @@ export default function Search() {
                 {/* Provider Header */}
                 <div className="flex items-start gap-3">
                   <div className="relative">
-                    <Avatar className="w-12 h-12">
+                    <Avatar 
+                      className="w-12 h-12 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
+                      onClick={() => handleProviderClick(provider.name)}
+                    >
                       <AvatarImage src={provider.avatar} alt={provider.name} />
                       <AvatarFallback>{provider.name[0]}</AvatarFallback>
                     </Avatar>
@@ -152,7 +162,12 @@ export default function Search() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold truncate">{provider.name}</h3>
+                      <h3 
+                        className="font-semibold truncate cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => handleProviderClick(provider.name)}
+                      >
+                        {provider.name}
+                      </h3>
                       <RatingDisplay 
                         rating={provider.rating} 
                         reviews={provider.reviewCount} 
@@ -197,7 +212,12 @@ export default function Search() {
                   <Button size="sm" className="flex-1 text-xs sm:text-sm">
                     Contact
                   </Button>
-                  <Button variant="outline" size="sm" className="flex-1 text-xs sm:text-sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 text-xs sm:text-sm"
+                    onClick={() => handleProviderClick(provider.name)}
+                  >
                     View Profile
                   </Button>
                 </div>
