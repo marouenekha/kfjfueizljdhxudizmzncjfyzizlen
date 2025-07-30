@@ -7,8 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PostCard } from "@/components/Feed/PostCard";
 import { RatingDisplay } from "@/components/ui/rating-display";
-import { PortfolioGrid, PortfolioPost } from "@/components/Portfolio/PortfolioGrid";
-import { toast } from "sonner";
 
 // Mock user data
 const mockUser = {
@@ -78,121 +76,10 @@ const mockReviews = [
   }
 ];
 
-// Mock portfolio data
-const mockPortfolio: PortfolioPost[] = [
-  {
-    id: "1",
-    media: [
-      {
-        id: "1-1",
-        type: "image",
-        url: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=800&fit=crop",
-        thumbnail: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop"
-      },
-      {
-        id: "1-2", 
-        type: "image",
-        url: "https://images.unsplash.com/photo-1585128792020-803d29415281?w=800&h=800&fit=crop",
-        thumbnail: "https://images.unsplash.com/photo-1585128792020-803d29415281?w=400&h=400&fit=crop"
-      }
-    ],
-    createdAt: "2024-01-15T10:30:00Z"
-  },
-  {
-    id: "2",
-    media: [
-      {
-        id: "2-1",
-        type: "image", 
-        url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=800&fit=crop",
-        thumbnail: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop"
-      }
-    ],
-    createdAt: "2024-01-14T14:20:00Z"
-  },
-  {
-    id: "3",
-    media: [
-      {
-        id: "3-1",
-        type: "image",
-        url: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&h=800&fit=crop", 
-        thumbnail: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=400&h=400&fit=crop"
-      },
-      {
-        id: "3-2",
-        type: "image",
-        url: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&h=800&fit=crop",
-        thumbnail: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&h=400&fit=crop"
-      },
-      {
-        id: "3-3",
-        type: "image", 
-        url: "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=800&h=800&fit=crop",
-        thumbnail: "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=400&h=400&fit=crop"
-      }
-    ],
-    createdAt: "2024-01-13T09:15:00Z"
-  },
-  {
-    id: "4", 
-    media: [
-      {
-        id: "4-1",
-        type: "image",
-        url: "https://images.unsplash.com/photo-1558977297-b316e4fa3438?w=800&h=800&fit=crop",
-        thumbnail: "https://images.unsplash.com/photo-1558977297-b316e4fa3438?w=400&h=400&fit=crop"
-      }
-    ],
-    createdAt: "2024-01-12T16:45:00Z"
-  },
-  {
-    id: "5",
-    media: [
-      {
-        id: "5-1", 
-        type: "image",
-        url: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&h=800&fit=crop",
-        thumbnail: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400&h=400&fit=crop"
-      }
-    ],
-    createdAt: "2024-01-11T11:30:00Z"
-  },
-  {
-    id: "6",
-    media: [
-      {
-        id: "6-1",
-        type: "image", 
-        url: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=800&fit=crop",
-        thumbnail: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop"
-      }
-    ],
-    createdAt: "2024-01-10T13:20:00Z"
-  }
-];
-
 export default function Profile() {
   const [user] = useState(mockUser);
   const [posts] = useState(mockPosts);
   const [reviews] = useState(mockReviews);
-  const [portfolio, setPortfolio] = useState<PortfolioPost[]>(mockPortfolio);
-
-  const handlePortfolioUpload = (files: File[]) => {
-    // Create new portfolio post with uploaded files
-    const newPost: PortfolioPost = {
-      id: Date.now().toString(),
-      media: files.map((file, index) => ({
-        id: `${Date.now()}-${index}`,
-        type: file.type.startsWith('image/') ? 'image' : 'video',
-        url: URL.createObjectURL(file), // In real app, upload to Supabase storage
-        thumbnail: URL.createObjectURL(file)
-      })),
-      createdAt: new Date().toISOString()
-    };
-
-    setPortfolio(prev => [newPost, ...prev]);
-  };
 
   return (
     <Layout title="Profile">
@@ -330,7 +217,17 @@ export default function Profile() {
           </TabsContent>
           
           <TabsContent value="portfolio" className="mt-4">
-            <PortfolioGrid posts={portfolio} onUpload={handlePortfolioUpload} />
+            <div className="grid grid-cols-2 gap-2">
+              {[1, 2, 3, 4, 5, 6].map((item) => (
+                <div key={item} className="aspect-square bg-muted rounded-lg overflow-hidden">
+                  <img 
+                    src={`https://images.unsplash.com/photo-155690911${item}?w=200&h=200&fit=crop`}
+                    alt={`Portfolio ${item}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
           </TabsContent>
           
           <TabsContent value="reviews" className="mt-4 space-y-4">
