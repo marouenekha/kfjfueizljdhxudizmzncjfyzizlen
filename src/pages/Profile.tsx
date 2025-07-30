@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Edit, Settings, Share, Star, MapPin, Calendar, Award, Users, MessageCircle, UserPlus, Phone } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -81,9 +82,17 @@ export default function Profile() {
   const [posts] = useState(mockPosts);
   const [reviews] = useState(mockReviews);
   const [isFollowing, setIsFollowing] = useState(false);
+  const navigate = useNavigate();
   
   // By default show own profile, but this could be dynamic based on URL params
   const isOwnProfile = true; // Change this to false when viewing another person's profile
+
+  const handleUserClick = (userName: string) => {
+    if (userName === "Sarah Johnson") {
+      // Navigate to Sarah Johnson's profile (for demo, we'll show the other profile view)
+      window.location.href = "/profile?user=sarah";
+    }
+  };
 
   return (
     <Layout title="Profile">
@@ -264,13 +273,21 @@ export default function Profile() {
             {reviews.map((review) => (
               <div key={review.id} className="post-card p-4 space-y-3">
                 <div className="flex items-center gap-3">
-                  <Avatar className="w-10 h-10">
+                  <Avatar 
+                    className="w-10 h-10 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
+                    onClick={() => handleUserClick(review.user.name)}
+                  >
                     <AvatarImage src={review.user.avatar} alt={review.user.name} />
                     <AvatarFallback>{review.user.name[0]}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-sm">{review.user.name}</span>
+                      <span 
+                        className="font-medium text-sm cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => handleUserClick(review.user.name)}
+                      >
+                        {review.user.name}
+                      </span>
                       <div className="flex">
                         {[...Array(review.rating)].map((_, i) => (
                           <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
