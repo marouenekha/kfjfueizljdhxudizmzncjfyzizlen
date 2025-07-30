@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Edit, Settings, Share, Star, MapPin, Calendar, Award, Users, MessageCircle, UserPlus, Phone } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/Layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -28,6 +28,27 @@ const mockUser = {
   priceRange: "AED 100-300 per hour",
   responseTime: "Usually responds within 2 hours",
   isOnline: true
+};
+
+// Mock Sarah Johnson data
+const mockSarahUser = {
+  id: "2",
+  name: "Sarah Johnson",
+  avatar: "https://images.unsplash.com/photo-1494790108755-2616b2e2c8a6?w=150&h=150&fit=crop&crop=face",
+  coverImage: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&h=300&fit=crop",
+  bio: "Interior designer with a passion for creating beautiful, functional spaces. Specializing in modern and minimalist designs. ✨",
+  location: "Business Bay, Dubai",
+  joinedDate: "2021-06-20",
+  isProvider: true,
+  serviceTypes: ["Interior Design", "Consultation", "Home Styling"],
+  rating: 4.9,
+  reviewCount: 89,
+  completedJobs: 156,
+  followers: 567,
+  following: 234,
+  priceRange: "AED 200-500 per hour",
+  responseTime: "Usually responds within 1 hour",
+  isOnline: false
 };
 
 // Mock posts
@@ -78,19 +99,22 @@ const mockReviews = [
 ];
 
 export default function Profile() {
-  const [user] = useState(mockUser);
-  const [posts] = useState(mockPosts);
-  const [reviews] = useState(mockReviews);
+  const [searchParams] = useSearchParams();
   const [isFollowing, setIsFollowing] = useState(false);
   const navigate = useNavigate();
   
-  // By default show own profile, but this could be dynamic based on URL params
-  const isOwnProfile = true; // Change this to false when viewing another person's profile
+  // Check URL params to determine which profile to show
+  const userParam = searchParams.get('user');
+  const isOwnProfile = !userParam || userParam === 'me';
+  
+  // Select the appropriate user data based on URL param
+  const user = userParam === 'sarah' ? mockSarahUser : mockUser;
+  const posts = mockPosts;
+  const reviews = mockReviews;
 
   const handleUserClick = (userName: string) => {
     if (userName === "Sarah Johnson") {
-      // Navigate to Sarah Johnson's profile (for demo, we'll show the other profile view)
-      window.location.href = "/profile?user=sarah";
+      navigate("/profile?user=sarah");
     }
   };
 
