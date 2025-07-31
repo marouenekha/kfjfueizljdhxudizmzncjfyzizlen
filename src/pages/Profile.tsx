@@ -211,16 +211,14 @@ export default function Profile() {
                   <UserPlus className="w-4 h-4 mr-2" />
                   {isFollowing ? "Following" : "Follow"}
                 </Button>
-                <Button size="sm" variant="outline">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => navigate("/messages")}
+                >
                   <MessageCircle className="w-4 h-4 mr-2" />
-                  Message
+                  Contact
                 </Button>
-                {user.isProvider && (
-                  <Button size="sm" variant="secondary">
-                    <Phone className="w-4 h-4 mr-2" />
-                    Contact
-                  </Button>
-                )}
               </div>
             )}
           </div>
