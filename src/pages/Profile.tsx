@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PostCard } from "@/components/Feed/PostCard";
 import { RatingDisplay } from "@/components/ui/rating-display";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Mock user data
 const mockUser = {
@@ -99,16 +100,33 @@ const mockReviews = [
 ];
 
 export default function Profile() {
-  const [searchParams] = useSearchParams();
-  const [isFollowing, setIsFollowing] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { user: authUser } = useAuth();
+  const [isFollowing, setIsFollowing] = useState(false);
+  const viewingOtherUser = searchParams.get('user');
+  const isOwnProfile = !viewingOtherUser || viewingOtherUser === 'me';
   
-  // Check URL params to determine which profile to show
-  const userParam = searchParams.get('user');
-  const isOwnProfile = !userParam || userParam === 'me';
-  
-  // Select the appropriate user data based on URL param
-  const user = userParam === 'sarah' ? mockSarahUser : mockUser;
+  // Select the appropriate user data - for now using mock data for other users
+  const user = viewingOtherUser === 'sarah' ? mockSarahUser : (authUser?.profile ? {
+    id: authUser.id,
+    name: authUser.profile.name || "User",
+    avatar: authUser.profile.avatar_url,
+    bio: authUser.profile.bio || "Welcome to my profile!",
+    location: authUser.profile.location || "Location not set",
+    isProvider: authUser.profile.is_provider,
+    serviceTypes: authUser.profile.service_types || [],
+    rating: 4.5, // Default rating
+    reviewCount: 0,
+    completedJobs: 0,
+    followers: 0,
+    following: 0,
+    priceRange: "Contact for pricing",
+    responseTime: "New user",
+    joinedDate: new Date().toISOString().split('T')[0],
+    isOnline: true,
+    coverImage: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&h=300&fit=crop"
+  } : mockUser);
   const posts = mockPosts;
   const reviews = mockReviews;
 
@@ -137,7 +155,7 @@ export default function Profile() {
             <div className="relative">
               <Avatar className="w-16 h-16 sm:w-20 sm:h-20 border-3 sm:border-4 border-background">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="text-base sm:text-lg">{user.name[0]}</AvatarFallback>
+                <AvatarFallback className="text-base sm:text-lg">{user.name?.[0] || 'U'}</AvatarFallback>
               </Avatar>
               {user.isOnline && (
                 <div className="absolute bottom-0 sm:bottom-1 right-0 sm:right-1 w-4 h-4 sm:w-6 sm:h-6 bg-accent rounded-full border-2 sm:border-3 border-background"></div>
@@ -187,7 +205,7 @@ export default function Profile() {
 
               {/* Service Types */}
               <div className="flex flex-wrap gap-2 mb-4">
-                {user.serviceTypes.map((service) => (
+                {(user.serviceTypes || []).map((service) => (
                   <Badge key={service} variant="outline" className="service-badge service-badge-home text-xs">
                     {service}
                   </Badge>
@@ -300,7 +318,7 @@ export default function Profile() {
                     onClick={() => handleUserClick(review.user.name)}
                   >
                     <AvatarImage src={review.user.avatar} alt={review.user.name} />
-                    <AvatarFallback>{review.user.name[0]}</AvatarFallback>
+                    <AvatarFallback>{review.user.name?.[0] || 'U'}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">

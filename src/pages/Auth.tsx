@@ -9,9 +9,13 @@ import { Eye, EyeOff, Mail, Lock, User, Chrome, Facebook } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Auth = () => {
   const { t } = useTranslation();
+  const { login, signup } = useAuth();
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -19,7 +23,8 @@ const Auth = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    name: ''
+    name: '',
+    isProvider: false
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
@@ -69,49 +74,32 @@ const Auth = () => {
     setLoading(true);
     
     try {
-      // TODO: Implémenter l'authentification Firebase
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulation
+      if (isLogin) {
+        await login(formData.email, formData.password);
+      } else {
+        await signup({
+          email: formData.email,
+          password: formData.password,
+          name: formData.name,
+          isProvider: formData.isProvider
+        });
+      }
       
-      toast({
-        title: isLogin ? 'Connexion réussie' : 'Compte créé',
-        description: isLogin ? 'Bienvenue !' : 'Votre compte a été créé avec succès',
-      });
-      
-      // Redirection vers la page d'accueil
-      window.location.href = '/feed';
+      // Navigate to feed page
+      navigate('/feed');
     } catch (error) {
-      toast({
-        title: 'Erreur',
-        description: 'Une erreur est survenue. Veuillez réessayer.',
-        variant: 'destructive',
-      });
+      // Error handling is done in the auth context
     } finally {
       setLoading(false);
     }
   };
 
   const handleSocialLogin = async (provider: 'google' | 'facebook') => {
-    setLoading(true);
-    
-    try {
-      // TODO: Implémenter la connexion sociale Firebase
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulation
-      
-      toast({
-        title: 'Connexion réussie',
-        description: `Connecté avec ${provider === 'google' ? 'Google' : 'Facebook'}`,
-      });
-      
-      window.location.href = '/feed';
-    } catch (error) {
-      toast({
-        title: 'Erreur',
-        description: 'Échec de la connexion sociale',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
+    // Note: Social login would need to be configured in Supabase dashboard
+    toast({
+      title: 'Coming Soon',
+      description: `${provider} login will be available soon`,
+    });
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -308,7 +296,8 @@ const Auth = () => {
                     email: '',
                     password: '',
                     confirmPassword: '',
-                    name: ''
+                    name: '',
+                    isProvider: false
                   });
                 }}
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"

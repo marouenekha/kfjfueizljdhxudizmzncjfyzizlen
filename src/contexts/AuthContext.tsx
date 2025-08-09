@@ -1,38 +1,37 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { useToast } from "@/hooks/use-toast";
+
+export interface Profile {
+  id: string;
+  user_id: string;
+  name?: string;
+  avatar_url?: string;
+  location?: string;
+  is_provider: boolean;
+  service_types?: string[];
+  verified: boolean;
+  bio?: string;
+  phone?: string;
+}
 
 export interface User {
   id: string;
-  name: string;
   email: string;
-  avatar?: string;
-  isProvider: boolean;
-  location?: string;
-  serviceTypes?: string[];
-  verified: boolean;
+  profile?: Profile;
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (userData: Partial<User> & { email: string; password: string }) => Promise<void>;
-  logout: () => void;
-  updateProfile: (updates: Partial<User>) => Promise<void>;
+  signup: (userData: { email: string; password: string; name?: string; isProvider?: boolean }) => Promise<void>;
+  logout: () => Promise<void>;
+  updateProfile: (updates: Partial<Profile>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Mock user for demonstration
-const mockUser: User = {
-  id: "1",
-  name: "Ahmed Al-Rashid",
-  email: "ahmed@example.com",
-  avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-  isProvider: true,
-  location: "Dubai Marina, UAE",
-  serviceTypes: ["Plumbing", "Electrical"],
-  verified: true
-};
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -45,93 +44,172 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Check for existing session
-    const checkSession = async () => {
-      setIsLoading(true);
-      try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Check if user is already logged in
-        const savedUser = localStorage.getItem("servicehub_user");
-        if (savedUser) {
-          setUser(JSON.parse(savedUser));
-        }
-        // No auto-login - user must authenticate
-      } catch (error) {
-        console.error("Session check failed:", error);
-      } finally {
-        setIsLoading(false);
+    // Get initial session
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await loadUserProfile(session.user);
       }
+      setIsLoading(false);
     };
 
-    checkSession();
+    getSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        await loadUserProfile(session.user);
+      } else {
+        setUser(null);
+      }
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  const loadUserProfile = async (authUser: SupabaseUser) => {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', authUser.id)
+        .single();
+
+      setUser({
+        id: authUser.id,
+        email: authUser.email!,
+        profile: profile || undefined
+      });
+    } catch (error) {
+      console.error('Error loading profile:', error);
+      setUser({
+        id: authUser.id,
+        email: authUser.email!
+      });
+    }
+  };
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Mock login success
-      setUser(mockUser);
-      localStorage.setItem("servicehub_user", JSON.stringify(mockUser));
-    } catch (error) {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully logged in.",
+      });
+    } catch (error: any) {
       console.error("Login failed:", error);
+      toast({
+        title: "Login failed",
+        description: error.message || "An error occurred during login",
+        variant: "destructive",
+      });
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const signup = async (userData: Partial<User> & { email: string; password: string }) => {
+  const signup = async (userData: { email: string; password: string; name?: string; isProvider?: boolean }) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const newUser: User = {
-        id: Date.now().toString(),
-        name: userData.name || "",
+      const { data, error } = await supabase.auth.signUp({
         email: userData.email,
-        avatar: userData.avatar,
-        isProvider: userData.isProvider || false,
-        location: userData.location,
-        serviceTypes: userData.serviceTypes || [],
-        verified: false
-      };
-      
-      setUser(newUser);
-      localStorage.setItem("servicehub_user", JSON.stringify(newUser));
-    } catch (error) {
+        password: userData.password,
+        options: {
+          data: {
+            name: userData.name || '',
+            is_provider: userData.isProvider || false,
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      // Create profile after signup
+      if (data.user) {
+        await supabase.from('profiles').insert({
+          user_id: data.user.id,
+          name: userData.name || '',
+          is_provider: userData.isProvider || false,
+          verified: false,
+        });
+      }
+
+      toast({
+        title: "Account created!",
+        description: "Please check your email to verify your account.",
+      });
+    } catch (error: any) {
       console.error("Signup failed:", error);
+      toast({
+        title: "Signup failed",
+        description: error.message || "An error occurred during signup",
+        variant: "destructive",
+      });
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("servicehub_user");
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      toast({
+        title: "Goodbye!",
+        description: "You have been logged out successfully.",
+      });
+    } catch (error: any) {
+      console.error("Logout failed:", error);
+      toast({
+        title: "Logout failed",
+        description: error.message || "An error occurred during logout",
+        variant: "destructive",
+      });
+    }
   };
 
-  const updateProfile = async (updates: Partial<User>) => {
-    if (!user) return;
+  const updateProfile = async (updates: Partial<Profile>) => {
+    if (!user?.profile) return;
     
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const updatedUser = { ...user, ...updates };
-      setUser(updatedUser);
-      localStorage.setItem("servicehub_user", JSON.stringify(updatedUser));
-    } catch (error) {
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      // Update local user state
+      setUser({
+        ...user,
+        profile: { ...user.profile, ...updates }
+      });
+
+      toast({
+        title: "Profile updated!",
+        description: "Your profile has been successfully updated.",
+      });
+    } catch (error: any) {
       console.error("Profile update failed:", error);
+      toast({
+        title: "Update failed",
+        description: error.message || "An error occurred while updating your profile",
+        variant: "destructive",
+      });
       throw error;
     } finally {
       setIsLoading(false);

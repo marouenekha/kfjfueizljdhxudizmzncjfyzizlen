@@ -13,7 +13,7 @@ import { toast } from "@/hooks/use-toast";
 export default function Settings() {
   const { t } = useTranslation();
   const { user, updateProfile, logout } = useAuth();
-  const [name, setName] = useState(user?.name || "");
+  const [name, setName] = useState(user?.profile?.name || "");
   const [email, setEmail] = useState(user?.email || "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -30,8 +30,8 @@ export default function Settings() {
 
   const handleEmailUpdate = async () => {
     try {
-      await updateProfile({ email });
-      toast({ title: "Email updated successfully" });
+      // Email updates should be handled through Supabase auth, not profiles
+      toast({ title: "Email update feature coming soon", variant: "default" });
     } catch (error) {
       toast({ title: "Failed to update email", variant: "destructive" });
     }
@@ -100,7 +100,7 @@ export default function Settings() {
                   placeholder="Enter your name"
                 />
               </div>
-              <Button onClick={handleNameUpdate} disabled={!name.trim() || name === user?.name}>
+              <Button onClick={handleNameUpdate} disabled={!name.trim() || name === user?.profile?.name}>
                 Update Name
               </Button>
             </div>
