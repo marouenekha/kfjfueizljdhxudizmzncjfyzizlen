@@ -94,7 +94,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const login = async (email: string, password: string) => {
-    setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -115,18 +114,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         variant: "destructive",
       });
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const signup = async (userData: { email: string; password: string; name?: string; isProvider?: boolean }) => {
-    setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/`,
           data: {
             name: userData.name || '',
             is_provider: userData.isProvider || false,
@@ -146,10 +143,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
       }
 
-      toast({
-        title: "Account created!",
-        description: "Please check your email to verify your account.",
-      });
     } catch (error: any) {
       console.error("Signup failed:", error);
       toast({
@@ -158,8 +151,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         variant: "destructive",
       });
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -184,7 +175,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user?.profile) return;
     
-    setIsLoading(true);
     try {
       const { error } = await supabase
         .from('profiles')
@@ -211,8 +201,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         variant: "destructive",
       });
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 

@@ -83,6 +83,7 @@ const Auth = () => {
     try {
       if (isLogin) {
         await login(formData.email, formData.password);
+        // Don't navigate here - let the useEffect handle it
       } else {
         await signup({
           email: formData.email,
@@ -90,12 +91,15 @@ const Auth = () => {
           name: formData.name,
           isProvider: formData.isProvider
         });
+        // For signup, show success message but don't auto-navigate
+        toast({
+          title: "Account created!",
+          description: "Please check your email to verify your account.",
+        });
       }
-      
-      // Navigate to feed page
-      navigate('/feed');
-    } catch (error) {
-      // Error handling is done in the auth context
+    } catch (error: any) {
+      console.error("Auth error:", error);
+      // Error toast is handled in the auth context
     } finally {
       setLoading(false);
     }
