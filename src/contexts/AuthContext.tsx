@@ -60,6 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('AuthContext: Auth state change event:', event, session?.user?.email);
       if (session?.user) {
         await loadUserProfile(session.user);
       } else {
@@ -95,17 +96,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     try {
+      console.log('AuthContext: Starting login with email:', email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
+      console.log('AuthContext: Login response:', { data, error });
       if (error) throw error;
 
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
+      console.log('AuthContext: Login completed successfully');
     } catch (error: any) {
       console.error("Login failed:", error);
       toast({
