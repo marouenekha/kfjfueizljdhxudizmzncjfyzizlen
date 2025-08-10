@@ -93,9 +93,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const cleanupAuthState = () => {
+    // Remove all Supabase auth keys from localStorage
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+    // Remove from sessionStorage if in use
+    Object.keys(sessionStorage || {}).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  };
+
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
+      // Clean up existing auth state first
+      cleanupAuthState();
+      
+      // Attempt global sign out to clear any existing sessions
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -107,6 +132,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
+
+      // Force page reload for clean state
+      if (data.user) {
+        setTimeout(() => {
+          window.location.href = '/feed';
+        }, 100);
+      }
     } catch (error: any) {
       console.error("Login failed:", error);
       toast({
@@ -165,12 +197,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      await supabase.auth.signOut();
+      // Clean up auth state first
+      cleanupAuthState();
+      
+      // Attempt global sign out
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+      }
+      
       setUser(null);
+      
       toast({
         title: "Goodbye!",
         description: "You have been logged out successfully.",
       });
+
+      // Force page reload for clean state
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
     } catch (error: any) {
       console.error("Logout failed:", error);
       toast({

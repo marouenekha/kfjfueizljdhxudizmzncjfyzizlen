@@ -76,6 +76,7 @@ const Auth = () => {
     try {
       if (isLogin) {
         await login(formData.email, formData.password);
+        // Navigation is handled in the login function with page reload
       } else {
         await signup({
           email: formData.email,
@@ -83,10 +84,9 @@ const Auth = () => {
           name: formData.name,
           isProvider: formData.isProvider
         });
+        // Navigate to feed page after signup
+        navigate('/feed');
       }
-      
-      // Navigate to feed page
-      navigate('/feed');
     } catch (error) {
       // Error handling is done in the auth context
     } finally {
