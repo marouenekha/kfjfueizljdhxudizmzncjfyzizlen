@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,8 +14,15 @@ import { useNavigate } from 'react-router-dom';
 
 const Auth = () => {
   const { t } = useTranslation();
-  const { login, signup } = useAuth();
+  const { login, signup, user, isLoading } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect authenticated users to feed
+  useEffect(() => {
+    if (!isLoading && user) {
+      navigate('/feed', { replace: true });
+    }
+  }, [user, isLoading, navigate]);
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
