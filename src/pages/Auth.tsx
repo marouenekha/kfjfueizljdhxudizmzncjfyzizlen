@@ -19,9 +19,7 @@ const Auth = () => {
 
   // Redirect authenticated users to feed
   useEffect(() => {
-    console.log('Auth useEffect triggered:', { user, isLoading });
     if (!isLoading && user) {
-      console.log('Redirecting to feed...');
       navigate('/feed', { replace: true });
     }
   }, [user, isLoading, navigate]);
@@ -81,35 +79,28 @@ const Auth = () => {
     
     if (!validateForm()) return;
 
-    console.log('Starting login process...');
     setLoading(true);
     
     try {
       if (isLogin) {
-        console.log('Calling login function...');
         await login(formData.email, formData.password);
-        console.log('Login function completed');
-        // Don't navigate here - let the useEffect handle it
+        // Success - user state will update and trigger redirect
       } else {
-        console.log('Calling signup function...');
         await signup({
           email: formData.email,
           password: formData.password,
           name: formData.name,
           isProvider: formData.isProvider
         });
-        console.log('Signup function completed');
-        // For signup, show success message but don't auto-navigate
         toast({
           title: "Account created!",
           description: "Please check your email to verify your account.",
         });
       }
     } catch (error: any) {
+      // Error handling is done in the auth context
       console.error("Auth error:", error);
-      // Error toast is handled in the auth context
     } finally {
-      console.log('Setting loading to false');
       setLoading(false);
     }
   };
