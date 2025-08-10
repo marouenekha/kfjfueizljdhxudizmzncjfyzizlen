@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,16 +14,8 @@ import { useNavigate } from 'react-router-dom';
 
 const Auth = () => {
   const { t } = useTranslation();
-  const { login, signup, user, isLoading } = useAuth();
+  const { login, signup } = useAuth();
   const navigate = useNavigate();
-
-  // Redirect authenticated users to feed
-  useEffect(() => {
-    if (!isLoading && user) {
-      navigate('/feed', { replace: true });
-    }
-  }, [user, isLoading, navigate]);
-
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -84,7 +76,6 @@ const Auth = () => {
     try {
       if (isLogin) {
         await login(formData.email, formData.password);
-        // Success - user state will update and trigger redirect
       } else {
         await signup({
           email: formData.email,
@@ -92,14 +83,12 @@ const Auth = () => {
           name: formData.name,
           isProvider: formData.isProvider
         });
-        toast({
-          title: "Account created!",
-          description: "Please check your email to verify your account.",
-        });
       }
-    } catch (error: any) {
+      
+      // Navigate to feed page
+      navigate('/feed');
+    } catch (error) {
       // Error handling is done in the auth context
-      console.error("Auth error:", error);
     } finally {
       setLoading(false);
     }
