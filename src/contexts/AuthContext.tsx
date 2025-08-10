@@ -93,34 +93,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const cleanupAuthState = () => {
-    // Remove all Supabase auth keys from localStorage
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
-    // Remove from sessionStorage if in use
-    Object.keys(sessionStorage || {}).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        sessionStorage.removeItem(key);
-      }
-    });
-  };
-
   const login = async (email: string, password: string) => {
-    setIsLoading(true);
     try {
-      // Clean up existing auth state first
-      cleanupAuthState();
-      
-      // Attempt global sign out to clear any existing sessions
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-      }
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -132,13 +106,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
-
-      // Force page reload for clean state
-      if (data.user) {
-        setTimeout(() => {
-          window.location.href = '/feed';
-        }, 100);
-      }
     } catch (error: any) {
       console.error("Login failed:", error);
       toast({
@@ -147,18 +114,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         variant: "destructive",
       });
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const signup = async (userData: { email: string; password: string; name?: string; isProvider?: boolean }) => {
-    setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/`,
           data: {
             name: userData.name || '',
             is_provider: userData.isProvider || false,
@@ -178,10 +143,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
       }
 
-      toast({
-        title: "Account created!",
-        description: "Please check your email to verify your account.",
-      });
     } catch (error: any) {
       console.error("Signup failed:", error);
       toast({
@@ -190,34 +151,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         variant: "destructive",
       });
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const logout = async () => {
     try {
-      // Clean up auth state first
-      cleanupAuthState();
-      
-      // Attempt global sign out
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-      }
-      
+      await supabase.auth.signOut();
       setUser(null);
-      
       toast({
         title: "Goodbye!",
         description: "You have been logged out successfully.",
       });
-
-      // Force page reload for clean state
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 100);
     } catch (error: any) {
       console.error("Logout failed:", error);
       toast({
@@ -231,7 +175,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user?.profile) return;
     
-    setIsLoading(true);
     try {
       const { error } = await supabase
         .from('profiles')
@@ -258,8 +201,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         variant: "destructive",
       });
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
