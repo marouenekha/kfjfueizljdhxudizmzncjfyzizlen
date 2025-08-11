@@ -78,27 +78,68 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         description: "Chargement du profil utilisateur...",
       });
       
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', authUser.id)
         .single();
 
-      toast({
-        title: "✅ Debug - Profil chargé",
-        description: `Profil trouvé: ${profile ? 'OUI' : 'NON'}`,
-      });
+      if (error && error.code === 'PGRST116') {
+        // No profile found, create one
+        toast({
+          title: "⚠️ Debug - Pas de profil",
+          description: "Création d'un nouveau profil...",
+        });
+        
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: authUser.id,
+            name: authUser.user_metadata?.name || '',
+            is_provider: authUser.user_metadata?.is_provider || false,
+            verified: false,
+          })
+          .select()
+          .single();
 
-      setUser({
-        id: authUser.id,
-        email: authUser.email!,
-        profile: profile || undefined
-      });
-    } catch (error) {
+        if (insertError) {
+          toast({
+            title: "❌ Debug - Erreur création",
+            description: `Erreur création profil: ${insertError.message}`,
+            variant: "destructive",
+          });
+          throw insertError;
+        }
+
+        toast({
+          title: "✅ Debug - Profil créé",
+          description: "Nouveau profil créé avec succès",
+        });
+
+        setUser({
+          id: authUser.id,
+          email: authUser.email!,
+          profile: newProfile
+        });
+      } else if (error) {
+        throw error;
+      } else {
+        toast({
+          title: "✅ Debug - Profil chargé",
+          description: `Profil trouvé: ${profile ? 'OUI' : 'NON'}`,
+        });
+
+        setUser({
+          id: authUser.id,
+          email: authUser.email!,
+          profile: profile || undefined
+        });
+      }
+    } catch (error: any) {
       console.error('Error loading profile:', error);
       toast({
         title: "⚠️ Debug - Profil",
-        description: `Erreur profil: ${error}`,
+        description: `Erreur profil: ${error.message}`,
         variant: "destructive",
       });
       setUser({
