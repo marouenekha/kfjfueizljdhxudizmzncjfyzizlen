@@ -23,7 +23,7 @@ const Auth = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    name: '',
+    username: '',
     isProvider: false
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -54,8 +54,8 @@ const Auth = () => {
     }
 
     if (!isLogin) {
-      if (!formData.name) {
-        newErrors.name = 'Nom requis';
+      if (!formData.username) {
+        newErrors.username = 'Nom d\'utilisateur requis';
       }
       if (formData.password !== formData.confirmPassword) {
         newErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
@@ -105,7 +105,7 @@ const Auth = () => {
         await signup({
           email: formData.email,
           password: formData.password,
-          name: formData.name,
+          username: formData.username,
           isProvider: formData.isProvider
         });
       }
@@ -206,24 +206,24 @@ const Auth = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               {!isLogin && (
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-medium">
-                    {t('fullName')}
+                  <Label htmlFor="username" className="text-sm font-medium">
+                    Nom d'utilisateur
                   </Label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
-                      id="name"
+                      id="username"
                       type="text"
-                      placeholder={t('fullName')}
-                      value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      placeholder="nom_utilisateur"
+                      value={formData.username}
+                      onChange={(e) => handleInputChange('username', e.target.value)}
                       className="pl-9"
                       disabled={loading}
                     />
                   </div>
-                  {errors.name && (
+                  {errors.username && (
                     <Alert variant="destructive" className="py-2">
-                      <AlertDescription className="text-xs">{errors.name}</AlertDescription>
+                      <AlertDescription className="text-xs">{errors.username}</AlertDescription>
                     </Alert>
                   )}
                 </div>
@@ -334,7 +334,7 @@ const Auth = () => {
                     email: '',
                     password: '',
                     confirmPassword: '',
-                    name: '',
+                    username: '',
                     isProvider: false
                   });
                 }}

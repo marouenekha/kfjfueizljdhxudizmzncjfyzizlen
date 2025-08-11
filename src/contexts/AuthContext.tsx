@@ -26,7 +26,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (userData: { email: string; password: string; name?: string; isProvider?: boolean }) => Promise<void>;
+  signup: (userData: { email: string; password: string; username?: string; isProvider?: boolean }) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
 }
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .from('profiles')
           .insert({
             user_id: authUser.id,
-            name: authUser.user_metadata?.name || '',
+            name: authUser.user_metadata?.username || '',
             is_provider: authUser.user_metadata?.is_provider || false,
             verified: false,
           })
@@ -208,15 +208,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signup = async (userData: { email: string; password: string; name?: string; isProvider?: boolean }) => {
+  const signup = async (userData: { email: string; password: string; username?: string; isProvider?: boolean }) => {
     setIsLoading(true);
     try {
+      // Check if username already exists
+      if (userData.username) {
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('name')
+          .eq('name', userData.username)
+          .single();
+
+        if (existingProfile) {
+          toast({
+            title: "Username exists",
+            description: "This username is already taken. Please choose another one.",
+            variant: "destructive",
+          });
+          throw new Error("Username already exists");
+        }
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/`,
           data: {
-            name: userData.name || '',
+            username: userData.username || '',
             is_provider: userData.isProvider || false,
           }
         }
@@ -228,7 +247,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (data.user) {
         await supabase.from('profiles').insert({
           user_id: data.user.id,
-          name: userData.name || '',
+          name: userData.username || '',
           is_provider: userData.isProvider || false,
           verified: false,
         });
