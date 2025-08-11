@@ -23,7 +23,7 @@ const Auth = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    username: '',
+    name: '',
     isProvider: false
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -54,8 +54,8 @@ const Auth = () => {
     }
 
     if (!isLogin) {
-      if (!formData.username) {
-        newErrors.username = 'Nom d\'utilisateur requis';
+      if (!formData.name) {
+        newErrors.name = 'Nom requis';
       }
       if (formData.password !== formData.confirmPassword) {
         newErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
@@ -69,66 +69,28 @@ const Auth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    toast({
-      title: "🔄 Debug - Formulaire",
-      description: "Soumission du formulaire...",
-    });
-    
-    if (!validateForm()) {
-      toast({
-        title: "❌ Debug - Validation",
-        description: "Erreurs de validation détectées",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "✅ Debug - Validation",
-      description: "Formulaire validé avec succès",
-    });
+    if (!validateForm()) return;
 
     setLoading(true);
     
     try {
       if (isLogin) {
-        toast({
-          title: "🔄 Debug - Action",
-          description: "Appel de la fonction login...",
-        });
         await login(formData.email, formData.password);
       } else {
-        toast({
-          title: "🔄 Debug - Action", 
-          description: "Appel de la fonction signup...",
-        });
         await signup({
           email: formData.email,
           password: formData.password,
-          username: formData.username,
+          name: formData.name,
           isProvider: formData.isProvider
         });
       }
       
-      toast({
-        title: "🔄 Debug - Navigation",
-        description: "Redirection vers /feed...",
-      });
-      
       // Navigate to feed page
       navigate('/feed');
     } catch (error) {
-      toast({
-        title: "❌ Debug - Erreur",
-        description: `Erreur dans handleSubmit: ${error}`,
-        variant: "destructive",
-      });
+      // Error handling is done in the auth context
     } finally {
       setLoading(false);
-      toast({
-        title: "🔄 Debug - Fin",
-        description: "Fin du processus de soumission",
-      });
     }
   };
 
@@ -206,24 +168,24 @@ const Auth = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               {!isLogin && (
                 <div className="space-y-2">
-                  <Label htmlFor="username" className="text-sm font-medium">
-                    Nom d'utilisateur
+                  <Label htmlFor="name" className="text-sm font-medium">
+                    {t('fullName')}
                   </Label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
-                      id="username"
+                      id="name"
                       type="text"
-                      placeholder="nom_utilisateur"
-                      value={formData.username}
-                      onChange={(e) => handleInputChange('username', e.target.value)}
+                      placeholder={t('fullName')}
+                      value={formData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
                       className="pl-9"
                       disabled={loading}
                     />
                   </div>
-                  {errors.username && (
+                  {errors.name && (
                     <Alert variant="destructive" className="py-2">
-                      <AlertDescription className="text-xs">{errors.username}</AlertDescription>
+                      <AlertDescription className="text-xs">{errors.name}</AlertDescription>
                     </Alert>
                   )}
                 </div>
@@ -334,7 +296,7 @@ const Auth = () => {
                     email: '',
                     password: '',
                     confirmPassword: '',
-                    username: '',
+                    name: '',
                     isProvider: false
                   });
                 }}

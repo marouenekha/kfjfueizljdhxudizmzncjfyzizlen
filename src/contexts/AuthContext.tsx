@@ -26,7 +26,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (userData: { email: string; password: string; username?: string; isProvider?: boolean }) => Promise<void>;
+  signup: (userData: { email: string; password: string; name?: string; isProvider?: boolean }) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
 }
@@ -73,75 +73,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const loadUserProfile = async (authUser: SupabaseUser) => {
     try {
-      toast({
-        title: "🔄 Debug - Profil",
-        description: "Chargement du profil utilisateur...",
-      });
-      
-      const { data: profile, error } = await supabase
+      const { data: profile } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', authUser.id)
         .single();
 
-      if (error && error.code === 'PGRST116') {
-        // No profile found, create one
-        toast({
-          title: "⚠️ Debug - Pas de profil",
-          description: "Création d'un nouveau profil...",
-        });
-        
-        const { data: newProfile, error: insertError } = await supabase
-          .from('profiles')
-          .insert({
-            user_id: authUser.id,
-            name: authUser.user_metadata?.username || '',
-            is_provider: authUser.user_metadata?.is_provider || false,
-            verified: false,
-          })
-          .select()
-          .single();
-
-        if (insertError) {
-          toast({
-            title: "❌ Debug - Erreur création",
-            description: `Erreur création profil: ${insertError.message}`,
-            variant: "destructive",
-          });
-          throw insertError;
-        }
-
-        toast({
-          title: "✅ Debug - Profil créé",
-          description: "Nouveau profil créé avec succès",
-        });
-
-        setUser({
-          id: authUser.id,
-          email: authUser.email!,
-          profile: newProfile
-        });
-      } else if (error) {
-        throw error;
-      } else {
-        toast({
-          title: "✅ Debug - Profil chargé",
-          description: `Profil trouvé: ${profile ? 'OUI' : 'NON'}`,
-        });
-
-        setUser({
-          id: authUser.id,
-          email: authUser.email!,
-          profile: profile || undefined
-        });
-      }
-    } catch (error: any) {
-      console.error('Error loading profile:', error);
-      toast({
-        title: "⚠️ Debug - Profil",
-        description: `Erreur profil: ${error.message}`,
-        variant: "destructive",
+      setUser({
+        id: authUser.id,
+        email: authUser.email!,
+        profile: profile || undefined
       });
+    } catch (error) {
+      console.error('Error loading profile:', error);
       setUser({
         id: authUser.id,
         email: authUser.email!
@@ -151,41 +95,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
-    
-    toast({
-      title: "🔄 Debug - Étape 1",
-      description: "Début de la connexion...",
-    });
-    
     try {
-      toast({
-        title: "🔄 Debug - Étape 2", 
-        description: "Envoi des données à Supabase...",
-      });
-      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      toast({
-        title: "🔄 Debug - Étape 3",
-        description: `Réponse reçue - Error: ${error ? 'OUI' : 'NON'}, Data: ${data ? 'OUI' : 'NON'}`,
-      });
-
-      if (error) {
-        toast({
-          title: "❌ Debug - Erreur détectée",
-          description: `Code: ${error.status}, Message: ${error.message}`,
-          variant: "destructive",
-        });
-        throw error;
-      }
-
-      toast({
-        title: "✅ Debug - Étape 4",
-        description: "Connexion réussie, chargement du profil...",
-      });
+      if (error) throw error;
 
       toast({
         title: "Welcome back!",
@@ -194,48 +110,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
       console.error("Login failed:", error);
       toast({
-        title: "❌ Login failed",
+        title: "Login failed",
         description: error.message || "An error occurred during login",
         variant: "destructive",
       });
       throw error;
     } finally {
       setIsLoading(false);
-      toast({
-        title: "🔄 Debug - Étape finale",
-        description: "Loading terminé",
-      });
     }
   };
 
-  const signup = async (userData: { email: string; password: string; username?: string; isProvider?: boolean }) => {
+  const signup = async (userData: { email: string; password: string; name?: string; isProvider?: boolean }) => {
     setIsLoading(true);
     try {
-      // Check if username already exists
-      if (userData.username) {
-        const { data: existingProfile } = await supabase
-          .from('profiles')
-          .select('name')
-          .eq('name', userData.username)
-          .single();
-
-        if (existingProfile) {
-          toast({
-            title: "Username exists",
-            description: "This username is already taken. Please choose another one.",
-            variant: "destructive",
-          });
-          throw new Error("Username already exists");
-        }
-      }
-
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
           data: {
-            username: userData.username || '',
+            name: userData.name || '',
             is_provider: userData.isProvider || false,
           }
         }
@@ -247,7 +140,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (data.user) {
         await supabase.from('profiles').insert({
           user_id: data.user.id,
-          name: userData.username || '',
+          name: userData.name || '',
           is_provider: userData.isProvider || false,
           verified: false,
         });

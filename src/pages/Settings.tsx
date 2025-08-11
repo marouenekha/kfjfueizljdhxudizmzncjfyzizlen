@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -22,46 +23,66 @@ export default function Settings() {
   const handleNameUpdate = async () => {
     try {
       await updateProfile({ name });
-      toast({ title: "Name updated successfully" });
-    } catch (error) {
-      toast({ title: "Failed to update name", variant: "destructive" });
+      toast({ title: t('nameUpdatedSuccessfully', 'Name updated successfully') });
+    } catch (error: any) {
+      toast({ 
+        title: t('failedToUpdateName', 'Failed to update name'), 
+        description: error.message,
+        variant: "destructive" 
+      });
     }
   };
 
   const handleEmailUpdate = async () => {
     try {
-      // Email updates should be handled through Supabase auth, not profiles
-      toast({ title: "Email update feature coming soon", variant: "default" });
-    } catch (error) {
-      toast({ title: "Failed to update email", variant: "destructive" });
+      const { error } = await supabase.auth.updateUser({ email });
+      if (error) throw error;
+      toast({ 
+        title: t('emailUpdateSent', 'Email update sent'), 
+        description: t('checkEmailConfirm', 'Check your email to confirm the change') 
+      });
+    } catch (error: any) {
+      toast({ 
+        title: t('failedToUpdateEmail', 'Failed to update email'), 
+        description: error.message,
+        variant: "destructive" 
+      });
     }
   };
 
   const handlePasswordChange = async () => {
     if (newPassword !== confirmPassword) {
-      toast({ title: "Passwords don't match", variant: "destructive" });
+      toast({ title: t('passwordsDontMatch', "Passwords don't match"), variant: "destructive" });
       return;
     }
     try {
-      // Simulate password change
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast({ title: "Password changed successfully" });
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      toast({ title: t('passwordChangedSuccessfully', 'Password changed successfully') });
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (error) {
-      toast({ title: "Failed to change password", variant: "destructive" });
+    } catch (error: any) {
+      toast({ 
+        title: t('failedToChangePassword', 'Failed to change password'), 
+        description: error.message,
+        variant: "destructive" 
+      });
     }
   };
 
   const handleDeleteAccount = async () => {
     try {
-      // Simulate account deletion
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { error } = await supabase.auth.admin.deleteUser(user!.id);
+      if (error) throw error;
       logout();
-      toast({ title: "Account deleted successfully" });
-    } catch (error) {
-      toast({ title: "Failed to delete account", variant: "destructive" });
+      toast({ title: t('accountDeletedSuccessfully', 'Account deleted successfully') });
+    } catch (error: any) {
+      toast({ 
+        title: t('failedToDeleteAccount', 'Failed to delete account'), 
+        description: error.message,
+        variant: "destructive" 
+      });
     }
   };
 
@@ -86,22 +107,22 @@ export default function Settings() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              👤 Change Name
+              👤 {t('changeName', 'Change Name')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">{t('name', 'Name')}</Label>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter your name"
+                  placeholder={t('enterYourName', 'Enter your name')}
                 />
               </div>
               <Button onClick={handleNameUpdate} disabled={!name.trim() || name === user?.profile?.name}>
-                Update Name
+                {t('updateName', 'Update Name')}
               </Button>
             </div>
           </CardContent>
@@ -111,23 +132,23 @@ export default function Settings() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              📧 Change Email Address
+              📧 {t('changeEmail', 'Change Email Address')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">{t('emailAddress', 'Email Address')}</Label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
+                  placeholder={t('enterYourEmail', 'Enter your email')}
                 />
               </div>
               <Button onClick={handleEmailUpdate} disabled={!email.trim() || email === user?.email}>
-                Update Email
+                {t('updateEmail', 'Update Email')}
               </Button>
             </div>
           </CardContent>
@@ -137,46 +158,46 @@ export default function Settings() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              🔒 Change Password
+              🔒 {t('changePassword', 'Change Password')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
+                <Label htmlFor="currentPassword">{t('currentPassword', 'Current Password')}</Label>
                 <Input
                   id="currentPassword"
                   type="password"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="Enter current password"
+                  placeholder={t('enterCurrentPassword', 'Enter current password')}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
+                <Label htmlFor="newPassword">{t('newPassword', 'New Password')}</Label>
                 <Input
                   id="newPassword"
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password"
+                  placeholder={t('enterNewPassword', 'Enter new password')}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Label htmlFor="confirmPassword">{t('confirmNewPassword', 'Confirm New Password')}</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm new password"
+                  placeholder={t('confirmNewPassword', 'Confirm new password')}
                 />
               </div>
               <Button 
                 onClick={handlePasswordChange} 
                 disabled={!currentPassword || !newPassword || !confirmPassword}
               >
-                Change Password
+                {t('changePassword', 'Change Password')}
               </Button>
             </div>
           </CardContent>
@@ -186,29 +207,29 @@ export default function Settings() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
-              🗑️ Delete Account
+              🗑️ {t('deleteAccount', 'Delete Account')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                This action cannot be undone. This will permanently delete your account and all associated data.
+                {t('deleteAccountWarning', 'This action cannot be undone. This will permanently delete your account and all associated data.')}
               </p>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive">Delete Account</Button>
+                  <Button variant="destructive">{t('deleteAccount', 'Delete Account')}</Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogTitle>{t('areYouSure', 'Are you absolutely sure?')}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
+                      {t('deleteAccountConfirm', 'This action cannot be undone. This will permanently delete your account and remove all your data from our servers.')}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>{t('cancel', 'Cancel')}</AlertDialogCancel>
                     <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                      Delete Account
+                      {t('deleteAccount', 'Delete Account')}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
