@@ -73,11 +73,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const loadUserProfile = async (authUser: SupabaseUser) => {
     try {
+      toast({
+        title: "🔄 Debug - Profil",
+        description: "Chargement du profil utilisateur...",
+      });
+      
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', authUser.id)
         .single();
+
+      toast({
+        title: "✅ Debug - Profil chargé",
+        description: `Profil trouvé: ${profile ? 'OUI' : 'NON'}`,
+      });
 
       setUser({
         id: authUser.id,
@@ -86,6 +96,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
     } catch (error) {
       console.error('Error loading profile:', error);
+      toast({
+        title: "⚠️ Debug - Profil",
+        description: `Erreur profil: ${error}`,
+        variant: "destructive",
+      });
       setUser({
         id: authUser.id,
         email: authUser.email!
@@ -95,13 +110,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
+    
+    toast({
+      title: "🔄 Debug - Étape 1",
+      description: "Début de la connexion...",
+    });
+    
     try {
+      toast({
+        title: "🔄 Debug - Étape 2", 
+        description: "Envoi des données à Supabase...",
+      });
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      toast({
+        title: "🔄 Debug - Étape 3",
+        description: `Réponse reçue - Error: ${error ? 'OUI' : 'NON'}, Data: ${data ? 'OUI' : 'NON'}`,
+      });
+
+      if (error) {
+        toast({
+          title: "❌ Debug - Erreur détectée",
+          description: `Code: ${error.status}, Message: ${error.message}`,
+          variant: "destructive",
+        });
+        throw error;
+      }
+
+      toast({
+        title: "✅ Debug - Étape 4",
+        description: "Connexion réussie, chargement du profil...",
+      });
 
       toast({
         title: "Welcome back!",
@@ -110,13 +153,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
       console.error("Login failed:", error);
       toast({
-        title: "Login failed",
+        title: "❌ Login failed",
         description: error.message || "An error occurred during login",
         variant: "destructive",
       });
       throw error;
     } finally {
       setIsLoading(false);
+      toast({
+        title: "🔄 Debug - Étape finale",
+        description: "Loading terminé",
+      });
     }
   };
 

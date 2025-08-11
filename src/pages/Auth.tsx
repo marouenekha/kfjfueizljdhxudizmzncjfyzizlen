@@ -69,14 +69,39 @@ const Auth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
+    toast({
+      title: "🔄 Debug - Formulaire",
+      description: "Soumission du formulaire...",
+    });
+    
+    if (!validateForm()) {
+      toast({
+        title: "❌ Debug - Validation",
+        description: "Erreurs de validation détectées",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "✅ Debug - Validation",
+      description: "Formulaire validé avec succès",
+    });
 
     setLoading(true);
     
     try {
       if (isLogin) {
+        toast({
+          title: "🔄 Debug - Action",
+          description: "Appel de la fonction login...",
+        });
         await login(formData.email, formData.password);
       } else {
+        toast({
+          title: "🔄 Debug - Action", 
+          description: "Appel de la fonction signup...",
+        });
         await signup({
           email: formData.email,
           password: formData.password,
@@ -85,12 +110,25 @@ const Auth = () => {
         });
       }
       
+      toast({
+        title: "🔄 Debug - Navigation",
+        description: "Redirection vers /feed...",
+      });
+      
       // Navigate to feed page
       navigate('/feed');
     } catch (error) {
-      // Error handling is done in the auth context
+      toast({
+        title: "❌ Debug - Erreur",
+        description: `Erreur dans handleSubmit: ${error}`,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
+      toast({
+        title: "🔄 Debug - Fin",
+        description: "Fin du processus de soumission",
+      });
     }
   };
 
