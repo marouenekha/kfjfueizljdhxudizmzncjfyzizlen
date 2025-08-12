@@ -1,88 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout/Layout";
 import { PostCard } from "@/components/Feed/PostCard";
 import { ServiceCategoryFilter } from "@/components/Feed/ServiceCategoryFilter";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-
-// Mock data for development
-const mockPosts = [
-  {
-    id: "1",
-    user: {
-      id: "1",
-      name: "Ahmed Al-Rashid",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      isProvider: true,
-      serviceTypes: ["plumbing", "electrical"],
-      rating: 4.8,
-      totalReviews: 127
-    },
-    content: "Just finished installing a modern kitchen sink for a lovely family in Dubai Marina! 🔧✨",
-    images: [
-      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop"
-    ],
-    serviceCategory: "home",
-    location: "Dubai Marina, Dubai",
-    likes: 24,
-    comments: 8,
-    createdAt: "2024-01-15T10:30:00Z",
-    isLiked: false
-  },
-  {
-    id: "2",
-    user: {
-      id: "2",
-      name: "Sarah Johnson",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b2e2c8a6?w=150&h=150&fit=crop&crop=face",
-      isProvider: true,
-      serviceTypes: ["graphic-design", "web-design"],
-      rating: 4.9,
-      totalReviews: 89
-    },
-    content: "New logo design for a tech startup! Clean, modern, and memorable. What do you think? 🎨",
-    images: [
-      "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop"
-    ],
-    serviceCategory: "digital",
-    location: "Business Bay, Dubai",
-    likes: 45,
-    comments: 12,
-    createdAt: "2024-01-15T08:15:00Z",
-    isLiked: true
-  },
-  {
-    id: "3",
-    user: {
-      id: "3",
-      name: "Marie Dubois",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-      isProvider: true,
-      serviceTypes: ["event-planning", "wedding-planning"],
-      rating: 4.7,
-      totalReviews: 203
-    },
-    content: "Successfully organized an amazing corporate event for 200+ guests! Every detail was perfect 💼🎉",
-    images: [
-      "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400&h=300&fit=crop",
-      "https://images.unsplash.com/photo-1515169067868-5387ec050dac?w=400&h=300&fit=crop"
-    ],
-    serviceCategory: "events",
-    location: "DIFC, Dubai",
-    likes: 67,
-    comments: 23,
-    createdAt: "2024-01-14T16:45:00Z",
-    isLiked: false
-  }
-];
+import { supabase } from "@/integrations/supabase/client";
+import { Plus, Users } from "lucide-react";
 
 export default function Feed() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [posts] = useState(mockPosts);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('posts')
+        .select(`
+          *,
+          profiles (
+            name,
+            avatar_url,
+            is_provider,
+            service_types
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setPosts(data || []);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredPosts = selectedCategory 
-    ? posts.filter(post => post.serviceCategory === selectedCategory)
+    ? posts.filter(post => post.service_type === selectedCategory)
     : posts;
 
   return (
@@ -97,17 +57,38 @@ export default function Feed() {
 
         {/* Posts Feed */}
         <div className="space-y-4">
-          {filteredPosts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))}
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : filteredPosts.length > 0 ? (
+            filteredPosts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))
+          ) : (
+            <div className="text-center py-12 space-y-4">
+              <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center">
+                <Users className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold">No posts yet</h3>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Be the first to share your work! Create a post to showcase your services and connect with potential clients.
+              </p>
+              <Button onClick={() => navigate('/create-post')} className="mt-4">
+                <Plus className="w-4 h-4 mr-2" />
+                Create First Post
+              </Button>
+            </div>
+          )}
         </div>
 
-        {/* Load More */}
-        <div className="flex justify-center py-8">
-          <button className="px-6 py-2 text-primary font-medium hover:bg-primary/10 rounded-lg transition-colors">
-            Load More Posts
-          </button>
-        </div>
+        {filteredPosts.length > 0 && (
+          <div className="flex justify-center py-8">
+            <button className="px-6 py-2 text-primary font-medium hover:bg-primary/10 rounded-lg transition-colors">
+              Load More Posts
+            </button>
+          </div>
+        )}
       </div>
     </Layout>
   );
