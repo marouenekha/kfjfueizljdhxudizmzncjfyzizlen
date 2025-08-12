@@ -8,57 +8,95 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ServiceCategoryFilter } from "@/components/Feed/ServiceCategoryFilter";
 import { RatingDisplay } from "@/components/ui/rating-display";
-import { supabase } from "@/integrations/supabase/client";
+
+// Mock provider data
+const mockProviders = [
+  {
+    id: "1",
+    name: "Ahmed Al-Rashid",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    rating: 4.8,
+    reviewCount: 127,
+    serviceTypes: ["Plumbing", "Electrical"],
+    location: "Dubai Marina",
+    distance: "2.1 km",
+    bio: "Professional plumber with 8+ years experience. Quick response, quality work.",
+    priceRange: "AED 100-300",
+    isOnline: true,
+    portfolioImages: [
+      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&h=150&fit=crop",
+      "https://images.unsplash.com/photo-1604709177225-055f99402ea3?w=200&h=150&fit=crop"
+    ]
+  },
+  {
+    id: "2",
+    name: "Sarah Johnson",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b2e2c8a6?w=150&h=150&fit=crop&crop=face",
+    rating: 4.9,
+    reviewCount: 89,
+    serviceTypes: ["Graphic Design", "Branding"],
+    location: "Business Bay",
+    distance: "1.8 km",
+    bio: "Creative designer specializing in modern branding and digital assets.",
+    priceRange: "AED 200-800",
+    isOnline: true,
+    portfolioImages: [
+      "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=200&h=150&fit=crop",
+      "https://images.unsplash.com/photo-1626785774625-0b1c2c4eab67?w=200&h=150&fit=crop"
+    ]
+  },
+  {
+    id: "3",
+    name: "Marie Dubois",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    rating: 5.0,
+    reviewCount: 156,
+    serviceTypes: ["Event Planning", "Wedding Coordinator"],
+    location: "DIFC",
+    distance: "3.2 km",
+    bio: "Luxury event planner with attention to every detail. Making dreams come true.",
+    priceRange: "AED 500-2000",
+    isOnline: false,
+    portfolioImages: [
+      "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=200&h=150&fit=crop",
+      "https://images.unsplash.com/photo-1515169067868-5387ec050dac?w=200&h=150&fit=crop"
+    ]
+  }
+];
 
 export default function Search() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [providers, setProviders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     const categoryParam = searchParams.get('category');
     if (categoryParam) {
       setSelectedCategory(categoryParam);
     }
-    fetchProviders();
   }, [searchParams]);
-
-  const fetchProviders = async () => {
-    try {
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('is_provider', true);
-
-      if (error) throw error;
-      setProviders(profiles || []);
-    } catch (error) {
-      console.error('Error fetching providers:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [providers] = useState(mockProviders);
 
   const filteredProviders = providers.filter(provider => {
     const matchesSearch = searchQuery === "" || 
-      provider.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      provider.service_types?.some((service: string) => 
+      provider.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      provider.serviceTypes.some(service => 
         service.toLowerCase().includes(searchQuery.toLowerCase())
       );
     
     const matchesCategory = selectedCategory === null || 
-      provider.service_types?.some((service: string) => 
+      provider.serviceTypes.some(service => 
         service.toLowerCase().includes(selectedCategory.toLowerCase())
       );
     
     return matchesSearch && matchesCategory;
   });
 
-  const handleProviderClick = (providerId: string) => {
-    navigate(`/profile?user=${providerId}`);
+  const handleProviderClick = (providerName: string) => {
+    if (providerName === "Sarah Johnson") {
+      navigate("/profile?user=sarah");
+    }
   };
 
   return (
@@ -105,86 +143,90 @@ export default function Search() {
 
           {/* Provider Cards */}
           <div className="space-y-4">
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            ) : filteredProviders.length > 0 ? (
-              filteredProviders.map((provider) => (
-                <div key={provider.id} className="post-card p-4 space-y-3">
-                  {/* Provider Header */}
-                  <div className="flex items-start gap-3">
-                    <div className="relative">
-                      <Avatar 
-                        className="w-12 h-12 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
-                        onClick={() => handleProviderClick(provider.id)}
-                      >
-                        <AvatarImage src={provider.avatar_url} alt={provider.name || 'Provider'} />
-                        <AvatarFallback>{provider.name?.[0] || 'P'}</AvatarFallback>
-                      </Avatar>
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 
-                          className="font-semibold truncate cursor-pointer hover:text-primary transition-colors"
-                          onClick={() => handleProviderClick(provider.id)}
-                        >
-                          {provider.name || 'Service Provider'}
-                        </h3>
-                      </div>
-
-                      {provider.service_types && (
-                        <div className="flex flex-wrap gap-1 mb-2">
-                          {provider.service_types.map((service: string) => (
-                            <Badge key={service} variant="secondary" className="text-xs">
-                              {service}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-
-                      {provider.location && (
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
-                          <div className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3" />
-                            <span>{provider.location}</span>
-                          </div>
-                        </div>
-                      )}
-
-                      {provider.bio && (
-                        <p className="text-sm text-muted-foreground mb-2">{provider.bio}</p>
-                      )}
-                    </div>
+            {filteredProviders.map((provider) => (
+              <div key={provider.id} className="post-card p-4 space-y-3">
+                {/* Provider Header */}
+                <div className="flex items-start gap-3">
+                  <div className="relative">
+                    <Avatar 
+                      className="w-12 h-12 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
+                      onClick={() => handleProviderClick(provider.name)}
+                    >
+                      <AvatarImage src={provider.avatar} alt={provider.name} />
+                      <AvatarFallback>{provider.name[0]}</AvatarFallback>
+                    </Avatar>
+                    {provider.isOnline && (
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-accent rounded-full border-2 border-card"></div>
+                    )}
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex gap-2">
-                    <Button 
-                      size="sm" 
-                      className="flex-1 text-xs sm:text-sm"
-                      onClick={() => navigate("/messages")}
-                    >
-                      Contact
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1 text-xs sm:text-sm"
-                      onClick={() => handleProviderClick(provider.id)}
-                    >
-                      View Profile
-                    </Button>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 
+                        className="font-semibold truncate cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => handleProviderClick(provider.name)}
+                      >
+                        {provider.name}
+                      </h3>
+                      <RatingDisplay 
+                        rating={provider.rating} 
+                        reviews={provider.reviewCount} 
+                        size="sm"
+                      />
+                    </div>
+
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {provider.serviceTypes.map((service) => (
+                        <Badge key={service} variant="secondary" className="text-xs">
+                          {service}
+                        </Badge>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        <span>{provider.location} • {provider.distance}</span>
+                      </div>
+                    </div>
+
+                    <p className="text-sm text-muted-foreground mb-2">{provider.bio}</p>
+                    <p className="text-sm font-medium text-primary">{provider.priceRange}</p>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No providers found</p>
-                <p className="text-sm text-muted-foreground mt-2">Try adjusting your search or filters</p>
+
+                {/* Portfolio Preview */}
+                <div className="flex gap-2 overflow-x-auto">
+                  {provider.portfolioImages.map((image, index) => (
+                    <img
+                      key={index}
+                      src={image}
+                      alt={`Portfolio ${index + 1}`}
+                      className="w-20 h-16 object-cover rounded-lg flex-shrink-0"
+                    />
+                  ))}
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2">
+                  <Button 
+                    size="sm" 
+                    className="flex-1 text-xs sm:text-sm"
+                    onClick={() => navigate("/messages")}
+                  >
+                    Contact
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 text-xs sm:text-sm"
+                    onClick={() => handleProviderClick(provider.name)}
+                  >
+                    View Profile
+                  </Button>
+                </div>
               </div>
-            )}
+            ))}
           </div>
         </div>
       </div>
