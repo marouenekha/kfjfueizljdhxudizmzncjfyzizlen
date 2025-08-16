@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { supabase } from "@/integrations/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
+import { cleanupAuthState } from "@/lib/authCleanup";
 
 export interface Profile {
   id: string;
@@ -47,21 +48,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Get initial session
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    // Listen for auth changes FIRST to avoid missing events
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
-        await loadUserProfile(session.user);
+        // Set minimal user synchronously
+        setUser({
+          id: session.user.id,
+          email: session.user.email || "",
+        });
+        // Defer any Supabase calls to avoid deadlocks
+        setTimeout(() => {
+          loadUserProfile(session.user);
+        }, 0);
+      } else {
+        setUser(null);
       }
       setIsLoading(false);
-    };
+    });
 
-    getSession();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // THEN, get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        await loadUserProfile(session.user);
+        setUser({
+          id: session.user.id,
+          email: session.user.email || "",
+        });
+        setTimeout(() => {
+          loadUserProfile(session.user);
+        }, 0);
       } else {
         setUser(null);
       }
@@ -96,6 +110,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
+      // Clean up any existing auth state to avoid limbo sessions
+      cleanupAuthState();
+      // Attempt a global sign out (ignore errors)
+      try {
+        await supabase.auth.signOut({ scope: "global" } as any);
+      } catch {}
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -107,6 +128,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
+
+      // Force a clean reload to ensure fresh session state
+      window.location.href = "/feed";
     } catch (error: any) {
       console.error("Login failed:", error);
       toast({
@@ -123,6 +147,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signup = async (userData: { email: string; password: string; name?: string; isProvider?: boolean }) => {
     setIsLoading(true);
     try {
+      // Clean up any existing auth state before sign up
+      cleanupAuthState();
+      try {
+        await supabase.auth.signOut({ scope: "global" } as any);
+      } catch {}
+
+      const redirectUrl = `${window.location.origin}/`;
+
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
@@ -130,7 +162,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           data: {
             name: userData.name || '',
             is_provider: userData.isProvider || false,
-          }
+          },
+          emailRedirectTo: redirectUrl,
         }
       });
 
@@ -165,12 +198,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      await supabase.auth.signOut();
-      setUser(null);
+      // Clean up auth storage and attempt a global sign out
+      cleanupAuthState();
+      try {
+        await supabase.auth.signOut({ scope: "global" } as any);
+      } catch {}
+      
       toast({
         title: "Goodbye!",
         description: "You have been logged out successfully.",
       });
+
+      // Hard redirect to ensure a clean state
+      window.location.href = "/auth";
     } catch (error: any) {
       console.error("Logout failed:", error);
       toast({
