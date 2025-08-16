@@ -9,6 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useTranslation } from 'react-i18next';
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const serviceCategories = [
   { id: "home", label: "Home Services" },
@@ -18,14 +22,11 @@ const serviceCategories = [
   { id: "business", label: "Business Services" }
 ];
 
-// Mock user data
-const mockUser = {
-  name: "Ahmed Al-Rashid",
-  avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
-};
-
 export default function CreatePost() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [content, setContent] = useState("");
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -36,9 +37,11 @@ export default function CreatePost() {
   const [userType, setUserType] = useState<"provider" | "seeker">("provider");
 
   const handleImageUpload = () => {
-    // In real app, would open file picker and upload images
-    const mockImage = `https://images.unsplash.com/photo-${Date.now()}?w=400&h=300&fit=crop`;
-    setSelectedImages([...selectedImages, mockImage]);
+    // TODO: Implement file picker and image upload
+    toast({
+      title: "Feature coming soon",
+      description: "Image upload will be available in a future update.",
+    });
   };
 
   const removeImage = (index: number) => {
@@ -57,26 +60,41 @@ export default function CreatePost() {
   };
 
   const handlePost = async () => {
-    if (!content.trim()) return;
+    if (!content.trim() || !user) return;
     
     setIsPosting(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // In real app, would send to API
-    console.log("Posting:", {
-      content,
-      images: selectedImages,
-      category: selectedCategory,
-      location,
-      hashtags
-    });
-    
-    setIsPosting(false);
-    
-    // Navigate back to feed or show success message
-    window.history.back();
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .insert({
+          title: content.slice(0, 100), // Use first 100 chars as title
+          description: content,
+          user_id: user.id,
+          service_type: selectedCategory,
+          location: location,
+          images: selectedImages.length > 0 ? selectedImages : null,
+          status: 'active'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Post created!",
+        description: "Your post has been successfully created.",
+      });
+
+      navigate('/feed');
+    } catch (error: any) {
+      console.error('Error creating post:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create post. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPosting(false);
+    }
   };
 
   return (
@@ -110,14 +128,14 @@ export default function CreatePost() {
         {/* User Info */}
         <div className="flex items-center gap-3">
           <Avatar className="w-12 h-12">
-            <AvatarImage src={mockUser.avatar} alt={mockUser.name} />
-            <AvatarFallback>{mockUser.name[0]}</AvatarFallback>
+            <AvatarImage src={user?.profile?.avatar_url} alt={user?.profile?.name || "User"} />
+            <AvatarFallback>{user?.profile?.name?.[0] || "U"}</AvatarFallback>
           </Avatar>
           <div>
-            <h3 className="font-semibold">{mockUser.name}</h3>
+            <h3 className="font-semibold">{user?.profile?.name || "User"}</h3>
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               <MapPin className="w-3 h-3" />
-              <span>{location}</span>
+              <span>{user?.profile?.location || location}</span>
             </div>
           </div>
         </div>
