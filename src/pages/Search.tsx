@@ -15,7 +15,7 @@ export default function Search() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [providers, setProviders] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
@@ -23,52 +23,55 @@ export default function Search() {
     if (categoryParam) {
       setSelectedCategory(categoryParam);
     }
-    fetchProviders();
+    fetchProfiles();
   }, [searchParams]);
 
-  const fetchProviders = async () => {
+  const fetchProfiles = async () => {
     try {
-      const { data: profiles, error } = await supabase
+      const { data: profileData, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('is_provider', true);
+        .not('name', 'is', null) // Only fetch profiles that have a name
+        .order('name');
 
       if (error) throw error;
-      setProviders(profiles || []);
+      setProfiles(profileData || []);
     } catch (error) {
-      console.error('Error fetching providers:', error);
+      console.error('Error fetching profiles:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredProviders = providers.filter(provider => {
+  const filteredProfiles = profiles.filter(profile => {
     const matchesSearch = searchQuery === "" || 
-      provider.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      provider.service_types?.some((service: string) => 
+      profile.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      profile.bio?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      profile.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      profile.service_types?.some((service: string) => 
         service.toLowerCase().includes(searchQuery.toLowerCase())
       );
     
     const matchesCategory = selectedCategory === null || 
-      provider.service_types?.some((service: string) => 
+      profile.service_types?.some((service: string) => 
         service.toLowerCase().includes(selectedCategory.toLowerCase())
       );
     
     return matchesSearch && matchesCategory;
   });
 
-  const handleProviderClick = (providerId: string) => {
-    navigate(`/profile?user=${providerId}`);
+  const handleProfileClick = (profileId: string) => {
+    navigate(`/profile?user=${profileId}`);
   };
 
   return (
-    <Layout title="Search Providers">
+    <Layout title="Search Profiles">
       <div className="container-mobile space-y-4 py-4">
         {/* Search Bar */}
         <div className="relative">
           <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
-            placeholder="Search services or providers..."
+            placeholder="Search profiles, services, or location..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 pr-4 h-12 rounded-xl border-border focus:border-primary"
@@ -96,7 +99,7 @@ export default function Search() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-base sm:text-lg font-semibold">
-              {filteredProviders.length} providers found
+              {filteredProfiles.length} profiles found
             </h2>
             <Button variant="ghost" size="sm" className="text-primary text-xs sm:text-sm">
               Sort by rating
@@ -109,34 +112,44 @@ export default function Search() {
               <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
-            ) : filteredProviders.length > 0 ? (
-              filteredProviders.map((provider) => (
-                <div key={provider.id} className="post-card p-4 space-y-3">
-                  {/* Provider Header */}
+            ) : filteredProfiles.length > 0 ? (
+              filteredProfiles.map((profile) => (
+                <div key={profile.id} className="post-card p-4 space-y-3">
+                  {/* Profile Header */}
                   <div className="flex items-start gap-3">
                     <div className="relative">
                       <Avatar 
                         className="w-12 h-12 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
-                        onClick={() => handleProviderClick(provider.id)}
+                        onClick={() => handleProfileClick(profile.user_id)}
                       >
-                        <AvatarImage src={provider.avatar_url} alt={provider.name || 'Provider'} />
-                        <AvatarFallback>{provider.name?.[0] || 'P'}</AvatarFallback>
+                        <AvatarImage src={profile.avatar_url} alt={profile.name || 'User'} />
+                        <AvatarFallback>{profile.name?.[0] || 'U'}</AvatarFallback>
                       </Avatar>
+                      {profile.is_provider && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full border-2 border-background flex items-center justify-center">
+                          <span className="text-[8px] text-primary-foreground font-bold">✓</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 
                           className="font-semibold truncate cursor-pointer hover:text-primary transition-colors"
-                          onClick={() => handleProviderClick(provider.id)}
+                          onClick={() => handleProfileClick(profile.user_id)}
                         >
-                          {provider.name || 'Service Provider'}
+                          {profile.name || 'User'}
                         </h3>
+                        {profile.is_provider && (
+                          <Badge variant="secondary" className="text-xs">
+                            Provider
+                          </Badge>
+                        )}
                       </div>
 
-                      {provider.service_types && (
+                      {profile.service_types && profile.service_types.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-2">
-                          {provider.service_types.map((service: string) => (
+                          {profile.service_types.map((service: string) => (
                             <Badge key={service} variant="secondary" className="text-xs">
                               {service}
                             </Badge>
@@ -144,17 +157,17 @@ export default function Search() {
                         </div>
                       )}
 
-                      {provider.location && (
+                      {profile.location && (
                         <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                           <div className="flex items-center gap-1">
                             <MapPin className="w-3 h-3" />
-                            <span>{provider.location}</span>
+                            <span>{profile.location}</span>
                           </div>
                         </div>
                       )}
 
-                      {provider.bio && (
-                        <p className="text-sm text-muted-foreground mb-2">{provider.bio}</p>
+                      {profile.bio && (
+                        <p className="text-sm text-muted-foreground mb-2">{profile.bio}</p>
                       )}
                     </div>
                   </div>
@@ -172,7 +185,7 @@ export default function Search() {
                       variant="outline" 
                       size="sm" 
                       className="flex-1 text-xs sm:text-sm"
-                      onClick={() => handleProviderClick(provider.id)}
+                      onClick={() => handleProfileClick(profile.user_id)}
                     >
                       View Profile
                     </Button>
@@ -181,7 +194,7 @@ export default function Search() {
               ))
             ) : (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">No providers found</p>
+                <p className="text-muted-foreground">No profiles found</p>
                 <p className="text-sm text-muted-foreground mt-2">Try adjusting your search or filters</p>
               </div>
             )}
