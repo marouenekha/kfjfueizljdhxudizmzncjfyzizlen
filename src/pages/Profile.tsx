@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 export default function Profile() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user: authUser } = useAuth();
+  const { user: authUser, isLoading: authLoading } = useAuth();
   const [isFollowing, setIsFollowing] = useState(false);
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,15 +77,27 @@ export default function Profile() {
     }
   };
 
-  if (!user) {
+  // Show loading spinner while auth is loading or if user exists but profile is still loading
+  if (authLoading || (authUser && !authUser.profile)) {
+    return (
+      <Layout title="Profile">
+        <div className="container-mobile py-8 text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading profile...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!authUser) {
     return (
       <Layout title="Profile">
         <div className="container-mobile py-8 text-center space-y-4">
           <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center">
             <Users className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-semibold">No profile found</h3>
-          <p className="text-muted-foreground">Please log in to view your profile.</p>
+          <h3 className="text-lg font-semibold">Please sign in</h3>
+          <p className="text-muted-foreground">You need to be logged in to view this profile.</p>
           <Button onClick={() => navigate('/auth')}>
             Sign In
           </Button>
