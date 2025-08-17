@@ -8,11 +8,16 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslation } from 'react-i18next';
 import { ReviewModal } from "@/components/ui/review-modal";
 import { supabase } from "@/integrations/supabase/client";
+import { useSearchParams } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Messages() {
   const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
+  const { user } = useAuth();
   const [conversations, setConversations] = useState<any[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+  const [selectedProfile, setSelectedProfile] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,15 +27,74 @@ export default function Messages() {
 
   useEffect(() => {
     fetchConversations();
-  }, []);
+    
+    // Check if we need to start a conversation with a specific user
+    const userParam = searchParams.get('user');
+    if (userParam && user) {
+      handleStartConversation(userParam);
+    }
+  }, [searchParams, user]);
 
   const fetchConversations = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) return;
 
-      // For now, just show empty state since there are no messages yet
-      setConversations([]);
+      // Get all messages where the user is either sender or receiver
+      const { data: messagesData, error } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`sender_id.eq.${authUser.id},receiver_id.eq.${authUser.id}`)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Group messages by conversation partner and fetch their profiles
+      const conversationMap = new Map();
+      const partnerIds = new Set<string>();
+      
+      messagesData?.forEach(message => {
+        const isFromCurrentUser = message.sender_id === authUser.id;
+        const partnerId = isFromCurrentUser ? message.receiver_id : message.sender_id;
+        partnerIds.add(partnerId);
+        
+        if (!conversationMap.has(partnerId)) {
+          conversationMap.set(partnerId, {
+            id: partnerId,
+            lastMessage: message.content,
+            timestamp: message.created_at,
+            unreadCount: 0
+          });
+        }
+      });
+
+      // Fetch profiles for all conversation partners
+      if (partnerIds.size > 0) {
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('user_id, name, avatar_url, is_provider')
+          .in('user_id', Array.from(partnerIds));
+
+        if (profilesError) throw profilesError;
+
+        // Merge profile data with conversations
+        const conversations = Array.from(conversationMap.entries()).map(([partnerId, conversation]) => {
+          const profile = profiles?.find(p => p.user_id === partnerId);
+          return {
+            ...conversation,
+            user: {
+              name: profile?.name || 'Unknown User',
+              avatar: profile?.avatar_url,
+              isOnline: false
+            },
+            isProvider: profile?.is_provider || false
+          };
+        });
+
+        setConversations(conversations);
+      } else {
+        setConversations([]);
+      }
     } catch (error) {
       console.error('Error fetching conversations:', error);
     } finally {
@@ -117,14 +181,57 @@ export default function Messages() {
     }
   };
 
+  const handleStartConversation = async (userId: string) => {
+    try {
+      // Fetch the user's profile
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) throw error;
+
+      const conversationData = {
+        id: userId,
+        user: {
+          name: profile.name || 'Unknown User',
+          avatar: profile.avatar_url,
+          isOnline: false
+        },
+        isProvider: profile.is_provider || false,
+        lastMessage: '',
+        timestamp: new Date().toISOString(),
+        unreadCount: 0
+      };
+
+      setSelectedProfile(profile);
+      setSelectedConversation(userId);
+      setMessages([]);
+      fetchMessages(userId);
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+    }
+  };
+
   const handleReviewSubmit = (rating: number, comment: string) => {
     console.log("Review submitted:", { rating, comment });
     // In real app, send review to API
   };
 
   if (selectedConversation) {
-    const conversation = conversations.find(c => c.id === selectedConversation);
-    if (!conversation) return null;
+    const conversation = conversations.find(c => c.id === selectedConversation) || {
+      id: selectedConversation,
+      user: {
+        name: selectedProfile?.name || 'Unknown User',
+        avatar: selectedProfile?.avatar_url,
+        isOnline: false
+      },
+      isProvider: selectedProfile?.is_provider || false,
+      lastMessage: '',
+      timestamp: new Date().toISOString(),
+      unreadCount: 0
+    };
 
     // Fetch messages when conversation is selected
     if (messages.length === 0) {
@@ -206,10 +313,14 @@ export default function Messages() {
               return (
                 <div
                   key={message.id}
-                  className={`flex justify-start`}
+                  className={`flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[280px] sm:max-w-xs px-3 sm:px-4 py-2 rounded-xl message-received`}
+                    className={`max-w-[280px] sm:max-w-xs px-3 sm:px-4 py-2 rounded-xl ${
+                      message.sender_id === user?.id 
+                        ? 'bg-primary text-primary-foreground ml-12' 
+                        : 'bg-muted mr-12'
+                    }`}
                   >
                     <p className="text-sm leading-relaxed">{message.content}</p>
                     <p className={`text-xs mt-1 opacity-70`}>

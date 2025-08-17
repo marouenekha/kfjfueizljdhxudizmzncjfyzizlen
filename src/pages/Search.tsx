@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Search as SearchIcon, MapPin, Filter } from "lucide-react";
+import { Search as SearchIcon, MapPin, Filter, MessageCircle } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/Layout/Layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 export default function Search() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [profiles, setProfiles] = useState<any[]>([]);
@@ -62,6 +64,16 @@ export default function Search() {
 
   const handleProfileClick = (profileId: string) => {
     navigate(`/profile?user=${profileId}`);
+  };
+
+  const handleMessageUser = async (profileId: string) => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    
+    // Navigate to messages with the selected user
+    navigate(`/messages?user=${profileId}`);
   };
 
   return (
@@ -177,9 +189,10 @@ export default function Search() {
                     <Button 
                       size="sm" 
                       className="flex-1 text-xs sm:text-sm"
-                      onClick={() => navigate("/messages")}
+                      onClick={() => handleMessageUser(profile.user_id)}
                     >
-                      Contact
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Message
                     </Button>
                     <Button 
                       variant="outline" 
