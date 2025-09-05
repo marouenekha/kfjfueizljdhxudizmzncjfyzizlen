@@ -10,6 +10,9 @@ import { PostCard } from "@/components/Feed/PostCard";
 import { RatingDisplay } from "@/components/ui/rating-display";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { ProfileEditDialog } from "@/components/ProfileEditDialog";
+import { RatingModal } from "@/components/RatingModal";
+import { PortfolioManager } from "@/components/PortfolioManager";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -18,11 +21,15 @@ export default function Profile() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const viewingOtherUser = searchParams.get('user');
-  const isOwnProfile = !viewingOtherUser || viewingOtherUser === 'me';
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [userRating, setUserRating] = useState({ rating: 0, count: 0 });
+  const viewingUserId = searchParams.get('user');
+  const isOwnProfile = !viewingUserId || viewingUserId === authUser?.id;
   
-  // Use actual user data when available, with fallbacks for empty state
-  const user = authUser?.profile ? {
+  // Determine which user's profile we're viewing
+  const user = isOwnProfile ? (authUser?.profile ? {
     id: authUser.id,
     name: authUser.profile.name || "User",
     avatar: authUser.profile.avatar_url,
@@ -30,29 +37,77 @@ export default function Profile() {
     location: authUser.profile.location || "Location not set",
     isProvider: authUser.profile.is_provider,
     serviceTypes: authUser.profile.service_types || [],
-    rating: 4.5, // Default rating
-    reviewCount: 0,
-    completedJobs: 0,
-    followers: 0,
-    following: 0,
-    priceRange: "Contact for pricing",
-    responseTime: "New user",
-    joinedDate: new Date().toISOString().split('T')[0],
-    isOnline: true,
-    coverImage: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&h=300&fit=crop"
-  } : null;
+    phone: authUser.profile.phone,
+    joinedDate: new Date().toISOString(),
+    isOnline: true
+  } : null) : userProfile;
 
   useEffect(() => {
-    if (user?.id) {
-      fetchUserPosts();
-    } else {
+    if (viewingUserId && viewingUserId !== authUser?.id) {
+      fetchOtherUserProfile();
+    } else if (authUser?.id) {
+      fetchUserPosts(authUser.id);
+      fetchUserRating(authUser.id);
+    }
+  }, [viewingUserId, authUser?.id]);
+
+  const fetchOtherUserProfile = async () => {
+    if (!viewingUserId) return;
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', viewingUserId)
+        .single();
+
+      if (error) throw error;
+      
+      setUserProfile({
+        id: viewingUserId,
+        name: data.name || "User",
+        avatar: data.avatar_url,
+        bio: data.bio || "Welcome to my profile! 👋",
+        location: data.location || "Location not set",
+        isProvider: data.is_provider,
+        serviceTypes: data.service_types || [],
+        phone: data.phone,
+        joinedDate: data.created_at,
+        isOnline: false
+      });
+
+      fetchUserPosts(viewingUserId);
+      fetchUserRating(viewingUserId);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      setUserProfile(null);
+    } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  };
 
-  const fetchUserPosts = async () => {
-    if (!user?.id) return;
-    
+  const fetchUserRating = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('ratings')
+        .select('rating')
+        .eq('rated_id', userId);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const avgRating = data.reduce((sum, r) => sum + r.rating, 0) / data.length;
+        setUserRating({ rating: avgRating, count: data.length });
+      } else {
+        setUserRating({ rating: 0, count: 0 });
+      }
+    } catch (error) {
+      console.error('Error fetching user rating:', error);
+    }
+  };
+
+  const fetchUserPosts = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('posts')
@@ -65,15 +120,13 @@ export default function Profile() {
             service_types
           )
         `)
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       setPosts(data || []);
     } catch (error) {
       console.error('Error fetching user posts:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -108,146 +161,119 @@ export default function Profile() {
   return (
     <Layout title="Profile">
       <div className="container-mobile pb-4">
-        {/* Cover Image */}
-        <div className="relative -mx-4 -mt-0">
-          <div 
-            className="h-24 sm:h-32 md:h-40 bg-gradient-to-r from-primary to-primary-dark"
-            style={{
-              backgroundImage: `url(${user.coverImage})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            }}
-          />
-          
-          {/* Profile Picture */}
-          <div className="absolute -bottom-6 sm:-bottom-8 left-3 sm:left-4">
+        {/* Profile Header - No Cover Image */}
+        <div className="pt-4 space-y-6">
+          {/* Profile Picture & Basic Info */}
+          <div className="flex items-start gap-4">
             <div className="relative">
-              <Avatar className="w-16 h-16 sm:w-20 sm:h-20 border-3 sm:border-4 border-background">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="text-base sm:text-lg">{user.name?.[0] || 'U'}</AvatarFallback>
+              <Avatar className="w-20 h-20 sm:w-24 sm:h-24">
+                <AvatarImage src={user?.avatar} alt={user?.name} />
+                <AvatarFallback className="text-xl">{user?.name?.[0] || 'U'}</AvatarFallback>
               </Avatar>
-              {user.isOnline && (
-                <div className="absolute bottom-0 sm:bottom-1 right-0 sm:right-1 w-4 h-4 sm:w-6 sm:h-6 bg-accent rounded-full border-2 sm:border-3 border-background"></div>
+              {user?.isOnline && (
+                <div className="absolute bottom-1 right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-background"></div>
               )}
             </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 flex gap-2">
-            <Button variant="outline" size="sm" className="bg-background/90 backdrop-blur p-2">
-              <Share className="w-4 h-4" />
-            </Button>
-            {isOwnProfile && (
-              <Button variant="outline" size="sm" className="bg-background/90 backdrop-blur p-2">
-                <Settings className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Profile Info */}
-        <div className="mt-8 sm:mt-12 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            
             <div className="flex-1 min-w-0">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-                <h1 className="text-lg sm:text-xl font-bold truncate">{user.name}</h1>
-                {user.isProvider && (
-                  <Badge variant="secondary" className="text-xs self-start sm:self-center">
-                    <Award className="w-3 h-3 mr-1" />
-                    Verified Provider
-                  </Badge>
-                )}
-              </div>
-              
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground mb-3">
-                <div className="flex items-center gap-1">
-                  <MapPin className="w-4 h-4 flex-shrink-0" />
-                  <span className="truncate">{user.location}</span>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h1 className="text-xl sm:text-2xl font-bold">{user?.name}</h1>
+                    {user?.isProvider && (
+                      <Badge variant="secondary" className="text-xs">
+                        <Award className="w-3 h-3 mr-1" />
+                        Provider
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
+                    {user?.location && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        <span>{user.location}</span>
+                      </div>
+                    )}
+                    {user?.joinedDate && (
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>Joined {new Date(user.joinedDate).getFullYear()}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4 flex-shrink-0" />
-                  <span>Joined {new Date(user.joinedDate).getFullYear()}</span>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  {isOwnProfile ? (
+                    <Button size="sm" onClick={() => setShowEditDialog(true)}>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit Profile
+                    </Button>
+                  ) : (
+                    <>
+                      <Button size="sm" onClick={() => setShowRatingModal(true)}>
+                        <Star className="w-4 h-4 mr-2" />
+                        Rate
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => navigate(`/messages?user=${user?.id}`)}
+                      >
+                        <MessageCircle className="w-4 h-4 mr-2" />
+                        Message
+                      </Button>
+                    </>
+                  )}
                 </div>
-              </div>
-
-              <p className="text-sm leading-relaxed mb-4">{user.bio}</p>
-
-              {/* Service Types */}
-              <div className="flex flex-wrap gap-2 mb-4">
-                {(user.serviceTypes || []).map((service) => (
-                  <Badge key={service} variant="outline" className="service-badge service-badge-home text-xs">
-                    {service}
-                  </Badge>
-                ))}
               </div>
             </div>
-
-            {isOwnProfile ? (
-              <Button size="sm" className="self-start sm:ml-4">
-                <Edit className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
-            ) : (
-              <div className="flex gap-2 self-start sm:ml-4">
-                <Button 
-                  size="sm" 
-                  variant={isFollowing ? "outline" : "default"}
-                  onClick={() => setIsFollowing(!isFollowing)}
-                  className="flex-1 sm:flex-none"
-                >
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  {isFollowing ? "Following" : "Follow"}
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => navigate("/messages")}
-                >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Contact
-                </Button>
-              </div>
-            )}
           </div>
+          {/* Bio and Service Types */}
+          {user?.bio && (
+            <p className="text-sm leading-relaxed">{user.bio}</p>
+          )}
+
+          {user?.serviceTypes && user.serviceTypes.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {user.serviceTypes.map((service) => (
+                <Badge key={service} variant="outline" className="text-xs">
+                  {service}
+                </Badge>
+              ))}
+            </div>
+          )}
 
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 p-3 sm:p-4 bg-muted/30 rounded-xl">
             <div className="text-center">
-              <RatingDisplay 
-                rating={user.rating} 
-                reviews={user.reviewCount} 
-                size="lg"
-                className="justify-center mb-1"
-              />
+              {userRating.count > 0 ? (
+                <RatingDisplay 
+                  rating={userRating.rating} 
+                  reviews={userRating.count} 
+                  size="lg"
+                  className="justify-center mb-1"
+                />
+              ) : (
+                <div className="text-sm text-muted-foreground">No ratings</div>
+              )}
               <span className="text-xs text-muted-foreground">Rating</span>
             </div>
             <div className="text-center">
-              <div className="font-bold text-base sm:text-lg">{user.reviewCount}</div>
+              <div className="font-bold text-base sm:text-lg">{userRating.count}</div>
               <span className="text-xs text-muted-foreground">Reviews</span>
             </div>
             <div className="text-center">
-              <div className="font-bold text-base sm:text-lg">{user.completedJobs}</div>
-              <span className="text-xs text-muted-foreground">Jobs</span>
+              <div className="font-bold text-base sm:text-lg">{posts.length}</div>
+              <span className="text-xs text-muted-foreground">Posts</span>
             </div>
             <div className="text-center">
-              <div className="font-bold text-base sm:text-lg">{user.followers}</div>
+              <div className="font-bold text-base sm:text-lg">0</div>
               <span className="text-xs text-muted-foreground">Followers</span>
             </div>
           </div>
-
-          {/* Provider Info */}
-          {user.isProvider && (
-            <div className="space-y-2 p-4 bg-primary/5 rounded-xl border border-primary/20">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Price Range:</span>
-                <span className="font-medium">{user.priceRange}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Response Time:</span>
-                <span className="font-medium text-accent">{user.responseTime}</span>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Tabs */}
@@ -290,15 +316,7 @@ export default function Profile() {
           </TabsContent>
           
           <TabsContent value="portfolio" className="mt-4">
-            <div className="text-center py-12 space-y-4">
-              <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center">
-                <Award className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold">Portfolio coming soon</h3>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Portfolio feature will be available in a future update.
-              </p>
-            </div>
+            <PortfolioManager userId={user?.id || ""} isOwnProfile={isOwnProfile} />
           </TabsContent>
           
           <TabsContent value="reviews" className="mt-4">
@@ -316,6 +334,22 @@ export default function Profile() {
             </div>
           </TabsContent>
         </Tabs>
+        
+        {/* Dialogs */}
+        <ProfileEditDialog 
+          open={showEditDialog} 
+          onOpenChange={setShowEditDialog} 
+        />
+        
+        {user && !isOwnProfile && (
+          <RatingModal
+            open={showRatingModal}
+            onOpenChange={setShowRatingModal}
+            userId={user.id}
+            userName={user.name}
+            onRatingSubmitted={() => fetchUserRating(user.id)}
+          />
+        )}
       </div>
     </Layout>
   );

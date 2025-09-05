@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Camera, MapPin, Hash, X, Plus } from "lucide-react";
+import { useState, useRef } from "react";
+import { Camera, MapPin, Hash, X, Plus, Upload } from "lucide-react";
 import { Layout } from "@/components/Layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useImageUpload } from "@/hooks/useImageUpload";
 
 const serviceCategories = [
   { id: "home", label: "Home Services" },
@@ -27,8 +28,11 @@ export default function CreatePost() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { uploadMultipleImages, uploading } = useImageUpload('posts');
   const [content, setContent] = useState("");
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [location, setLocation] = useState("Dubai Marina, Dubai");
   const [hashtags, setHashtags] = useState<string[]>([]);
@@ -36,16 +40,21 @@ export default function CreatePost() {
   const [isPosting, setIsPosting] = useState(false);
   const [userType, setUserType] = useState<"provider" | "seeker">("provider");
 
-  const handleImageUpload = () => {
-    // TODO: Implement file picker and image upload
-    toast({
-      title: "Feature coming soon",
-      description: "Image upload will be available in a future update.",
-    });
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
+
+    // Add files to state for uploading later
+    setSelectedFiles(prev => [...prev, ...files]);
+    
+    // Create preview URLs
+    const previewUrls = files.map(file => URL.createObjectURL(file));
+    setSelectedImages(prev => [...prev, ...previewUrls]);
   };
 
   const removeImage = (index: number) => {
     setSelectedImages(selectedImages.filter((_, i) => i !== index));
+    setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
   };
 
   const addHashtag = () => {
@@ -65,6 +74,13 @@ export default function CreatePost() {
     setIsPosting(true);
     
     try {
+      let imageUrls: string[] = [];
+      
+      // Upload images if any are selected
+      if (selectedFiles.length > 0) {
+        imageUrls = await uploadMultipleImages(selectedFiles);
+      }
+
       const { error } = await supabase
         .from('posts')
         .insert({
@@ -73,7 +89,7 @@ export default function CreatePost() {
           user_id: user.id,
           service_type: selectedCategory,
           location: location,
-          images: selectedImages.length > 0 ? selectedImages : null,
+          images: imageUrls.length > 0 ? imageUrls : null,
           status: 'active'
         });
 
@@ -179,12 +195,25 @@ export default function CreatePost() {
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={handleImageUpload}
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
               className="flex items-center gap-2"
             >
-              <Camera className="w-4 h-4" />
-              {t('addPhoto')}
+              {uploading ? (
+                <div className="w-4 h-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              ) : (
+                <Camera className="w-4 h-4" />
+              )}
+              {uploading ? "Uploading..." : t('addPhoto')}
             </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*"
+              multiple
+              onChange={handleImageUpload}
+              className="hidden"
+            />
           </div>
           
           {selectedImages.length > 0 && (
@@ -285,10 +314,10 @@ export default function CreatePost() {
           </Button>
           <Button 
             onClick={handlePost}
-            disabled={!content.trim() || isPosting}
+            disabled={!content.trim() || isPosting || uploading}
             className="flex-1"
           >
-            {isPosting ? t('posting') : t('post')}
+            {isPosting ? t('posting') : uploading ? "Uploading..." : t('post')}
           </Button>
         </div>
       </div>
