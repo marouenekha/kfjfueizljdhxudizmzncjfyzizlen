@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          id: string
+          location: string | null
+          provider_id: string
+          requester_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          provider_id: string
+          requester_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          provider_id?: string
+          requester_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -80,7 +140,9 @@ export type Database = {
           description: string | null
           id: string
           images: string[] | null
+          latitude: number | null
           location: string | null
+          longitude: number | null
           price_range: string | null
           service_type: string | null
           status: string | null
@@ -93,7 +155,9 @@ export type Database = {
           description?: string | null
           id?: string
           images?: string[] | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           price_range?: string | null
           service_type?: string | null
           status?: string | null
@@ -106,7 +170,9 @@ export type Database = {
           description?: string | null
           id?: string
           images?: string[] | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           price_range?: string | null
           service_type?: string | null
           status?: string | null
@@ -123,7 +189,9 @@ export type Database = {
           created_at: string
           id: string
           is_provider: boolean | null
+          latitude: number | null
           location: string | null
+          longitude: number | null
           name: string | null
           phone: string | null
           service_types: string[] | null
@@ -137,7 +205,9 @@ export type Database = {
           created_at?: string
           id?: string
           is_provider?: boolean | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           name?: string | null
           phone?: string | null
           service_types?: string[] | null
@@ -151,7 +221,9 @@ export type Database = {
           created_at?: string
           id?: string
           is_provider?: boolean | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           name?: string | null
           phone?: string | null
           service_types?: string[] | null

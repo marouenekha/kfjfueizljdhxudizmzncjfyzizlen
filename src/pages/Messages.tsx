@@ -338,7 +338,12 @@ export default function Messages() {
           )}
         </div>
 
-        {/* Message Input */}
+        {otherUserProfile && (
+          <JobManager
+            otherUserId={viewingUserId || ""}
+            otherUserName={otherUserProfile.name}
+          />
+        )}
         <div className="sticky bottom-0 bg-background border-t border-border p-3 sm:p-4">
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" className="hidden sm:flex">

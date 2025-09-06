@@ -1,21 +1,15 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Plus, Upload, X, Image, Video } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-
-interface PortfolioItem {
-  id: string;
-  title: string;
-  description: string | null;
-  image_url: string | null;
-  video_url: string | null;
-  created_at: string;
-}
+import { useImageUpload } from "@/hooks/useImageUpload";
+import { PortfolioGrid } from "@/components/PortfolioGrid";
 
 interface PortfolioManagerProps {
   userId: string;
@@ -25,270 +19,218 @@ interface PortfolioManagerProps {
 export const PortfolioManager: React.FC<PortfolioManagerProps> = ({ userId, isOwnProfile }) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [items, setItems] = useState<PortfolioItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-  });
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
-  useEffect(() => {
-    fetchPortfolioItems();
-  }, [userId]);
-
-  const fetchPortfolioItems = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('portfolio_items')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setItems(data || []);
-    } catch (error) {
-      console.error('Error fetching portfolio items:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { uploadImage, uploadMultipleImages, uploading } = useImageUpload('portfolio');
+  const [showDialog, setShowDialog] = useState(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isVideo, setIsVideo] = useState(false);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
+    const files = Array.from(event.target.files || []);
+    const file = files[0];
+    
+    if (!file) return;
+
+    // Check if it's a video
+    if (file.type.startsWith('video/')) {
+      setIsVideo(true);
+    } else {
+      setIsVideo(false);
     }
+
+    setSelectedFiles([file]);
+  };
+
+  const validateImage = async (file: File): Promise<string | null> => {
+    return new Promise((resolve) => {
+      const img = document.createElement('img');
+      img.onload = () => {
+        const maxWidth = 1000;
+        const maxHeight = 1000;
+        
+        if (img.width > maxWidth || img.height > maxHeight) {
+          resolve(`Image is too large. Maximum size: ${maxWidth}px × ${maxHeight}px. Current size: ${img.width}px × ${img.height}px`);
+        } else {
+          resolve(null);
+        }
+      };
+      img.src = URL.createObjectURL(file);
+    });
   };
 
   const handleSubmit = async () => {
-    if (!user || !formData.title.trim()) return;
+    if (!user || !title.trim() || selectedFiles.length === 0) return;
 
-    setUploading(true);
+    // Validate image size if not video
+    if (!isVideo) {
+      const validationError = await validateImage(selectedFiles[0]);
+      if (validationError) {
+        toast({
+          title: "Image too large",
+          description: validationError,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     try {
-      let mediaUrl = null;
+      let mediaUrl = '';
+      
+      if (isVideo) {
+        // Upload video
+        mediaUrl = await uploadImage(selectedFiles[0]) || '';
+      } else {
+        // Upload image
+        mediaUrl = await uploadImage(selectedFiles[0]) || '';
+      }
 
-      if (selectedFile) {
-        const fileExt = selectedFile.name.split('.').pop();
-        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-        const isVideo = selectedFile.type.startsWith('video/');
-
-        const { error: uploadError } = await supabase.storage
-          .from('portfolio')
-          .upload(fileName, selectedFile);
-
-        if (uploadError) throw uploadError;
-
-        const { data } = supabase.storage
-          .from('portfolio')
-          .getPublicUrl(fileName);
-
-        mediaUrl = data.publicUrl;
+      if (!mediaUrl) {
+        throw new Error('Failed to upload file');
       }
 
       const { error } = await supabase
         .from('portfolio_items')
         .insert({
           user_id: user.id,
-          title: formData.title.trim(),
-          description: formData.description.trim() || null,
-          image_url: selectedFile?.type.startsWith('image/') ? mediaUrl : null,
-          video_url: selectedFile?.type.startsWith('video/') ? mediaUrl : null,
+          title: title.trim(),
+          description: description.trim() || null,
+          [isVideo ? 'video_url' : 'image_url']: mediaUrl,
         });
 
       if (error) throw error;
 
       toast({
-        title: "Portfolio item added!",
-        description: "Your portfolio has been updated.",
+        title: "Portfolio item added",
+        description: "Your portfolio has been updated successfully.",
       });
 
-      fetchPortfolioItems();
-      setShowAddDialog(false);
-      setFormData({ title: "", description: "" });
-      setSelectedFile(null);
+      // Reset form
+      setTitle('');
+      setDescription('');
+      setSelectedFiles([]);
+      setIsVideo(false);
+      setShowDialog(false);
     } catch (error: any) {
       toast({
         title: "Upload failed",
         description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setUploading(false);
     }
   };
-
-  const handleDelete = async (itemId: string) => {
-    try {
-      const { error } = await supabase
-        .from('portfolio_items')
-        .delete()
-        .eq('id', itemId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Item deleted",
-        description: "Portfolio item has been removed.",
-      });
-
-      fetchPortfolioItems();
-    } catch (error: any) {
-      toast({
-        title: "Delete failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4">
+      {/* Add Item Button (only for own profile) */}
       {isOwnProfile && (
-        <div className="flex justify-end">
-          <Button onClick={() => setShowAddDialog(true)} size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Item
-          </Button>
-        </div>
-      )}
+        <Dialog open={showDialog} onOpenChange={setShowDialog}>
+          <DialogTrigger asChild>
+            <Button className="w-full">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Portfolio Item
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add Portfolio Item</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="title">Title</Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Enter item title"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe your work"
+                  rows={3}
+                />
+              </div>
 
-      {items.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {items.map((item) => (
-            <div key={item.id} className="bg-card border rounded-lg overflow-hidden">
-              {item.image_url && (
-                <img
-                  src={item.image_url}
-                  alt={item.title}
-                  className="w-full h-48 object-cover"
-                />
-              )}
-              {item.video_url && (
-                <video
-                  src={item.video_url}
-                  controls
-                  className="w-full h-48 object-cover"
-                />
-              )}
-              <div className="p-4">
-                <div className="flex justify-between items-start">
-                  <h3 className="font-semibold">{item.title}</h3>
-                  {isOwnProfile && (
+              {/* File Upload */}
+              <div>
+                <Label>Media</Label>
+                <div className="flex gap-2 mt-2">
+                  <div className="flex-1">
+                    <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-muted rounded-lg cursor-pointer hover:bg-muted/10 transition-colors">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        {selectedFiles.length > 0 ? (
+                          <>
+                            {isVideo ? <Video className="w-4 h-4" /> : <Image className="w-4 h-4" />}
+                            <span>{selectedFiles[0].name}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4" />
+                            <span>Select image or video</span>
+                          </>
+                        )}
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*,video/*"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                  {selectedFiles.length > 0 && (
                     <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(item.id)}
-                      className="text-destructive hover:text-destructive"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        setSelectedFiles([]);
+                        setIsVideo(false);
+                      }}
                     >
                       <X className="w-4 h-4" />
                     </Button>
                   )}
                 </div>
-                {item.description && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {item.description}
-                  </p>
-                )}
+                <p className="text-xs text-muted-foreground mt-1">
+                  Max image size: 1000px × 1000px. Videos will be auto-cropped to proper aspect ratio.
+                </p>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12 space-y-4">
-          <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center">
-            <Image className="w-8 h-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-semibold">
-            {isOwnProfile ? "No portfolio items yet" : "No portfolio available"}
-          </h3>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            {isOwnProfile 
-              ? "Showcase your work by adding images and videos to your portfolio."
-              : "This user hasn't shared any portfolio items yet."
-            }
-          </p>
-        </div>
-      )}
 
-      {/* Add Item Dialog */}
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Add Portfolio Item</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Title</label>
-              <Input
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="Enter title"
-              />
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium">Description</label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Describe your work"
-                maxLength={300}
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">Media (Image or Video)</label>
-              <div className="mt-2">
+              <div className="flex gap-2 pt-2">
                 <Button
                   variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full"
+                  onClick={() => setShowDialog(false)}
+                  className="flex-1"
                 >
-                  <Upload className="w-4 h-4 mr-2" />
-                  {selectedFile ? selectedFile.name : "Choose file"}
+                  Cancel
                 </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*,video/*"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
+                <Button
+                  onClick={handleSubmit}
+                  disabled={uploading || !title.trim() || selectedFiles.length === 0}
+                  className="flex-1"
+                >
+                  {uploading ? "Uploading..." : "Add Item"}
+                </Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
-            <div className="flex gap-2 pt-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowAddDialog(false)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSubmit}
-                disabled={uploading || !formData.title.trim()}
-                className="flex-1"
-              >
-                {uploading ? "Adding..." : "Add Item"}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Portfolio Grid */}
+      <PortfolioGrid 
+        userId={userId} 
+        isOwnProfile={isOwnProfile}
+        userName={user?.profile?.name || "User"}
+        userAvatar={user?.profile?.avatar_url}
+      />
     </div>
   );
 };

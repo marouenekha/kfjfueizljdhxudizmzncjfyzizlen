@@ -271,7 +271,7 @@ export default function Profile() {
             </div>
             <div className="text-center">
               <div className="font-bold text-base sm:text-lg">0</div>
-              <span className="text-xs text-muted-foreground">Followers</span>
+              <span className="text-xs text-muted-foreground">Jobs Done</span>
             </div>
           </div>
         </div>
