@@ -44,8 +44,35 @@ export default function CreatePost() {
     const files = Array.from(event.target.files || []);
     if (files.length === 0) return;
 
+    // Validate file types and sizes
+    const validFiles = files.filter(file => {
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/');
+      const isValidSize = file.size <= 50 * 1024 * 1024; // 50MB limit
+      
+      if (!isImage && !isVideo) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select images or videos only.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      if (!isValidSize) {
+        toast({
+          title: "File too large",
+          description: "File size must be less than 50MB.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      return true;
+    });
+
     // Add files to state for uploading later
-    setSelectedFiles(prev => [...prev, ...files]);
+    setSelectedFiles(prev => [...prev, ...validFiles]);
     
     // Create preview URLs
     const previewUrls = files.map(file => URL.createObjectURL(file));

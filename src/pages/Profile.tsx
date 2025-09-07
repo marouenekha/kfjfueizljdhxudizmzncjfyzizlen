@@ -25,6 +25,8 @@ export default function Profile() {
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userRating, setUserRating] = useState({ rating: 0, count: 0 });
+  const [followerCount, setFollowerCount] = useState(0);
+  const [jobsCompleted, setJobsCompleted] = useState(0);
   const viewingUserId = searchParams.get('user');
   const isOwnProfile = !viewingUserId || viewingUserId === authUser?.id;
   
@@ -48,6 +50,8 @@ export default function Profile() {
     } else if (authUser?.id) {
       fetchUserPosts(authUser.id);
       fetchUserRating(authUser.id);
+      fetchFollowerCount(authUser.id);
+      fetchJobsCompleted(authUser.id);
     }
   }, [viewingUserId, authUser?.id]);
 
@@ -79,6 +83,8 @@ export default function Profile() {
 
       fetchUserPosts(viewingUserId);
       fetchUserRating(viewingUserId);
+      fetchFollowerCount(viewingUserId);
+      fetchJobsCompleted(viewingUserId);
     } catch (error) {
       console.error('Error fetching user profile:', error);
       setUserProfile(null);
@@ -127,6 +133,33 @@ export default function Profile() {
       setPosts(data || []);
     } catch (error) {
       console.error('Error fetching user posts:', error);
+    }
+  };
+
+  const fetchFollowerCount = async (userId: string) => {
+    try {
+      const { count } = await supabase
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('following_id', userId);
+      
+      setFollowerCount(count || 0);
+    } catch (error) {
+      console.error('Error fetching follower count:', error);
+    }
+  };
+
+  const fetchJobsCompleted = async (userId: string) => {
+    try {
+      const { count } = await supabase
+        .from('jobs')
+        .select('*', { count: 'exact', head: true })
+        .eq('provider_id', userId)
+        .eq('status', 'completed');
+      
+      setJobsCompleted(count || 0);
+    } catch (error) {
+      console.error('Error fetching jobs completed:', error);
     }
   };
 
@@ -247,31 +280,22 @@ export default function Profile() {
           )}
 
           {/* Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 p-3 sm:p-4 bg-muted/30 rounded-xl">
-            <div className="text-center">
+          <div className="flex justify-center space-x-6 py-3 text-center">
+            <div>
+              <div className="font-bold text-base">{followerCount}</div>
+              <span className="text-xs text-muted-foreground">Followers</span>
+            </div>
+            <div>
+              <div className="font-bold text-base">{jobsCompleted}</div>
+              <span className="text-xs text-muted-foreground">Jobs Completed</span>
+            </div>
+            <div>
               {userRating.count > 0 ? (
-                <RatingDisplay 
-                  rating={userRating.rating} 
-                  reviews={userRating.count} 
-                  size="lg"
-                  className="justify-center mb-1"
-                />
+                <div className="font-bold text-base">⭐ {userRating.rating.toFixed(1)} ({userRating.count})</div>
               ) : (
-                <div className="text-sm text-muted-foreground">No ratings</div>
+                <div className="font-bold text-base">⭐ No ratings</div>
               )}
               <span className="text-xs text-muted-foreground">Rating</span>
-            </div>
-            <div className="text-center">
-              <div className="font-bold text-base sm:text-lg">{userRating.count}</div>
-              <span className="text-xs text-muted-foreground">Reviews</span>
-            </div>
-            <div className="text-center">
-              <div className="font-bold text-base sm:text-lg">{posts.length}</div>
-              <span className="text-xs text-muted-foreground">Posts</span>
-            </div>
-            <div className="text-center">
-              <div className="font-bold text-base sm:text-lg">0</div>
-              <span className="text-xs text-muted-foreground">Jobs Done</span>
             </div>
           </div>
         </div>

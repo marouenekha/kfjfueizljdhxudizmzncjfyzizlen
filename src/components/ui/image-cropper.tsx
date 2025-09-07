@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from '@/components/ui/button';
@@ -20,12 +20,26 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
   const imgRef = useRef<HTMLImageElement>(null);
   const [crop, setCrop] = useState<Crop>({
     unit: '%',
-    x: 25,
-    y: 25,
-    width: 50,
-    height: 50,
+    x: 10,
+    y: 10,
+    width: 80,
+    height: 80,
   });
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+
+  // Reset crop when image changes
+  useEffect(() => {
+    if (imageUrl) {
+      setCrop({
+        unit: '%',
+        x: 10,
+        y: 10,
+        width: 80,
+        height: 80,
+      });
+      setCompletedCrop(undefined);
+    }
+  }, [imageUrl]);
 
   const getCroppedImg = useCallback(async () => {
     if (!completedCrop || !imgRef.current) return;
@@ -52,10 +66,14 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
       canvas.height
     );
 
-    return new Promise<Blob>((resolve) => {
+    return new Promise<Blob>((resolve, reject) => {
       canvas.toBlob((blob) => {
-        if (blob) resolve(blob);
-      }, 'image/jpeg', 1);
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('Failed to create blob'));
+        }
+      }, 'image/jpeg', 0.95);
     });
   }, [completedCrop]);
 
@@ -75,22 +93,29 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
         </DialogHeader>
         
         <div className="space-y-4">
-          <div className="max-h-96 overflow-hidden">
+          <div className="max-h-[400px] overflow-hidden rounded-lg border">
             <ReactCrop
               crop={crop}
               onChange={(c) => setCrop(c)}
               onComplete={(c) => setCompletedCrop(c)}
               aspect={1}
               circularCrop
+              minWidth={50}
+              minHeight={50}
+              keepSelection
             >
               <img
                 ref={imgRef}
                 src={imageUrl}
                 alt="Crop preview"
-                className="max-w-full h-auto"
+                className="max-w-full h-auto block"
+                style={{ maxHeight: '400px' }}
               />
             </ReactCrop>
           </div>
+          <p className="text-sm text-muted-foreground text-center">
+            Drag to adjust the crop area. The image will be cropped to a perfect circle.
+          </p>
           
           <div className="flex gap-2 pt-2">
             <Button

@@ -100,22 +100,42 @@ export const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({ open, onOp
 
     setLoading(true);
     try {
+      const updateData = {
+        user_id: user.id,
+        name,
+        bio,
+        location: selectedLocation?.address || location,
+        avatar_url: avatarUrl,
+        phone,
+        is_provider: isProvider,
+        service_types: serviceTypes.length > 0 ? serviceTypes : null,
+        latitude: selectedLocation?.latitude || null,
+        longitude: selectedLocation?.longitude || null,
+      };
+
       const { error } = await supabase
         .from('profiles')
-        .upsert({
-          user_id: user.id,
-          name,
-          bio,
-          location,
-          avatar_url: avatarUrl,
-          phone,
-          is_provider: isProvider,
-          service_types: serviceTypes.length > 0 ? serviceTypes : null,
-          latitude: selectedLocation?.latitude || null,
-          longitude: selectedLocation?.longitude || null,
-        });
+        .upsert(updateData);
 
       if (error) throw error;
+
+      // Refetch user data to update the context
+      const { data: updatedProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (updatedProfile && user) {
+        // Update the auth context with the new profile data
+        const updatedUser = {
+          ...user,
+          profile: updatedProfile
+        };
+        
+        // Force a context update by triggering a profile fetch
+        window.location.reload();
+      }
 
       toast({
         title: "Profile updated!",
