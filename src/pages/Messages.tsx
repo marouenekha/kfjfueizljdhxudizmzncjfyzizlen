@@ -10,6 +10,7 @@ import { ReviewModal } from "@/components/ui/review-modal";
 import { supabase } from "@/integrations/supabase/client";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { JobManager } from "@/components/JobManager";
 
 export default function Messages() {
   const { t } = useTranslation();
@@ -338,12 +339,6 @@ export default function Messages() {
           )}
         </div>
 
-        {otherUserProfile && (
-          <JobManager
-            otherUserId={viewingUserId || ""}
-            otherUserName={otherUserProfile.name}
-          />
-        )}
         <div className="sticky bottom-0 bg-background border-t border-border p-3 sm:p-4">
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" className="hidden sm:flex">
