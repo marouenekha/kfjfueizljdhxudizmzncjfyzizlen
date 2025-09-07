@@ -9,23 +9,24 @@ import { cn } from "@/lib/utils";
 
 interface Post {
   id: string;
-  user: {
-    id: string;
-    name: string;
-    avatar: string;
-    isProvider: boolean;
-    serviceTypes: string[];
-    rating?: number;
-    totalReviews?: number;
-  };
-  content: string;
-  images: string[];
-  serviceCategory: string;
+  user_id: string;
+  title: string;
+  description: string;
+  service_type: string;
   location: string;
-  likes: number;
-  comments: number;
-  createdAt: string;
-  isLiked: boolean;
+  price_range?: string;
+  images?: string[];
+  status: string;
+  created_at: string;
+  updated_at: string;
+  latitude?: number;
+  longitude?: number;
+  profiles: {
+    name: string;
+    avatar_url: string;
+    is_provider: boolean;
+    service_types: string[];
+  };
 }
 
 interface PostCardProps {
@@ -41,8 +42,8 @@ const serviceCategories = {
 };
 
 export const PostCard = ({ post }: PostCardProps) => {
-  const [isLiked, setIsLiked] = useState(post.isLiked);
-  const [likes, setLikes] = useState(post.likes);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likes, setLikes] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const navigate = useNavigate();
 
@@ -52,9 +53,7 @@ export const PostCard = ({ post }: PostCardProps) => {
   };
 
   const handleUserClick = () => {
-    if (post.user.name === "Sarah Johnson") {
-      navigate("/profile?user=sarah");
-    }
+    navigate(`/profile?user=${post.user_id}`);
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -67,7 +66,7 @@ export const PostCard = ({ post }: PostCardProps) => {
     return `${Math.floor(diffInHours / 24)}d`;
   };
 
-  const category = serviceCategories[post.serviceCategory as keyof typeof serviceCategories];
+  const category = serviceCategories[post.service_type as keyof typeof serviceCategories];
 
   return (
     <div className="post-card p-4 space-y-3 animate-fade-in">
@@ -78,8 +77,8 @@ export const PostCard = ({ post }: PostCardProps) => {
             className="w-10 h-10 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
             onClick={handleUserClick}
           >
-            <AvatarImage src={post.user.avatar} alt={post.user.name} />
-            <AvatarFallback>{post.user.name[0]}</AvatarFallback>
+            <AvatarImage src={post.profiles.avatar_url} alt={post.profiles.name} />
+            <AvatarFallback>{post.profiles.name[0]}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -87,9 +86,9 @@ export const PostCard = ({ post }: PostCardProps) => {
                 className="font-semibold text-sm truncate cursor-pointer hover:text-primary transition-colors"
                 onClick={handleUserClick}
               >
-                {post.user.name}
+                {post.profiles.name}
               </h3>
-              {post.user.isProvider && (
+              {post.profiles.is_provider && (
                 <Badge variant="secondary" className="text-xs px-2 py-0">
                   Provider
                 </Badge>
@@ -100,15 +99,8 @@ export const PostCard = ({ post }: PostCardProps) => {
                 <MapPin className="w-3 h-3" />
                 <span className="truncate">{post.location}</span>
                 <span>•</span>
-                <span>{formatTimeAgo(post.createdAt)}</span>
+                <span>{formatTimeAgo(post.created_at)}</span>
               </div>
-              {post.user.rating && post.user.totalReviews && (
-                <RatingDisplay 
-                  rating={post.user.rating} 
-                  reviews={post.user.totalReviews} 
-                  size="sm" 
-                />
-              )}
             </div>
           </div>
         </div>
@@ -125,10 +117,15 @@ export const PostCard = ({ post }: PostCardProps) => {
       )}
 
       {/* Content */}
-      <p className="text-sm leading-relaxed">{post.content}</p>
+      <div className="space-y-2">
+        <h4 className="font-semibold">{post.title}</h4>
+        {post.description && (
+          <p className="text-sm leading-relaxed">{post.description}</p>
+        )}
+      </div>
 
       {/* Images */}
-      {post.images.length > 0 && (
+      {post.images && post.images.length > 0 && (
         <div className="relative">
           <div className="relative overflow-hidden rounded-lg aspect-[4/3]">
             <img
@@ -177,7 +174,7 @@ export const PostCard = ({ post }: PostCardProps) => {
           
           <Button variant="ghost" size="sm" className="flex items-center gap-2 px-3 py-2 rounded-lg">
             <MessageCircle className="w-4 h-4" />
-            <span className="text-sm font-medium">{post.comments}</span>
+            <span className="text-sm font-medium">0</span>
           </Button>
         </div>
 

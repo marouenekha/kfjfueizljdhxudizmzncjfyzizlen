@@ -127,13 +127,7 @@ export const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({ open, onOp
         .single();
 
       if (updatedProfile && user) {
-        // Update the auth context with the new profile data
-        const updatedUser = {
-          ...user,
-          profile: updatedProfile
-        };
-        
-        // Force a context update by triggering a profile fetch
+        // Force a page refresh to update the profile data
         window.location.reload();
       }
 
