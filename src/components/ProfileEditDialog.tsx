@@ -115,7 +115,7 @@ export const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({ open, onOp
 
       const { error } = await supabase
         .from('profiles')
-        .upsert(updateData);
+        .upsert(updateData, { onConflict: 'user_id' });
 
       if (error) throw error;
 
