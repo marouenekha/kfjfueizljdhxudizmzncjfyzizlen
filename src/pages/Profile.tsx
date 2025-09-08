@@ -119,7 +119,7 @@ export default function Profile() {
         .from('posts')
         .select(`
           *,
-          profiles!posts_user_id_fkey (
+          profiles (
             name,
             avatar_url,
             is_provider,
@@ -129,7 +129,12 @@ export default function Profile() {
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching user posts:', error);
+        throw error;
+      }
+      
+      console.log('Fetched user posts:', data);
       setPosts(data || []);
     } catch (error) {
       console.error('Error fetching user posts:', error);

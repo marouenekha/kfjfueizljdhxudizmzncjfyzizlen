@@ -23,7 +23,7 @@ export default function Feed() {
         .from('posts')
         .select(`
           *,
-          profiles!posts_user_id_fkey (
+          profiles (
             name,
             avatar_url,
             is_provider,
@@ -32,7 +32,12 @@ export default function Feed() {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching posts:', error);
+        throw error;
+      }
+      
+      console.log('Fetched posts:', data);
       setPosts(data || []);
     } catch (error) {
       console.error('Error fetching posts:', error);
