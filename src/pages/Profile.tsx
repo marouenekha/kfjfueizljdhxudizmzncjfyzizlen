@@ -119,7 +119,7 @@ export default function Profile() {
         .from('posts')
         .select(`
           *,
-          profiles (
+          profiles!posts_user_id_fkey (
             name,
             avatar_url,
             is_provider,
