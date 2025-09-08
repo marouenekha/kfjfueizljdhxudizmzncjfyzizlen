@@ -18,6 +18,7 @@ export default function Feed() {
   }, []);
 
   const fetchPosts = async () => {
+    console.log('Starting to fetch posts...');
     try {
       const { data, error } = await supabase
         .from('posts')
@@ -32,15 +33,17 @@ export default function Feed() {
         `)
         .order('created_at', { ascending: false });
 
+      console.log('Posts query result:', { data, error });
+
       if (error) {
         console.error('Error fetching posts:', error);
         throw error;
       }
       
-      console.log('Fetched posts:', data);
+      console.log('Setting posts:', data);
       setPosts(data || []);
     } catch (error) {
-      console.error('Error fetching posts:', error);
+      console.error('Error in fetchPosts:', error);
     } finally {
       setLoading(false);
     }

@@ -47,6 +47,13 @@ export const PostCard = ({ post }: PostCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const navigate = useNavigate();
 
+  console.log('PostCard received post:', post);
+
+  // Handle cases where profiles might be null
+  const profileName = post.profiles?.name || 'Unknown User';
+  const profileAvatar = post.profiles?.avatar_url;
+  const isProvider = post.profiles?.is_provider || false;
+
   const handleLike = () => {
     setIsLiked(!isLiked);
     setLikes(prev => isLiked ? prev - 1 : prev + 1);
@@ -77,8 +84,8 @@ export const PostCard = ({ post }: PostCardProps) => {
             className="w-10 h-10 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
             onClick={handleUserClick}
           >
-            <AvatarImage src={post.profiles.avatar_url} alt={post.profiles.name} />
-            <AvatarFallback>{post.profiles.name[0]}</AvatarFallback>
+            <AvatarImage src={profileAvatar} alt={profileName} />
+            <AvatarFallback>{profileName[0]}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -86,9 +93,9 @@ export const PostCard = ({ post }: PostCardProps) => {
                 className="font-semibold text-sm truncate cursor-pointer hover:text-primary transition-colors"
                 onClick={handleUserClick}
               >
-                {post.profiles.name}
+                {profileName}
               </h3>
-              {post.profiles.is_provider && (
+              {isProvider && (
                 <Badge variant="secondary" className="text-xs px-2 py-0">
                   Provider
                 </Badge>
@@ -97,7 +104,7 @@ export const PostCard = ({ post }: PostCardProps) => {
             <div className="flex items-center gap-2 text-xs">
               <div className="flex items-center gap-1 text-muted-foreground">
                 <MapPin className="w-3 h-3" />
-                <span className="truncate">{post.location}</span>
+                <span className="truncate">{post.location || 'No location'}</span>
                 <span>•</span>
                 <span>{formatTimeAgo(post.created_at)}</span>
               </div>

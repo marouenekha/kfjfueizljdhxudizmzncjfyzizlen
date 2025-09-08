@@ -114,6 +114,7 @@ export default function Profile() {
   };
 
   const fetchUserPosts = async (userId: string) => {
+    console.log('Starting to fetch user posts for:', userId);
     try {
       const { data, error } = await supabase
         .from('posts')
@@ -129,15 +130,17 @@ export default function Profile() {
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
+      console.log('User posts query result:', { data, error });
+
       if (error) {
         console.error('Error fetching user posts:', error);
         throw error;
       }
       
-      console.log('Fetched user posts:', data);
+      console.log('Setting user posts:', data);
       setPosts(data || []);
     } catch (error) {
-      console.error('Error fetching user posts:', error);
+      console.error('Error in fetchUserPosts:', error);
     }
   };
 
