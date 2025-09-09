@@ -23,10 +23,15 @@ export default function Feed() {
       setLoading(true);
       setErrorMessage(null);
 
-      console.log("Fetching posts...");
+      console.log("Fetching posts with usernames...");
+
+      // Fetch posts with user info
       const { data, error } = await supabase
         .from("posts")
-        .select("*")
+        .select(`
+          *,
+          user:profiles (id, name)
+        `)
         .order("created_at", { ascending: false });
 
       console.log("Posts query result:", { data, error });
@@ -35,7 +40,12 @@ export default function Feed() {
         setErrorMessage(error.message);
         console.error("Error fetching posts:", error);
       } else {
-        setPosts(data || []);
+        // Map posts to include username directly
+        const postsWithUsername = (data || []).map(post => ({
+          ...post,
+          username: post.user?.name || "Anonymous",
+        }));
+        setPosts(postsWithUsername);
       }
     } catch (err: any) {
       setErrorMessage(err.message || "Unknown error");
