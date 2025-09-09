@@ -17,37 +17,68 @@ export default function Feed() {
 
   useEffect(() => {
     fetchPosts();
+
+    // ✅ Realtime subscription for new posts
+    const channel = supabase
+      .channel("posts-changes")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "posts" },
+        async (payload) => {
+          console.log("New post detected:", payload.new);
+
+          // Fetch profile info for the new post (since relation isn’t returned by realtime)
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("name, avatar_url, is_provider")
+            .eq("id", payload.new.user_id)
+            .single();
+
+          const newPost = {
+            ...payload.new,
+            profiles: profileData ? { ...profileData } : null,
+          };
+
+          setPosts((prev) => [newPost, ...prev]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchPosts = async () => {
     try {
-      console.log('Fetching posts...');
+      console.log("Fetching posts...");
       const { data, error } = await supabase
-        .from('posts')
-        .select(`
+        .from("posts")
+        .select(
+          `
           *,
           profiles!posts_user_id_fkey (
             name,
             avatar_url,
             is_provider
           )
-        `)
-        .order('created_at', { ascending: false });
+        `
+        )
+        .order("created_at", { ascending: false });
 
-      console.log('Posts query result:', { data, error });
       if (error) throw error;
-      
+
       setPosts(data || []);
-      console.log('Posts set to state:', data?.length || 0);
+      console.log("Posts set to state:", data?.length || 0);
     } catch (error) {
-      console.error('Error fetching posts:', error);
+      console.error("Error fetching posts:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredPosts = selectedCategory 
-    ? posts.filter(post => post.service_category === selectedCategory)
+  const filteredPosts = selectedCategory
+    ? posts.filter((post) => post.service_category === selectedCategory)
     : posts;
 
   return (
@@ -57,10 +88,12 @@ export default function Feed() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Feed</h1>
-            <p className="text-muted-foreground">Discover services from the community</p>
+            <p className="text-muted-foreground">
+              Discover services from the community
+            </p>
           </div>
           {user && (
-            <Button onClick={() => navigate('/create-post')} className="gap-2">
+            <Button onClick={() => navigate("/create-post")} className="gap-2">
               <Plus className="w-4 h-4" />
               Create Post
             </Button>
@@ -68,7 +101,7 @@ export default function Feed() {
         </div>
 
         {/* Service Category Filter */}
-        <ServiceCategoryFilter 
+        <ServiceCategoryFilter
           selectedCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}
         />
@@ -92,10 +125,14 @@ export default function Feed() {
               </div>
               <h3 className="text-xl font-semibold">No posts yet</h3>
               <p className="text-muted-foreground max-w-md mx-auto">
-                Be the first to share your work! Create a post to showcase your services and connect with potential clients.
+                Be the first to share your work! Create a post to showcase your
+                services and connect with potential clients.
               </p>
               {user && (
-                <Button onClick={() => navigate('/create-post')} className="mt-6 gap-2">
+                <Button
+                  onClick={() => navigate("/create-post")}
+                  className="mt-6 gap-2"
+                >
                   <Plus className="w-4 h-4" />
                   Create First Post
                 </Button>
