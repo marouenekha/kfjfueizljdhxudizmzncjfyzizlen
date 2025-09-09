@@ -4,12 +4,13 @@ import { PostCard } from "@/components/Feed/PostCard";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Users } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Feed() {
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -19,26 +20,26 @@ export default function Feed() {
 
   const fetchPosts = async () => {
     try {
+      setLoading(true);
+      setErrorMessage(null);
+
       console.log("Fetching posts...");
       const { data, error } = await supabase
         .from("posts")
-        .select(`
-          *,
-          profiles!posts_user_id_fkey (
-            name,
-            avatar_url,
-            is_provider
-          )
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
       console.log("Posts query result:", { data, error });
-      if (error) throw error;
 
-      setPosts(data || []);
-      console.log("Posts set to state:", data?.length || 0);
-    } catch (error) {
-      console.error("Error fetching posts:", error);
+      if (error) {
+        setErrorMessage(error.message);
+        console.error("Error fetching posts:", error);
+      } else {
+        setPosts(data || []);
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || "Unknown error");
+      console.error("Unexpected error:", err);
     } finally {
       setLoading(false);
     }
@@ -64,9 +65,9 @@ export default function Feed() {
         {/* Posts Feed */}
         <div className="space-y-6">
           {loading ? (
-            <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
+            <p>Loading posts...</p>
+          ) : errorMessage ? (
+            <p className="text-red-500">Error: {errorMessage}</p>
           ) : posts.length > 0 ? (
             <div className="grid gap-6">
               {posts.map((post) => (
@@ -74,21 +75,7 @@ export default function Feed() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 space-y-4">
-              <div className="w-20 h-20 bg-muted rounded-full mx-auto flex items-center justify-center">
-                <Users className="w-10 h-10 text-muted-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold">No posts yet</h3>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Be the first to share your work! Create a post to showcase your services and connect with potential clients.
-              </p>
-              {user && (
-                <Button onClick={() => navigate("/create-post")} className="mt-6 gap-2">
-                  <Plus className="w-4 h-4" />
-                  Create First Post
-                </Button>
-              )}
-            </div>
+            <p>No posts found. Try creating a post!</p>
           )}
         </div>
       </div>
