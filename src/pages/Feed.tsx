@@ -112,5 +112,3 @@ Create Post
 );
 }
 
-When I create a post it doesn't appear
-
