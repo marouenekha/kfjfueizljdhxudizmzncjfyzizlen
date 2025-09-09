@@ -114,7 +114,6 @@ export default function Profile() {
   };
 
   const fetchUserPosts = async (userId: string) => {
-    console.log('Starting to fetch user posts for:', userId);
     try {
       const { data, error } = await supabase
         .from('posts')
@@ -123,24 +122,17 @@ export default function Profile() {
           profiles (
             name,
             avatar_url,
-            is_provider,
-            service_types
+            is_provider
           )
         `)
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
-      console.log('User posts query result:', { data, error });
-
-      if (error) {
-        console.error('Error fetching user posts:', error);
-        throw error;
-      }
+      if (error) throw error;
       
-      console.log('Setting user posts:', data);
       setPosts(data || []);
     } catch (error) {
-      console.error('Error in fetchUserPosts:', error);
+      console.error('Error fetching user posts:', error);
     }
   };
 
@@ -316,21 +308,23 @@ export default function Profile() {
             <TabsTrigger value="reviews">Reviews</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="posts" className="mt-4 space-y-4">
+          <TabsContent value="posts" className="mt-6 space-y-6">
             {loading ? (
-              <div className="flex justify-center py-8">
+              <div className="flex justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
             ) : posts.length > 0 ? (
-              posts.map((post) => (
-                <PostCard key={post.id} post={post} />
-              ))
+              <div className="grid gap-6">
+                {posts.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </div>
             ) : (
-              <div className="text-center py-12 space-y-4">
-                <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center">
-                  <FileText className="w-8 h-8 text-muted-foreground" />
+              <div className="text-center py-16 space-y-4">
+                <div className="w-20 h-20 bg-muted rounded-full mx-auto flex items-center justify-center">
+                  <FileText className="w-10 h-10 text-muted-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold">No posts yet</h3>
+                <h3 className="text-xl font-semibold">No posts yet</h3>
                 <p className="text-muted-foreground max-w-md mx-auto">
                   {isOwnProfile 
                     ? "Share your work and connect with potential clients by creating your first post!"
@@ -338,8 +332,8 @@ export default function Profile() {
                   }
                 </p>
                 {isOwnProfile && (
-                  <Button onClick={() => navigate('/create-post')} className="mt-4">
-                    <Plus className="w-4 h-4 mr-2" />
+                  <Button onClick={() => navigate('/create-post')} className="mt-6 gap-2">
+                    <Plus className="w-4 h-4" />
                     Create First Post
                   </Button>
                 )}

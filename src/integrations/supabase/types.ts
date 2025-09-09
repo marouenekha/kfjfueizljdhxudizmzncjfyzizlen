@@ -136,46 +136,34 @@ export type Database = {
       }
       posts: {
         Row: {
+          content: string | null
           created_at: string
-          description: string | null
           id: string
           images: string[] | null
-          latitude: number | null
           location: string | null
-          longitude: number | null
-          price_range: string | null
-          service_type: string | null
-          status: string | null
+          service_category: string | null
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          content?: string | null
           created_at?: string
-          description?: string | null
           id?: string
           images?: string[] | null
-          latitude?: number | null
           location?: string | null
-          longitude?: number | null
-          price_range?: string | null
-          service_type?: string | null
-          status?: string | null
+          service_category?: string | null
           title: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          content?: string | null
           created_at?: string
-          description?: string | null
           id?: string
           images?: string[] | null
-          latitude?: number | null
           location?: string | null
-          longitude?: number | null
-          price_range?: string | null
-          service_type?: string | null
-          status?: string | null
+          service_category?: string | null
           title?: string
           updated_at?: string
           user_id?: string

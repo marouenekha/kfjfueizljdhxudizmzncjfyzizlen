@@ -37,7 +37,7 @@ const App = () => (
                 <Search />
               </ProtectedRoute>
             } />
-            <Route path="/post" element={
+            <Route path="/create-post" element={
               <ProtectedRoute>
                 <CreatePost />
               </ProtectedRoute>
