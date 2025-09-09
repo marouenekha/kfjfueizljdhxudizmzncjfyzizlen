@@ -21,11 +21,12 @@ export default function Feed() {
 
   const fetchPosts = async () => {
     try {
+      console.log('Fetching posts...');
       const { data, error } = await supabase
         .from('posts')
         .select(`
           *,
-          profiles (
+          profiles!posts_user_id_fkey (
             name,
             avatar_url,
             is_provider
@@ -33,9 +34,11 @@ export default function Feed() {
         `)
         .order('created_at', { ascending: false });
 
+      console.log('Posts query result:', { data, error });
       if (error) throw error;
       
       setPosts(data || []);
+      console.log('Posts set to state:', data?.length || 0);
     } catch (error) {
       console.error('Error fetching posts:', error);
     } finally {
