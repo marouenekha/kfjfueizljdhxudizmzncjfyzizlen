@@ -7,12 +7,16 @@ interface MediaItem {
 }
 
 interface PortfolioPostProps {
-  userName: string;
-  description: string;
-  media: MediaItem[];
+  userName?: string;
+  description?: string;
+  media?: MediaItem[];
 }
 
-export default function PortfolioPost({ userName, description, media }: PortfolioPostProps) {
+export default function PortfolioPost({
+  userName = "Unknown User",
+  description = "",
+  media = [],
+}: PortfolioPostProps) {
   const [liked, setLiked] = useState(false);
 
   return (
@@ -25,29 +29,33 @@ export default function PortfolioPost({ userName, description, media }: Portfoli
 
       {/* Media list (stacked vertically like Behance) */}
       <div className="space-y-4">
-        {media.map((item) => (
-          <div key={item.id} className="w-full flex justify-center">
-            {item.type === "image" ? (
-              <img
-                src={item.url}
-                alt="portfolio"
-                className="object-contain"
-                style={{ maxHeight: "1000px", maxWidth: "100px" }}
-              />
-            ) : (
-              <video
-                src={item.url}
-                controls
-                className="rounded-lg"
-                style={{ maxHeight: "1000px", width: "100%" }}
-              />
-            )}
-          </div>
-        ))}
+        {media.length > 0 ? (
+          media.map((item) => (
+            <div key={item.id} className="w-full flex justify-center">
+              {item.type === "image" ? (
+                <img
+                  src={item.url}
+                  alt="portfolio"
+                  className="object-contain"
+                  style={{ maxHeight: "1000px", maxWidth: "100px" }}
+                />
+              ) : (
+                <video
+                  src={item.url}
+                  controls
+                  className="rounded-lg"
+                  style={{ maxHeight: "1000px", width: "100%" }}
+                />
+              )}
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-500 text-sm text-center">No media uploaded yet</p>
+        )}
       </div>
 
       {/* Description */}
-      <p className="mt-3 text-sm text-gray-700">{description}</p>
+      {description && <p className="mt-3 text-sm text-gray-700">{description}</p>}
 
       {/* Actions */}
       <div className="flex items-center justify-between mt-4">
