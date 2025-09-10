@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Search as SearchIcon, MapPin, Filter, MessageCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/Layout/Layout";
@@ -7,26 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ServiceCategoryFilter } from "@/components/Feed/ServiceCategoryFilter";
-import { RatingDisplay } from "@/components/ui/rating-display";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function Search() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [profiles, setProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    const categoryParam = searchParams.get('category');
-    if (categoryParam) {
-      setSelectedCategory(categoryParam);
-    }
     fetchProfiles();
-  }, [searchParams]);
+  }, []);
 
   const fetchProfiles = async () => {
     try {
@@ -54,12 +46,7 @@ export default function Search() {
         service.toLowerCase().includes(searchQuery.toLowerCase())
       );
     
-    const matchesCategory = selectedCategory === null || 
-      profile.service_types?.some((service: string) => 
-        service.toLowerCase().includes(selectedCategory.toLowerCase())
-      );
-    
-    return matchesSearch && matchesCategory;
+    return matchesSearch;
   });
 
   const handleProfileClick = (profileId: string) => {
@@ -101,11 +88,6 @@ export default function Search() {
           </Button>
         </div>
 
-        {/* Category Filter */}
-        <ServiceCategoryFilter 
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-        />
 
         {/* Results */}
         <div className="space-y-4">
