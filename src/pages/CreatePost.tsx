@@ -4,19 +4,25 @@ import { Layout } from "@/components/Layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ImageIcon, X, MapPin, ArrowLeft } from "lucide-react";
+import { ImagePlus, X, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useImageUpload } from "@/hooks/useImageUpload";
 
 const serviceCategories = [
-  { value: "home", label: "Home Services" },
-  { value: "digital", label: "Digital Services" },
-  { value: "events", label: "Events" },
-  { value: "wellness", label: "Wellness" },
+  { value: "cleaning", label: "Cleaning" },
+  { value: "handyman", label: "Handyman" },
+  { value: "gardening", label: "Gardening" },
+  { value: "tutoring", label: "Tutoring" },
+  { value: "delivery", label: "Delivery" },
+  { value: "pet_care", label: "Pet Care" },
+  { value: "beauty", label: "Beauty & Wellness" },
+  { value: "tech", label: "Tech Support" },
+  { value: "fitness", label: "Fitness" },
   { value: "business", label: "Business" }
 ];
 
@@ -25,50 +31,47 @@ export default function CreatePost() {
   const [content, setContent] = useState("");
   const [serviceCategory, setServiceCategory] = useState("");
   const [location, setLocation] = useState("");
-  const [images, setImages] = useState<File[]>([]);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { toast } = useToast();
+  const { uploadMultipleImages, uploading } = useImageUpload('posts');
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      const newFiles = Array.from(files).slice(0, 5 - images.length);
-      const newUrls = newFiles.map(file => URL.createObjectURL(file));
-      
-      setImages(prev => [...prev, ...newFiles]);
-      setImageUrls(prev => [...prev, ...newUrls]);
+    const files = Array.from(event.target.files || []);
+    
+    if (selectedImages.length + files.length > 5) {
+      toast({
+        title: "Too many images",
+        description: "You can upload a maximum of 5 images.",
+        variant: "destructive",
+      });
+      return;
     }
+
+    const newImages = [...selectedImages, ...files];
+    setSelectedImages(newImages);
+
+    // Create previews
+    const newPreviews = [...imagePreviews];
+    files.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        newPreviews.push(e.target?.result as string);
+        setImagePreviews([...newPreviews]);
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const removeImage = (index: number) => {
-    URL.revokeObjectURL(imageUrls[index]);
-    setImages(prev => prev.filter((_, i) => i !== index));
-    setImageUrls(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const uploadImages = async () => {
-    const uploadPromises = images.map(async (image, index) => {
-      const fileExt = image.name.split('.').pop();
-      const fileName = `${Date.now()}-${index}.${fileExt}`;
-      
-      const { data, error } = await supabase.storage
-        .from('posts')
-        .upload(fileName, image);
-
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('posts')
-        .getPublicUrl(fileName);
-
-      return publicUrl;
-    });
-
-    return Promise.all(uploadPromises);
+    const newImages = selectedImages.filter((_, i) => i !== index);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+    setSelectedImages(newImages);
+    setImagePreviews(newPreviews);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -77,8 +80,8 @@ export default function CreatePost() {
     if (!user) {
       toast({
         title: "Authentication required",
-        description: "Please sign in to create a post",
-        variant: "destructive"
+        description: "Please sign in to create a post.",
+        variant: "destructive",
       });
       return;
     }
@@ -86,19 +89,18 @@ export default function CreatePost() {
     if (!title.trim()) {
       toast({
         title: "Title required",
-        description: "Please add a title for your post",
-        variant: "destructive"
+        description: "Please enter a title for your post.",
+        variant: "destructive",
       });
       return;
     }
 
     setLoading(true);
-
     try {
-      let uploadedImageUrls: string[] = [];
+      let imageUrls: string[] = [];
       
-      if (images.length > 0) {
-        uploadedImageUrls = await uploadImages();
+      if (selectedImages.length > 0) {
+        imageUrls = await uploadMultipleImages(selectedImages);
       }
 
       const { error } = await supabase
@@ -109,23 +111,23 @@ export default function CreatePost() {
           content: content.trim() || null,
           service_category: serviceCategory || null,
           location: location.trim() || null,
-          images: uploadedImageUrls.length > 0 ? uploadedImageUrls : null
+          images: imageUrls.length > 0 ? imageUrls : null
         });
 
       if (error) throw error;
 
       toast({
-        title: "Post created successfully!",
-        description: "Your post has been shared with the community"
+        title: "Post created!",
+        description: "Your post has been created successfully.",
       });
 
       navigate('/feed');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating post:', error);
       toast({
         title: "Failed to create post",
-        description: "Please try again later",
-        variant: "destructive"
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -133,23 +135,11 @@ export default function CreatePost() {
   };
 
   return (
-    <Layout title="Create Post">
-      <div className="container mx-auto max-w-2xl px-4 py-4 md:py-6">
-        <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/feed')}
-            className="p-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-          <h1 className="text-xl md:text-2xl font-bold">Create Post</h1>
-        </div>
-
+    <Layout title="Create Post" showMenu={true}>
+      <div className="container mx-auto max-w-2xl px-4 py-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Share Your Work</CardTitle>
+            <CardTitle>Create a New Post</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -158,22 +148,21 @@ export default function CreatePost() {
                 <Label htmlFor="title">Title *</Label>
                 <Input
                   id="title"
-                  placeholder="What service are you offering?"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  maxLength={100}
+                  placeholder="What service are you offering or looking for?"
+                  required
                 />
               </div>
 
-              {/* Content */}
+              {/* Description */}
               <div className="space-y-2">
                 <Label htmlFor="content">Description</Label>
                 <Textarea
                   id="content"
-                  placeholder="Tell us more about your service..."
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  maxLength={500}
+                  placeholder="Describe your service in detail..."
                   rows={4}
                 />
               </div>
@@ -198,63 +187,57 @@ export default function CreatePost() {
               {/* Location */}
               <div className="space-y-2">
                 <Label htmlFor="location">Location</Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="location"
-                    placeholder="Where are you located?"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
+                <Input
+                  id="location"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="Where is this service available?"
+                />
               </div>
 
               {/* Images */}
               <div className="space-y-3">
-                <Label>Images (Max 5)</Label>
-                
-                {imageUrls.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {imageUrls.map((url, index) => (
-                      <div key={index} className="relative aspect-square">
+                <Label>Images (Optional, max 5)</Label>
+                <div className="flex items-center justify-center w-full">
+                  <label htmlFor="images" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/80 transition-colors">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <ImagePlus className="w-8 h-8 mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">Click to upload images</p>
+                      <p className="text-xs text-muted-foreground">PNG, JPG up to 10MB each</p>
+                    </div>
+                    <input
+                      id="images"
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                      disabled={selectedImages.length >= 5}
+                    />
+                  </label>
+                </div>
+
+                {/* Image Previews */}
+                {imagePreviews.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {imagePreviews.map((preview, index) => (
+                      <div key={index} className="relative group">
                         <img
-                          src={url}
-                          alt={`Upload ${index + 1}`}
-                          className="w-full h-full object-cover rounded-lg border"
+                          src={preview}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-24 object-cover rounded-lg"
                         />
                         <Button
                           type="button"
                           variant="destructive"
                           size="sm"
-                          className="absolute top-2 right-2 p-1 h-auto"
+                          className="absolute -top-2 -right-2 w-6 h-6 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={() => removeImage(index)}
                         >
                           <X className="w-3 h-3" />
                         </Button>
                       </div>
                     ))}
-                  </div>
-                )}
-
-                {images.length < 5 && (
-                  <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      id="image-upload"
-                    />
-                    <Label
-                      htmlFor="image-upload"
-                      className="flex flex-col items-center gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <ImageIcon className="w-8 h-8" />
-                      <span>Click to upload images</span>
-                      <span className="text-xs">({images.length}/5 selected)</span>
-                    </Label>
                   </div>
                 )}
               </div>
@@ -271,10 +254,17 @@ export default function CreatePost() {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={loading || !title.trim()}
+                  disabled={loading || uploading || !title.trim()}
                   className="flex-1"
                 >
-                  {loading ? "Creating..." : "Create Post"}
+                  {loading || uploading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    'Create Post'
+                  )}
                 </Button>
               </div>
             </form>
