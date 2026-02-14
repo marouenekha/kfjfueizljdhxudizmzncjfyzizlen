@@ -10,7 +10,7 @@ import Feed from "./pages/Feed";
 import Search from "./pages/Search";
 import Messages from "./pages/Messages";
 import Profile from "./pages/Profile";
-import CreatePost from "./pages/CreatePost";
+
 import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
 import ProviderSignup from "./pages/ProviderSignup";
@@ -37,11 +37,8 @@ const App = () => (
                 <Search />
               </ProtectedRoute>
             } />
-            <Route path="/create-post" element={
-              <ProtectedRoute>
-                <CreatePost />
-              </ProtectedRoute>
-            } />
+
+
             <Route path="/messages" element={
               <ProtectedRoute>
                 <Messages />
