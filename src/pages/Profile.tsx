@@ -1,22 +1,25 @@
 import { useState, useEffect } from "react";
-import { Edit, Star, MapPin, Calendar, Award, Users, MessageCircle } from "lucide-react";
+import { Edit, Settings, Share, Star, MapPin, Calendar, Award, Users, MessageCircle, UserPlus, Phone, Plus, FileText } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/Layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PostCard } from "@/components/Feed/PostCard";
 import { RatingDisplay } from "@/components/ui/rating-display";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileEditDialog } from "@/components/ProfileEditDialog";
 import { RatingModal } from "@/components/RatingModal";
+import { PortfolioManager } from "@/components/PortfolioManager";
 
 export default function Profile() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user: authUser, isLoading: authLoading } = useAuth();
   const [isFollowing, setIsFollowing] = useState(false);
+  const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
@@ -45,6 +48,7 @@ export default function Profile() {
     if (viewingUserId && viewingUserId !== authUser?.id) {
       fetchOtherUserProfile();
     } else if (authUser?.id) {
+      fetchUserPosts(authUser.id);
       fetchUserRating(authUser.id);
       fetchFollowerCount(authUser.id);
       fetchJobsCompleted(authUser.id);
@@ -77,6 +81,7 @@ export default function Profile() {
         isOnline: false
       });
 
+      fetchUserPosts(viewingUserId);
       fetchUserRating(viewingUserId);
       fetchFollowerCount(viewingUserId);
       fetchJobsCompleted(viewingUserId);
@@ -105,6 +110,29 @@ export default function Profile() {
       }
     } catch (error) {
       console.error('Error fetching user rating:', error);
+    }
+  };
+
+  const fetchUserPosts = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('posts')
+        .select(`
+          *,
+          profiles (
+            name,
+            avatar_url,
+            is_provider
+          )
+        `)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      setPosts(data || []);
+    } catch (error) {
+      console.error('Error fetching user posts:', error);
     }
   };
 
@@ -273,10 +301,49 @@ export default function Profile() {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="reviews" className="mt-6">
-          <TabsList className="grid w-full grid-cols-1">
+        <Tabs defaultValue="posts" className="mt-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="posts">Posts</TabsTrigger>
+            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="reviews">Reviews</TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="posts" className="mt-6 space-y-6">
+            {loading ? (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : posts.length > 0 ? (
+              <div className="grid gap-6">
+                {posts.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 space-y-4">
+                <div className="w-20 h-20 bg-muted rounded-full mx-auto flex items-center justify-center">
+                  <FileText className="w-10 h-10 text-muted-foreground" />
+                </div>
+                <h3 className="text-xl font-semibold">No posts yet</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  {isOwnProfile 
+                    ? "Share your work and connect with potential clients by creating your first post!"
+                    : "This user hasn't shared any posts yet."
+                  }
+                </p>
+                {isOwnProfile && (
+                  <Button onClick={() => navigate('/create-post')} className="mt-6 gap-2">
+                    <Plus className="w-4 h-4" />
+                    Create First Post
+                  </Button>
+                )}
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="portfolio" className="mt-4">
+            <PortfolioManager userId={user?.id || ""} isOwnProfile={isOwnProfile} />
+          </TabsContent>
           
           <TabsContent value="reviews" className="mt-4">
             <div className="text-center py-12 space-y-4">
