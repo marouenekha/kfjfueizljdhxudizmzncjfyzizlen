@@ -13,6 +13,7 @@ import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
 import ProviderSignup from "./pages/ProviderSignup";
+import CreatePost from "./pages/CreatePost";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -54,6 +55,11 @@ const App = () => (
             <Route path="/welcome" element={
               <ProtectedRoute>
                 <Index />
+              </ProtectedRoute>
+            } />
+            <Route path="/create-post" element={
+              <ProtectedRoute>
+                <CreatePost />
               </ProtectedRoute>
             } />
             <Route path="/provider-signup" element={<ProviderSignup />} />

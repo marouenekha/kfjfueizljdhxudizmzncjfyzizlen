@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Edit, Star, MapPin, Calendar, Award, Users, MessageCircle, FileText } from "lucide-react";
+import { Edit, Star, MapPin, Calendar, Award, Users, MessageCircle, FileText, Loader2 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/Layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileEditDialog } from "@/components/ProfileEditDialog";
 import { RatingModal } from "@/components/RatingModal";
-
+import { PostCard } from "@/components/Feed/PostCard";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -25,6 +25,8 @@ export default function Profile() {
   const [userRating, setUserRating] = useState({ rating: 0, count: 0 });
   const [followerCount, setFollowerCount] = useState(0);
   const [jobsCompleted, setJobsCompleted] = useState(0);
+  const [userPosts, setUserPosts] = useState<any[]>([]);
+  const [postsLoading, setPostsLoading] = useState(true);
   const viewingUserId = searchParams.get('user');
   const isOwnProfile = !viewingUserId || viewingUserId === authUser?.id;
   
@@ -43,6 +45,7 @@ export default function Profile() {
   } : null) : userProfile;
 
   useEffect(() => {
+    const targetId = viewingUserId && viewingUserId !== authUser?.id ? viewingUserId : authUser?.id;
     if (viewingUserId && viewingUserId !== authUser?.id) {
       fetchOtherUserProfile();
     } else if (authUser?.id) {
@@ -50,7 +53,25 @@ export default function Profile() {
       fetchFollowerCount(authUser.id);
       fetchJobsCompleted(authUser.id);
     }
+    if (targetId) fetchUserPosts(targetId);
   }, [viewingUserId, authUser?.id]);
+
+  const fetchUserPosts = async (userId: string) => {
+    setPostsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("posts")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      setUserPosts(data || []);
+    } catch (error) {
+      console.error("Error fetching user posts:", error);
+    } finally {
+      setPostsLoading(false);
+    }
+  };
 
   const fetchOtherUserProfile = async () => {
     if (!viewingUserId) return;
@@ -284,12 +305,24 @@ export default function Profile() {
           </TabsList>
           
           <TabsContent value="posts" className="mt-4">
-            <div className="text-center py-12 space-y-4">
-              <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center">
-                <FileText className="w-8 h-8 text-muted-foreground" />
+            {postsLoading ? (
+              <div className="text-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-semibold">No post exists</h3>
-            </div>
+            ) : userPosts.length === 0 ? (
+              <div className="text-center py-12 space-y-4">
+                <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center">
+                  <FileText className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold">No post exists</h3>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {userPosts.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="portfolio" className="mt-4">
