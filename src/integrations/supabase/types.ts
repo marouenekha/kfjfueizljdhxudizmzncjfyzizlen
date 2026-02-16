@@ -101,72 +101,36 @@ export type Database = {
         }
         Relationships: []
       }
-      portfolio_items: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          image_url: string | null
-          title: string
-          updated_at: string
-          user_id: string
-          video_url: string | null
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          image_url?: string | null
-          title: string
-          updated_at?: string
-          user_id: string
-          video_url?: string | null
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          image_url?: string | null
-          title?: string
-          updated_at?: string
-          user_id?: string
-          video_url?: string | null
-        }
-        Relationships: []
-      }
       posts: {
         Row: {
           content: string | null
-          created_at: string
+          created_at: string | null
           id: string
           images: string[] | null
-          location: string | null
-          service_category: string | null
-          title: string
-          updated_at: string
-          user_id: string
+          role: string | null
+          user_avatar: string | null
+          user_id: string | null
+          user_name: string
         }
         Insert: {
           content?: string | null
-          created_at?: string
+          created_at?: string | null
           id?: string
           images?: string[] | null
-          location?: string | null
-          service_category?: string | null
-          title: string
-          updated_at?: string
-          user_id: string
+          role?: string | null
+          user_avatar?: string | null
+          user_id?: string | null
+          user_name: string
         }
         Update: {
           content?: string | null
-          created_at?: string
+          created_at?: string | null
           id?: string
           images?: string[] | null
-          location?: string | null
-          service_category?: string | null
-          title?: string
-          updated_at?: string
-          user_id?: string
+          role?: string | null
+          user_avatar?: string | null
+          user_id?: string | null
+          user_name?: string
         }
         Relationships: []
       }
