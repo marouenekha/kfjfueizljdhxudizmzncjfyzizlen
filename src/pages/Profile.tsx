@@ -291,7 +291,15 @@ export default function Profile() {
               <h3 className="text-lg font-semibold">No post exists</h3>
             </div>
           </TabsContent>
-          
+
+          <TabsContent value="portfolio" className="mt-4">
+            <div className="text-center py-12 space-y-4">
+              <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center">
+                <FileText className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold">No portfolio items yet</h3>
+            </div>
+          </TabsContent>
           
           <TabsContent value="reviews" className="mt-4">
             <div className="text-center py-12 space-y-4">
