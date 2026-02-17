@@ -26,6 +26,8 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   const images = post.images || [];
   const isCarousel = post.media_type === "carousel" && images.length > 1;
@@ -35,6 +37,22 @@ export function PostCard({ post }: PostCardProps) {
 
   const nextSlide = () => setCurrentSlide((p) => (p + 1) % images.length);
   const prevSlide = () => setCurrentSlide((p) => (p === 0 ? images.length - 1 : p - 1));
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+  const onTouchMove = (e: React.TouchEvent) => setTouchEnd(e.targetTouches[0].clientX);
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const diff = touchStart - touchEnd;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0 && currentSlide < images.length - 1) nextSlide();
+      if (diff < 0 && currentSlide > 0) prevSlide();
+    }
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
 
   return (
     <div className="post-card overflow-hidden">
@@ -89,7 +107,7 @@ export function PostCard({ post }: PostCardProps) {
       )}
 
       {isCarousel && (
-        <div className="relative">
+        <div className="relative" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
           <div className="overflow-hidden">
             <div
               className="flex transition-transform duration-300 ease-out"
