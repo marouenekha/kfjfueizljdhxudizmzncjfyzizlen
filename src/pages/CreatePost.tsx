@@ -19,7 +19,7 @@ export default function CreatePost() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const { uploadImage, uploading } = useImageUpload("Post_images");
+  const { uploadImage, uploading } = useImageUpload("posts");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
