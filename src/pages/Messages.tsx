@@ -241,8 +241,9 @@ export default function Messages() {
 
     return (
       <Layout title={t('messages')} showMobileNav={false}>
+        <div className="flex flex-col h-[calc(100vh-56px)]">
         {/* Chat Header */}
-        <div className="sticky top-0 z-40 bg-background border-b border-border">
+        <div className="flex-shrink-0 z-40 bg-background border-b border-border">
           <div className="flex items-center justify-between p-3 sm:p-4">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <Button 
@@ -308,7 +309,7 @@ export default function Messages() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 pb-20">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
           {messages.length > 0 ? (
             messages.map((message) => {
               return (
@@ -347,7 +348,7 @@ export default function Messages() {
           />
         )}
 
-        <div className="sticky bottom-0 bg-background border-t border-border p-3 sm:p-4">
+        <div className="flex-shrink-0 bg-background border-t border-border p-3 sm:p-4">
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" className="hidden sm:flex">
               <Paperclip className="w-4 h-4" />
@@ -379,6 +380,7 @@ export default function Messages() {
           onSubmit={handleReviewSubmit}
           providerName={conversation.user.name}
         />
+        </div>
       </Layout>
     );
   }
