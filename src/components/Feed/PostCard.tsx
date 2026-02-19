@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,8 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Post {
   id: string;
@@ -34,8 +36,17 @@ interface PostCardProps {
   post: Post;
 }
 
+interface Comment {
+  id: string;
+  user_name: string;
+  user_avatar: string | null;
+  content: string;
+  created_at: string;
+}
+
 export function PostCard({ post }: PostCardProps) {
   const navigate = useNavigate();
+  const { user: authUser } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -43,7 +54,8 @@ export function PostCard({ post }: PostCardProps) {
   const [likeCount, setLikeCount] = useState(0);
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
-  const [comments, setComments] = useState<{ name: string; text: string }[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentCount, setCommentCount] = useState(0);
   const [expanded, setExpanded] = useState(false);
 
   const images = post.images || [];
@@ -51,6 +63,47 @@ export function PostCard({ post }: PostCardProps) {
   const timeAgo = post.created_at
     ? formatDistanceToNow(new Date(post.created_at), { addSuffix: true })
     : "";
+
+  // Load likes and comments from DB
+  useEffect(() => {
+    loadLikes();
+    loadCommentCount();
+  }, [post.id, authUser?.id]);
+
+  const loadLikes = async () => {
+    const { count } = await supabase
+      .from("post_likes")
+      .select("*", { count: "exact", head: true })
+      .eq("post_id", post.id);
+    setLikeCount(count || 0);
+
+    if (authUser?.id) {
+      const { data } = await supabase
+        .from("post_likes")
+        .select("id")
+        .eq("post_id", post.id)
+        .eq("user_id", authUser.id)
+        .maybeSingle();
+      setLiked(!!data);
+    }
+  };
+
+  const loadCommentCount = async () => {
+    const { count } = await supabase
+      .from("post_comments")
+      .select("*", { count: "exact", head: true })
+      .eq("post_id", post.id);
+    setCommentCount(count || 0);
+  };
+
+  const loadComments = async () => {
+    const { data } = await supabase
+      .from("post_comments")
+      .select("*")
+      .eq("post_id", post.id)
+      .order("created_at", { ascending: true });
+    setComments((data as Comment[]) || []);
+  };
 
   const nextSlide = () => setCurrentSlide((p) => (p + 1) % images.length);
   const prevSlide = () => setCurrentSlide((p) => (p === 0 ? images.length - 1 : p - 1));
@@ -71,22 +124,51 @@ export function PostCard({ post }: PostCardProps) {
     setTouchEnd(null);
   };
 
-  const handleLike = () => {
-    setLiked((prev) => !prev);
-    setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
+  const handleLike = async () => {
+    if (!authUser?.id) return;
+    if (liked) {
+      await supabase
+        .from("post_likes")
+        .delete()
+        .eq("post_id", post.id)
+        .eq("user_id", authUser.id);
+      setLiked(false);
+      setLikeCount((p) => p - 1);
+    } else {
+      await supabase
+        .from("post_likes")
+        .insert({ post_id: post.id, user_id: authUser.id });
+      setLiked(true);
+      setLikeCount((p) => p + 1);
+    }
   };
 
-  const handleAddComment = () => {
-    if (!commentText.trim()) return;
-    setComments((prev) => [...prev, { name: "You", text: commentText.trim() }]);
-    setCommentText("");
+  const handleAddComment = async () => {
+    if (!commentText.trim() || !authUser?.id) return;
+    const { error } = await supabase.from("post_comments").insert({
+      post_id: post.id,
+      user_id: authUser.id,
+      user_name: authUser.profile?.name || "User",
+      user_avatar: authUser.profile?.avatar_url || null,
+      content: commentText.trim(),
+    });
+    if (!error) {
+      setCommentText("");
+      setCommentCount((p) => p + 1);
+      loadComments();
+    }
+  };
+
+  const handleToggleComments = () => {
+    const next = !showComments;
+    setShowComments(next);
+    if (next) loadComments();
   };
 
   const handleShare = async () => {
     try {
       await navigator.share?.({ text: post.content || "", url: window.location.href });
     } catch {
-      // fallback: copy to clipboard
       navigator.clipboard?.writeText(window.location.href);
     }
   };
@@ -215,7 +297,6 @@ export function PostCard({ post }: PostCardProps) {
               <ChevronRight className="w-4 h-4" />
             </button>
           )}
-          {/* Slide indicator */}
           <div className="absolute top-3 right-3 bg-foreground/60 text-background text-xs px-2 py-0.5 rounded-full">
             {currentSlide + 1}/{images.length}
           </div>
@@ -236,24 +317,14 @@ export function PostCard({ post }: PostCardProps) {
       <div className="px-4 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9"
-              onClick={handleLike}
-            >
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleLike}>
               <Heart
                 className={`w-6 h-6 transition-colors ${
                   liked ? "fill-destructive text-destructive" : "text-foreground"
                 }`}
               />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9"
-              onClick={() => setShowComments((p) => !p)}
-            >
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleToggleComments}>
               <MessageCircle className="w-6 h-6 text-foreground" />
             </Button>
             <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleShare}>
@@ -270,11 +341,19 @@ export function PostCard({ post }: PostCardProps) {
           </Button>
         </div>
 
-        {/* Like count */}
         {likeCount > 0 && (
           <p className="text-sm font-semibold mt-1">
             {likeCount} {likeCount === 1 ? "like" : "likes"}
           </p>
+        )}
+
+        {commentCount > 0 && !showComments && (
+          <button
+            onClick={handleToggleComments}
+            className="text-muted-foreground text-sm mt-0.5"
+          >
+            View all {commentCount} comments
+          </button>
         )}
       </div>
 
@@ -283,10 +362,10 @@ export function PostCard({ post }: PostCardProps) {
         <div className="px-4 pb-3 space-y-2">
           {comments.length > 0 && (
             <div className="space-y-1.5 max-h-40 overflow-y-auto">
-              {comments.map((c, i) => (
-                <p key={i} className="text-sm">
-                  <span className="font-semibold mr-1">{c.name}</span>
-                  {c.text}
+              {comments.map((c) => (
+                <p key={c.id} className="text-sm">
+                  <span className="font-semibold mr-1">{c.user_name}</span>
+                  {c.content}
                 </p>
               ))}
             </div>
