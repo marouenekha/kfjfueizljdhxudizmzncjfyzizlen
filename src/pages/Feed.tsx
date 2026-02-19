@@ -61,7 +61,7 @@ export default function Feed() {
             <Button onClick={() => navigate("/create-post")}>Create Post</Button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-0 -mx-4 border-t border-border">
             {posts.map((post) => (
               <PostCard key={post.id} post={post} />
             ))}
