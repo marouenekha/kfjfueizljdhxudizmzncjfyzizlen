@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Edit, Star, MapPin, Calendar, Award, Users, MessageCircle, FileText, Loader2 } from "lucide-react";
+import { Edit, Star, MapPin, Calendar, Award, Users, MessageCircle, FileText, Loader2, UserPlus, UserCheck } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/Layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ export default function Profile() {
   const [searchParams] = useSearchParams();
   const { user: authUser, isLoading: authLoading } = useAuth();
   const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
@@ -48,6 +49,7 @@ export default function Profile() {
     const targetId = viewingUserId && viewingUserId !== authUser?.id ? viewingUserId : authUser?.id;
     if (viewingUserId && viewingUserId !== authUser?.id) {
       fetchOtherUserProfile();
+      checkFollowStatus(viewingUserId);
     } else if (authUser?.id) {
       fetchUserRating(authUser.id);
       fetchFollowerCount(authUser.id);
@@ -55,6 +57,47 @@ export default function Profile() {
     }
     if (targetId) fetchUserPosts(targetId);
   }, [viewingUserId, authUser?.id]);
+
+  const checkFollowStatus = async (targetId: string) => {
+    if (!authUser?.id) return;
+    try {
+      const { data } = await supabase
+        .from('follows')
+        .select('id')
+        .eq('follower_id', authUser.id)
+        .eq('following_id', targetId)
+        .maybeSingle();
+      setIsFollowing(!!data);
+    } catch (error) {
+      console.error('Error checking follow status:', error);
+    }
+  };
+
+  const handleFollowToggle = async () => {
+    if (!authUser?.id || !user?.id || isOwnProfile) return;
+    setFollowLoading(true);
+    try {
+      if (isFollowing) {
+        await supabase
+          .from('follows')
+          .delete()
+          .eq('follower_id', authUser.id)
+          .eq('following_id', user.id);
+        setIsFollowing(false);
+        setFollowerCount(prev => Math.max(0, prev - 1));
+      } else {
+        await supabase
+          .from('follows')
+          .insert({ follower_id: authUser.id, following_id: user.id });
+        setIsFollowing(true);
+        setFollowerCount(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error('Error toggling follow:', error);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   const fetchUserPosts = async (userId: string) => {
     setPostsLoading(true);
@@ -242,7 +285,22 @@ export default function Profile() {
                     </Button>
                   ) : (
                     <>
-                      <Button size="sm" onClick={() => setShowRatingModal(true)}>
+                      <Button 
+                        size="sm" 
+                        variant={isFollowing ? "secondary" : "default"}
+                        onClick={handleFollowToggle}
+                        disabled={followLoading}
+                      >
+                        {followLoading ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : isFollowing ? (
+                          <UserCheck className="w-4 h-4 mr-2" />
+                        ) : (
+                          <UserPlus className="w-4 h-4 mr-2" />
+                        )}
+                        {isFollowing ? "Following" : "Follow"}
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => setShowRatingModal(true)}>
                         <Star className="w-4 h-4 mr-2" />
                         Rate
                       </Button>
