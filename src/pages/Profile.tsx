@@ -277,7 +277,7 @@ export default function Profile() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {isOwnProfile ? (
                     <Button size="sm" onClick={() => setShowEditDialog(true)}>
                       <Edit className="w-4 h-4 mr-2" />
