@@ -8,13 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslation } from 'react-i18next';
 import { ReviewModal } from "@/components/ui/review-modal";
 import { supabase } from "@/integrations/supabase/client";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { JobManager } from "@/components/JobManager";
 
 export default function Messages() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [conversations, setConversations] = useState<any[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
@@ -259,7 +260,7 @@ export default function Messages() {
                 <AvatarFallback>{conversation.user.name[0]}</AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <h3 className="font-semibold text-sm truncate">{conversation.user.name}</h3>
+                <h3 className="font-semibold text-sm truncate cursor-pointer hover:underline" onClick={(e) => { e.stopPropagation(); navigate(`/profile?user=${conversation.id}`); }}>{conversation.user.name}</h3>
                 <div className="flex items-center gap-2">
                   {conversation.user.isOnline && (
                     <>
@@ -435,7 +436,7 @@ export default function Messages() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-sm truncate">{conversation.user.name}</h3>
+                        <h3 className="font-semibold text-sm truncate cursor-pointer hover:underline" onClick={(e) => { e.stopPropagation(); navigate(`/profile?user=${conversation.id}`); }}>{conversation.user.name}</h3>
                         {conversation.isProvider && (
                           <Badge variant="secondary" className="text-xs">Provider</Badge>
                         )}
