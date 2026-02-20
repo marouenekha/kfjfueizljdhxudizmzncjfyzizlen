@@ -436,7 +436,7 @@ export default function Messages() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-sm truncate cursor-pointer hover:underline" onClick={(e) => { e.stopPropagation(); navigate(`/profile?user=${conversation.id}`); }}>{conversation.user.name}</h3>
+                        <h3 className="font-semibold text-sm truncate">{conversation.user.name}</h3>
                         {conversation.isProvider && (
                           <Badge variant="secondary" className="text-xs">Provider</Badge>
                         )}
