@@ -409,8 +409,14 @@ export default function Messages() {
             filteredConversations.map((conversation) => (
               <div
                 key={conversation.id}
-                onClick={() => {
+              onClick={() => {
                   setSelectedConversation(conversation.id);
+                  setSelectedProfile({
+                    user_id: conversation.id,
+                    name: conversation.user.name,
+                    avatar_url: conversation.user.avatar,
+                    is_provider: conversation.isProvider
+                  });
                   setMessages([]);
                 }}
                 className="post-card p-4 cursor-pointer hover:bg-muted/30 transition-colors"
