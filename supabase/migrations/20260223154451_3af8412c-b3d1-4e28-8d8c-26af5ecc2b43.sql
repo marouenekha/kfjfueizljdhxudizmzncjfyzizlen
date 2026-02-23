@@ -1,0 +1,1 @@
+ALTER TABLE public.ratings DROP CONSTRAINT IF EXISTS ratings_rater_id_rated_id_key;
