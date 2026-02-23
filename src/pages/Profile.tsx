@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Edit, Star, MapPin, Calendar, Award, Users, MessageCircle, FileText, Loader2, UserPlus, UserCheck } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { fr } from "date-fns/locale";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/Layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -28,6 +30,8 @@ export default function Profile() {
   const [jobsCompleted, setJobsCompleted] = useState(0);
   const [userPosts, setUserPosts] = useState<any[]>([]);
   const [postsLoading, setPostsLoading] = useState(true);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
   const viewingUserId = searchParams.get('user');
   const isOwnProfile = !viewingUserId || viewingUserId === authUser?.id;
   
@@ -55,7 +59,10 @@ export default function Profile() {
       fetchFollowerCount(authUser.id);
       fetchJobsCompleted(authUser.id);
     }
-    if (targetId) fetchUserPosts(targetId);
+    if (targetId) {
+      fetchUserPosts(targetId);
+      fetchReviews(targetId);
+    }
   }, [viewingUserId, authUser?.id]);
 
   const checkFollowStatus = async (targetId: string) => {
@@ -158,14 +165,23 @@ export default function Profile() {
     try {
       const { data, error } = await supabase
         .from('ratings')
-        .select('rating')
-        .eq('rated_id', userId);
+        .select('rater_id, rating, created_at')
+        .eq('rated_id', userId)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       if (data && data.length > 0) {
-        const avgRating = data.reduce((sum, r) => sum + r.rating, 0) / data.length;
-        setUserRating({ rating: avgRating, count: data.length });
+        // Only keep latest rating per rater for the average
+        const latestByRater = new Map<string, number>();
+        for (const r of data) {
+          if (!latestByRater.has(r.rater_id)) {
+            latestByRater.set(r.rater_id, r.rating);
+          }
+        }
+        const ratings = Array.from(latestByRater.values());
+        const avgRating = ratings.reduce((sum, r) => sum + r, 0) / ratings.length;
+        setUserRating({ rating: avgRating, count: ratings.length });
       } else {
         setUserRating({ rating: 0, count: 0 });
       }
@@ -202,7 +218,43 @@ export default function Profile() {
     }
   };
 
-  // Show loading spinner while auth is loading or if user exists but profile is still loading
+  const fetchReviews = async (userId: string) => {
+    setReviewsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('ratings')
+        .select('*')
+        .eq('rated_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Fetch rater profiles
+      if (data && data.length > 0) {
+        const raterIds = [...new Set(data.map(r => r.rater_id))];
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, name, avatar_url')
+          .in('user_id', raterIds);
+
+        const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+        const enriched = data.map(r => ({
+          ...r,
+          rater_name: profileMap.get(r.rater_id)?.name || 'User',
+          rater_avatar: profileMap.get(r.rater_id)?.avatar_url,
+        }));
+        setReviews(enriched);
+      } else {
+        setReviews([]);
+      }
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+
   if (authLoading || (authUser && !authUser.profile)) {
     return (
       <Layout title="Profile">
@@ -393,18 +445,51 @@ export default function Profile() {
           </TabsContent>
           
           <TabsContent value="reviews" className="mt-4">
-            <div className="text-center py-12 space-y-4">
-              <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center">
-                <Star className="w-8 h-8 text-muted-foreground" />
+            {reviewsLoading ? (
+              <div className="text-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-semibold">No reviews yet</h3>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                {isOwnProfile 
-                  ? "Complete your first job to start receiving reviews from clients!"
-                  : "This user hasn't received any reviews yet."
-                }
-              </p>
-            </div>
+            ) : reviews.length === 0 ? (
+              <div className="text-center py-12 space-y-4">
+                <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center">
+                  <Star className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold">Aucun avis</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  {isOwnProfile 
+                    ? "Complétez votre premier travail pour recevoir des avis !"
+                    : "Cet utilisateur n'a pas encore reçu d'avis."
+                  }
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {reviews.map((review) => (
+                  <div key={review.id} className="border rounded-lg p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={review.rater_avatar} />
+                          <AvatarFallback className="text-xs">{review.rater_name?.[0] || 'U'}</AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-medium">{review.rater_name}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(review.created_at), { addSuffix: true, locale: fr })}
+                      </span>
+                    </div>
+                    <div className="flex gap-0.5">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star key={s} className={`w-4 h-4 ${s <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'}`} />
+                      ))}
+                    </div>
+                    {review.comment && (
+                      <p className="text-sm text-muted-foreground">{review.comment}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
         
@@ -420,7 +505,10 @@ export default function Profile() {
             onOpenChange={setShowRatingModal}
             userId={user.id}
             userName={user.name}
-            onRatingSubmitted={() => fetchUserRating(user.id)}
+            onRatingSubmitted={() => {
+              fetchUserRating(user.id);
+              fetchReviews(user.id);
+            }}
           />
         )}
       </div>
