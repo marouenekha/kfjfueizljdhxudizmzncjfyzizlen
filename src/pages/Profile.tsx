@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Edit, Star, MapPin, Calendar, Award, Users, MessageCircle, FileText, Loader2, UserPlus, UserCheck } from "lucide-react";
+import { Edit, Star, MapPin, Calendar, Award, Users, MessageCircle, FileText, Loader2, UserPlus, UserCheck, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -215,6 +215,23 @@ export default function Profile() {
       setJobsCompleted(count || 0);
     } catch (error) {
       console.error('Error fetching jobs completed:', error);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    const targetId = viewingUserId || authUser?.id;
+    try {
+      const { error } = await supabase
+        .from('ratings')
+        .delete()
+        .eq('id', reviewId);
+      if (error) throw error;
+      if (targetId) {
+        fetchUserRating(targetId);
+        fetchReviews(targetId);
+      }
+    } catch (error) {
+      console.error('Error deleting review:', error);
     }
   };
 
@@ -474,9 +491,21 @@ export default function Profile() {
                         </Avatar>
                         <span className="text-sm font-medium">{review.rater_name}</span>
                       </div>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(review.created_at), { addSuffix: true, locale: fr })}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">
+                          {formatDistanceToNow(new Date(review.created_at), { addSuffix: true, locale: fr })}
+                        </span>
+                        {review.rater_id === authUser?.id && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                            onClick={() => handleDeleteReview(review.id)}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                     <div className="flex gap-0.5">
                       {[1, 2, 3, 4, 5].map((s) => (
