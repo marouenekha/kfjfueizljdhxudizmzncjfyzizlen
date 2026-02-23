@@ -1,4 +1,5 @@
-import { Bell, Menu, Settings, LogOut } from "lucide-react";
+import { Menu, Settings, LogOut } from "lucide-react";
+import { NotificationsPopover } from "./NotificationsPopover";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import {
@@ -59,11 +60,7 @@ export const Header = ({
           </div>
 
           <div className="flex items-center gap-2">
-            {showNotifications && (
-              <Button variant="ghost" size="sm" className="relative">
-                <Bell className="w-5 h-5" />
-              </Button>
-            )}
+            {showNotifications && <NotificationsPopover />}
           </div>
         </div>
       </div>
