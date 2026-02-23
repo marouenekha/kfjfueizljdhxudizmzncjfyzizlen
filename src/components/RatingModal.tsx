@@ -36,7 +36,7 @@ export const RatingModal: React.FC<RatingModalProps> = ({
     try {
       const { error } = await supabase
         .from('ratings')
-        .upsert({
+        .insert({
           rater_id: user.id,
           rated_id: userId,
           rating,
