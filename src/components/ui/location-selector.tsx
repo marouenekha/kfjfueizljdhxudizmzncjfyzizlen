@@ -35,11 +35,11 @@ function formatAddress(addr: any): string {
 }
 
 // Reverse geocode to get "City, Region, Country" format
-async function reverseGeocodeCity(lat: number, lng: number): Promise<string> {
+async function reverseGeocodeCity(lat: number, lng: number, lang: string): Promise<string> {
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=10&addressdetails=1`,
-      { headers: { 'Accept-Language': 'en' } }
+      { headers: { 'Accept-Language': lang } }
     );
     const data = await res.json();
     const formatted = formatAddress(data.address);
@@ -50,11 +50,11 @@ async function reverseGeocodeCity(lat: number, lng: number): Promise<string> {
 }
 
 // Search for a city
-async function searchCity(query: string): Promise<{ name: string; lat: number; lon: number } | null> {
+async function searchCity(query: string, lang: string): Promise<{ name: string; lat: number; lon: number } | null> {
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&addressdetails=1`,
-      { headers: { 'Accept-Language': 'en' } }
+      { headers: { 'Accept-Language': lang } }
     );
     const data = await res.json();
     if (data.length > 0) {
