@@ -214,6 +214,14 @@ export default function Search() {
           </div>
         </div>
       </div>
+      <LocationSelector
+        open={showLocationSelector}
+        onOpenChange={setShowLocationSelector}
+        onLocationSelect={(loc) => {
+          setSelectedRegion(loc.address);
+        }}
+        initialLocation={selectedRegion}
+      />
     </Layout>
   );
 }
