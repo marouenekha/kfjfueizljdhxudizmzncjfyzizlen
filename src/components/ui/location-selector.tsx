@@ -125,6 +125,8 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
     const timer = setTimeout(async () => {
       if (!mapContainer.current || mapRef.current) return;
 
+      const L = await import('leaflet');
+
       // Try to get user location first, fallback to Tunisia
       let startLat = TUNISIA_LAT;
       let startLng = TUNISIA_LNG;
