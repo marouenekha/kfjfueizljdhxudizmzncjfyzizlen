@@ -268,3 +268,22 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Leaflet map inside dialogs */
+.leaflet-container {
+  z-index: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+.leaflet-tile-pane {
+  z-index: 1 !important;
+}
+.leaflet-control-container {
+  z-index: 2 !important;
+}
+.leaflet-grab {
+  cursor: grab;
+}
+.leaflet-dragging .leaflet-grab {
+  cursor: grabbing;
+}

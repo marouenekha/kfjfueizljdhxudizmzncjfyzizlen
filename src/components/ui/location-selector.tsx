@@ -208,7 +208,9 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg [&_.leaflet-container]:touch-auto [&_.leaflet-container]:touch-manipulation"
+        onPointerDownOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Select City</DialogTitle>
         </DialogHeader>
@@ -241,7 +243,9 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
           <div
             ref={mapContainer}
             className="rounded-lg overflow-hidden border border-border"
-            style={{ height: 250, width: '100%', position: 'relative', zIndex: 0 }}
+            style={{ height: 250, width: '100%', position: 'relative', zIndex: 10, touchAction: 'none' }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
           />
           <p className="text-xs text-muted-foreground text-center">
             Tap or drag the pin to select a city
