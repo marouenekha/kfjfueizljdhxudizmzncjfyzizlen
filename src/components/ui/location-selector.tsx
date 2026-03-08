@@ -4,11 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { useTranslation } from 'react-i18next';
-
-// Tunisia default coordinates
-const TUNISIA_LAT = 33.8869;
-const TUNISIA_LNG = 9.5375;
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface LocationSelectorProps {
   open: boolean;
@@ -21,58 +18,38 @@ interface LocationSelectorProps {
   initialLocation?: string;
 }
 
-// Build "City, Region, Country" from Nominatim address
-function formatAddress(addr: any): string {
-  const city = addr.city || addr.town || addr.village || addr.municipality || addr.hamlet || addr.suburb || addr.district || addr.county || '';
-  const region = addr.state || addr.governorate || addr.province || addr.region || addr.state_district || '';
-  const parts: string[] = [];
-  if (city) parts.push(city);
-  if (region && region !== city) parts.push(region);
-  return parts.join(', ');
-}
-
-// Reverse geocode to get "City, Region, Country" format
-async function reverseGeocodeCity(lat: number, lng: number, lang: string): Promise<string> {
+// Reverse geocode to get city name only
+async function reverseGeocodeCity(lat: number, lng: number): Promise<string> {
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=10&addressdetails=1`,
-      { headers: { 'Accept-Language': lang } }
+      { headers: { 'Accept-Language': 'en' } }
     );
     const data = await res.json();
-    const formatted = formatAddress(data.address);
-    return formatted || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    const addr = data.address;
+    return addr.city || addr.town || addr.village || addr.state || data.display_name?.split(',')[0] || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   } catch {
     return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   }
 }
 
 // Search for a city
-async function searchCity(query: string, lang: string): Promise<{ name: string; lat: number; lon: number } | null> {
+async function searchCity(query: string): Promise<{ name: string; lat: number; lon: number } | null> {
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&addressdetails=1`,
-      { headers: { 'Accept-Language': lang } }
+      { headers: { 'Accept-Language': 'en' } }
     );
     const data = await res.json();
     if (data.length > 0) {
       const item = data[0];
-      const name = formatAddress(item.address);
+      const addr = item.address;
+      const name = addr.city || addr.town || addr.village || addr.state || item.display_name?.split(',')[0];
       return { name, lat: parseFloat(item.lat), lon: parseFloat(item.lon) };
     }
     return null;
   } catch {
     return null;
-  }
-}
-
-// Inject leaflet CSS if not already present
-function ensureLeafletCSS() {
-  if (!document.getElementById('leaflet-css')) {
-    const link = document.createElement('link');
-    link.id = 'leaflet-css';
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    document.head.appendChild(link);
   }
 }
 
@@ -83,11 +60,9 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
   initialLocation,
 }) => {
   const { toast } = useToast();
-  const { i18n } = useTranslation();
-  const lang = i18n.language || 'en';
   const mapContainer = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<any>(null);
-  const markerRef = useRef<any>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markerRef = useRef<L.Marker | null>(null);
   const [searchQuery, setSearchQuery] = useState(initialLocation || '');
   const [loading, setLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<{
@@ -96,102 +71,82 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
     longitude: number;
   } | null>(null);
 
-  const updateMarkerPosition = useCallback(async (lat: number, lng: number) => {
+  const updateMarker = useCallback(async (lat: number, lng: number) => {
     setLoading(true);
-    const city = await reverseGeocodeCity(lat, lng, lang);
+    const city = await reverseGeocodeCity(lat, lng);
     setSelectedLocation({ address: city, latitude: lat, longitude: lng });
     setSearchQuery(city);
     setLoading(false);
-  }, [lang]);
 
-  // Initialize map when dialog opens
-  useEffect(() => {
-    if (!open) {
-      // Cleanup on close
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-        markerRef.current = null;
-      }
-      return;
+    if (markerRef.current) {
+      markerRef.current.setLatLng([lat, lng]);
     }
+    if (mapRef.current) {
+      mapRef.current.setView([lat, lng], mapRef.current.getZoom());
+    }
+  }, []);
 
-    ensureLeafletCSS();
+  // Initialize map
+  useEffect(() => {
+    if (!open || !mapContainer.current || mapRef.current) return;
 
-    // Delay to let dialog render and CSS load
-    const timer = setTimeout(async () => {
-      if (!mapContainer.current || mapRef.current) return;
+    const defaultLat = 25.2048;
+    const defaultLng = 55.2708;
 
-      const L = await import('leaflet');
+    const map = L.map(mapContainer.current, {
+      center: [defaultLat, defaultLng],
+      zoom: 6,
+      zoomControl: true,
+    });
 
-      // Try to get user location first, fallback to Tunisia
-      let startLat = TUNISIA_LAT;
-      let startLng = TUNISIA_LNG;
-      
-      if ('geolocation' in navigator) {
-        try {
-          const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
-          });
-          startLat = pos.coords.latitude;
-          startLng = pos.coords.longitude;
-        } catch {
-          // Use Tunisia default
-        }
-      }
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+    }).addTo(map);
 
-      const map = L.map(mapContainer.current, {
-        center: [startLat, startLng],
-        zoom: 6,
-        zoomControl: true,
-      });
+    // Custom icon
+    const icon = L.divIcon({
+      html: `<div style="color: hsl(var(--primary)); font-size: 32px; line-height: 1; transform: translate(-50%, -100%);">📍</div>`,
+      className: '',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+    });
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap',
-      }).addTo(map);
+    const marker = L.marker([defaultLat, defaultLng], { icon, draggable: true }).addTo(map);
+    markerRef.current = marker;
+    mapRef.current = map;
 
-      // Custom pin icon
-      const icon = L.divIcon({
-        html: `<div style="font-size: 32px; line-height: 1; transform: translate(-50%, -100%);">📍</div>`,
-        className: '',
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-      });
+    // Drag end → update city
+    marker.on('dragend', () => {
+      const pos = marker.getLatLng();
+      updateMarker(pos.lat, pos.lng);
+    });
 
-      const marker = L.marker([startLat, startLng], { icon, draggable: true }).addTo(map);
-      markerRef.current = marker;
-      mapRef.current = map;
+    // Click map → move marker
+    map.on('click', (e: L.LeafletMouseEvent) => {
+      marker.setLatLng(e.latlng);
+      updateMarker(e.latlng.lat, e.latlng.lng);
+    });
 
-      // Drag end → update city
-      marker.on('dragend', () => {
-        const pos = marker.getLatLng();
-        updateMarkerPosition(pos.lat, pos.lng);
-      });
+    // Fix map size after dialog animation
+    setTimeout(() => map.invalidateSize(), 300);
 
-      // Click map → move marker & update city
-      map.on('click', (e: any) => {
-        marker.setLatLng(e.latlng);
-        updateMarkerPosition(e.latlng.lat, e.latlng.lng);
-      });
-
-      // Ensure proper sizing
-      setTimeout(() => map.invalidateSize(), 100);
-    }, 400);
-
-    return () => clearTimeout(timer);
-  }, [open, updateMarkerPosition]);
+    return () => {
+      map.remove();
+      mapRef.current = null;
+      markerRef.current = null;
+    };
+  }, [open, updateMarker]);
 
   const getCurrentLocation = () => {
     if (!('geolocation' in navigator)) return;
     setLoading(true);
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
+      (position) => {
         const { latitude, longitude } = position.coords;
-        if (mapRef.current && markerRef.current) {
+        if (mapRef.current) {
           mapRef.current.setView([latitude, longitude], 10);
-          markerRef.current.setLatLng([latitude, longitude]);
         }
-        await updateMarkerPosition(latitude, longitude);
+        updateMarker(latitude, longitude);
       },
       () => {
         setLoading(false);
@@ -207,10 +162,12 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     setLoading(true);
-    const result = await searchCity(searchQuery, lang);
+    const result = await searchCity(searchQuery);
     if (result) {
-      if (mapRef.current && markerRef.current) {
+      if (mapRef.current) {
         mapRef.current.setView([result.lat, result.lon], 10);
+      }
+      if (markerRef.current) {
         markerRef.current.setLatLng([result.lat, result.lon]);
       }
       setSelectedLocation({ address: result.name, latitude: result.lat, longitude: result.lon });
@@ -267,7 +224,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
           <div
             ref={mapContainer}
             className="h-56 rounded-lg overflow-hidden border border-border"
-            style={{ minHeight: 224, zIndex: 0 }}
+            style={{ minHeight: 224 }}
           />
           <p className="text-xs text-muted-foreground text-center">
             Tap or drag the pin to select a city
