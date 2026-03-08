@@ -147,7 +147,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
 
       // If initial location, try to geocode it
       if (initialLocation) {
-        searchCity(initialLocation).then(results => {
+        searchRegion(initialLocation).then(results => {
           if (results.length > 0) {
             const { lat, lon } = results[0];
             map.setView([lat, lon], 10);
