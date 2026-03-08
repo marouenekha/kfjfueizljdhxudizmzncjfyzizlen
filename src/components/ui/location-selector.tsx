@@ -16,7 +16,7 @@ interface LocationSelectorProps {
   initialLocation?: string;
 }
 
-// Reverse geocode to get city name only
+// Reverse geocode to get "City, Region, Country" format
 async function reverseGeocodeCity(lat: number, lng: number): Promise<string> {
   try {
     const res = await fetch(
@@ -25,7 +25,10 @@ async function reverseGeocodeCity(lat: number, lng: number): Promise<string> {
     );
     const data = await res.json();
     const addr = data.address;
-    return addr.city || addr.town || addr.village || addr.state || data.display_name?.split(',')[0] || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    const city = addr.city || addr.town || addr.village || '';
+    const state = addr.state || addr.county || '';
+    const country = addr.country || '';
+    return [city, state, country].filter(Boolean).join(', ') || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   } catch {
     return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   }
