@@ -4,8 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 
 interface LocationSelectorProps {
   open: boolean;
@@ -53,6 +51,17 @@ async function searchCity(query: string): Promise<{ name: string; lat: number; l
   }
 }
 
+// Inject leaflet CSS if not already present
+function ensureLeafletCSS() {
+  if (!document.getElementById('leaflet-css')) {
+    const link = document.createElement('link');
+    link.id = 'leaflet-css';
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(link);
+  }
+}
+
 export const LocationSelector: React.FC<LocationSelectorProps> = ({
   open,
   onOpenChange,
@@ -61,8 +70,8 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
 }) => {
   const { toast } = useToast();
   const mapContainer = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<L.Map | null>(null);
-  const markerRef = useRef<L.Marker | null>(null);
+  const mapRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
   const [searchQuery, setSearchQuery] = useState(initialLocation || '');
   const [loading, setLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<{
@@ -71,82 +80,89 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
     longitude: number;
   } | null>(null);
 
-  const updateMarker = useCallback(async (lat: number, lng: number) => {
+  const updateMarkerPosition = useCallback(async (lat: number, lng: number) => {
     setLoading(true);
     const city = await reverseGeocodeCity(lat, lng);
     setSelectedLocation({ address: city, latitude: lat, longitude: lng });
     setSearchQuery(city);
     setLoading(false);
-
-    if (markerRef.current) {
-      markerRef.current.setLatLng([lat, lng]);
-    }
-    if (mapRef.current) {
-      mapRef.current.setView([lat, lng], mapRef.current.getZoom());
-    }
   }, []);
 
-  // Initialize map
+  // Initialize map when dialog opens
   useEffect(() => {
-    if (!open || !mapContainer.current || mapRef.current) return;
+    if (!open) {
+      // Cleanup on close
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+        markerRef.current = null;
+      }
+      return;
+    }
 
-    const defaultLat = 25.2048;
-    const defaultLng = 55.2708;
+    ensureLeafletCSS();
 
-    const map = L.map(mapContainer.current, {
-      center: [defaultLat, defaultLng],
-      zoom: 6,
-      zoomControl: true,
-    });
+    // Delay to let dialog render and CSS load
+    const timer = setTimeout(async () => {
+      if (!mapContainer.current || mapRef.current) return;
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap',
-    }).addTo(map);
+      const L = await import('leaflet');
 
-    // Custom icon
-    const icon = L.divIcon({
-      html: `<div style="color: hsl(var(--primary)); font-size: 32px; line-height: 1; transform: translate(-50%, -100%);">📍</div>`,
-      className: '',
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-    });
+      const defaultLat = 25.2048;
+      const defaultLng = 55.2708;
 
-    const marker = L.marker([defaultLat, defaultLng], { icon, draggable: true }).addTo(map);
-    markerRef.current = marker;
-    mapRef.current = map;
+      const map = L.map(mapContainer.current, {
+        center: [defaultLat, defaultLng],
+        zoom: 6,
+        zoomControl: true,
+      });
 
-    // Drag end → update city
-    marker.on('dragend', () => {
-      const pos = marker.getLatLng();
-      updateMarker(pos.lat, pos.lng);
-    });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap',
+      }).addTo(map);
 
-    // Click map → move marker
-    map.on('click', (e: L.LeafletMouseEvent) => {
-      marker.setLatLng(e.latlng);
-      updateMarker(e.latlng.lat, e.latlng.lng);
-    });
+      // Custom pin icon
+      const icon = L.divIcon({
+        html: `<div style="font-size: 32px; line-height: 1; transform: translate(-50%, -100%);">📍</div>`,
+        className: '',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+      });
 
-    // Fix map size after dialog animation
-    setTimeout(() => map.invalidateSize(), 300);
+      const marker = L.marker([defaultLat, defaultLng], { icon, draggable: true }).addTo(map);
+      markerRef.current = marker;
+      mapRef.current = map;
 
-    return () => {
-      map.remove();
-      mapRef.current = null;
-      markerRef.current = null;
-    };
-  }, [open, updateMarker]);
+      // Drag end → update city
+      marker.on('dragend', () => {
+        const pos = marker.getLatLng();
+        updateMarkerPosition(pos.lat, pos.lng);
+      });
+
+      // Click map → move marker & update city
+      map.on('click', (e: any) => {
+        marker.setLatLng(e.latlng);
+        updateMarkerPosition(e.latlng.lat, e.latlng.lng);
+      });
+
+      // Ensure proper sizing
+      setTimeout(() => map.invalidateSize(), 100);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [open, updateMarkerPosition]);
 
   const getCurrentLocation = () => {
     if (!('geolocation' in navigator)) return;
     setLoading(true);
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const { latitude, longitude } = position.coords;
-        if (mapRef.current) {
+        if (mapRef.current && markerRef.current) {
           mapRef.current.setView([latitude, longitude], 10);
+          markerRef.current.setLatLng([latitude, longitude]);
         }
-        updateMarker(latitude, longitude);
+        await updateMarkerPosition(latitude, longitude);
       },
       () => {
         setLoading(false);
@@ -164,10 +180,8 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
     setLoading(true);
     const result = await searchCity(searchQuery);
     if (result) {
-      if (mapRef.current) {
+      if (mapRef.current && markerRef.current) {
         mapRef.current.setView([result.lat, result.lon], 10);
-      }
-      if (markerRef.current) {
         markerRef.current.setLatLng([result.lat, result.lon]);
       }
       setSelectedLocation({ address: result.name, latitude: result.lat, longitude: result.lon });
@@ -224,7 +238,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
           <div
             ref={mapContainer}
             className="h-56 rounded-lg overflow-hidden border border-border"
-            style={{ minHeight: 224 }}
+            style={{ minHeight: 224, zIndex: 0 }}
           />
           <p className="text-xs text-muted-foreground text-center">
             Tap or drag the pin to select a city
