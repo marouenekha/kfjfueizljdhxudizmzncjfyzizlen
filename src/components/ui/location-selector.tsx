@@ -191,7 +191,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     setLoadingSearch(true);
-    const results = await searchCity(searchQuery);
+    const results = await searchRegion(searchQuery);
     setSearchResults(results);
     setLoadingSearch(false);
     if (results.length === 0) {
