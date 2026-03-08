@@ -43,18 +43,32 @@ const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
   }
 };
 
-const searchCity = async (query: string): Promise<{ name: string; lat: number; lon: number }[]> => {
+const searchRegion = async (query: string): Promise<{ name: string; lat: number; lon: number }[]> => {
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`,
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&featuretype=state`,
       { headers: { 'Accept-Language': 'en' } }
     );
-    const data = await res.json();
-    return data.map((item: any) => {
-      const addr = item.address;
-      const name = addr?.city || addr?.town || addr?.village || addr?.municipality || item.display_name.split(',')[0];
-      return { name, lat: parseFloat(item.lat), lon: parseFloat(item.lon) };
-    });
+    let data = await res.json();
+    if (data.length === 0) {
+      const fallbackRes = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`,
+        { headers: { 'Accept-Language': 'en' } }
+      );
+      data = await fallbackRes.json();
+    }
+    const seen = new Set<string>();
+    return data
+      .map((item: any) => {
+        const addr = item.address;
+        const name = addr?.state || addr?.region || item.display_name.split(',')[0];
+        return { name, lat: parseFloat(item.lat), lon: parseFloat(item.lon) };
+      })
+      .filter((item: { name: string }) => {
+        if (seen.has(item.name)) return false;
+        seen.add(item.name);
+        return true;
+      });
   } catch {
     return [];
   }
