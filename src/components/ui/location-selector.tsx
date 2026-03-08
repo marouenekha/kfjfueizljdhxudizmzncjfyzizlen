@@ -208,7 +208,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     setLoading(true);
-    const result = await searchCity(searchQuery);
+    const result = await searchCity(searchQuery, lang);
     if (result) {
       if (mapRef.current && markerRef.current) {
         mapRef.current.setView([result.lat, result.lon], 10);
