@@ -85,10 +85,22 @@ export default function Search() {
 
         {/* Location & Filter */}
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="flex items-center gap-2 flex-1 min-w-0">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-2 flex-1 min-w-0"
+            onClick={() => setShowLocationSelector(true)}
+          >
             <MapPin className="w-4 h-4 flex-shrink-0" />
-            <span className="truncate text-xs sm:text-sm">Near Dubai Marina</span>
+            <span className="truncate text-xs sm:text-sm">
+              {selectedRegion || "Select region"}
+            </span>
           </Button>
+          {selectedRegion && (
+            <Button variant="ghost" size="sm" className="flex-shrink-0 text-xs" onClick={() => setSelectedRegion("")}>
+              Clear
+            </Button>
+          )}
           <Button variant="outline" size="sm" className="flex-shrink-0">
             <Filter className="w-4 h-4" />
           </Button>
