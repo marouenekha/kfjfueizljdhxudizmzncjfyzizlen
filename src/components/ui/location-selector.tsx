@@ -48,10 +48,11 @@ async function searchCity(query: string): Promise<{ name: string; lat: number; l
     if (data.length > 0) {
       const item = data[0];
       const addr = item.address;
-      const city = addr.city || addr.town || addr.village || '';
-      const state = addr.state || addr.county || '';
+      const city = addr.city || addr.town || addr.village || addr.municipality || addr.hamlet || '';
+      const state = addr.state || addr.governorate || addr.province || addr.region || addr.county || addr.state_district || '';
       const country = addr.country || '';
-      const name = [city, state, country].filter(Boolean).join(', ');
+      const parts = [city, state, country].filter(Boolean);
+      const name = parts.filter((v, i) => parts.indexOf(v) === i).join(', ');
       return { name, lat: parseFloat(item.lat), lon: parseFloat(item.lon) };
     }
     return null;
