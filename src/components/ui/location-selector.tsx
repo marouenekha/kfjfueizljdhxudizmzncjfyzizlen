@@ -112,9 +112,10 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
     const timer = setTimeout(() => {
       if (!mapContainerRef.current || mapRef.current) return;
 
+      const defaultCenter: [number, number] = [33.5731, -7.5898];
       const map = L.map(mapContainerRef.current, {
-        center: [33.5731, -7.5898], // Default: Casablanca
-        zoom: 10,
+        center: defaultCenter,
+        zoom: 6,
         zoomControl: true,
       });
 
@@ -123,7 +124,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
         maxZoom: 19,
       }).addTo(map);
 
-      const marker = L.marker([33.5731, -7.5898], {
+      const marker = L.marker(defaultCenter, {
         icon: defaultIcon,
         draggable: true,
       }).addTo(map);
@@ -137,24 +138,36 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
         updateMarkerAndCity(e.latlng.lat, e.latlng.lng);
       });
 
-      // Allow map drag to update city when user stops panning
-      map.on('moveend', () => {
-        // Only update if user is dragging the map (not programmatic)
-      });
-
       mapRef.current = map;
       markerRef.current = marker;
 
-      // If initial location, try to geocode it
+      // If initial location provided, geocode it
       if (initialLocation) {
         searchRegion(initialLocation).then(results => {
           if (results.length > 0) {
             const { lat, lon } = results[0];
-            map.setView([lat, lon], 10);
+            map.setView([lat, lon], 7);
             marker.setLatLng([lat, lon]);
             setSelectedLocation({ address: results[0].name, latitude: lat, longitude: lon });
           }
         });
+      } else {
+        // Auto-detect user location to center map on their country/region
+        if ('geolocation' in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const { latitude, longitude } = position.coords;
+              if (mapRef.current && markerRef.current) {
+                mapRef.current.setView([latitude, longitude], 7);
+                markerRef.current.setLatLng([latitude, longitude]);
+              }
+            },
+            () => {
+              // Silent fail — keep default center
+            },
+            { timeout: 5000, maximumAge: 300000 }
+          );
+        }
       }
     }, 100);
 
