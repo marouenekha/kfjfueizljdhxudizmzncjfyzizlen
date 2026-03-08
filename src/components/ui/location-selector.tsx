@@ -231,7 +231,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for a city..."
+                placeholder="Search for a region..."
                 className="pl-9"
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               />
