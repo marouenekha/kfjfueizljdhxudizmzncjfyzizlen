@@ -4,6 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
+
+// Tunisia default coordinates
+const TUNISIA_LAT = 33.8869;
+const TUNISIA_LNG = 9.5375;
 
 interface LocationSelectorProps {
   open: boolean;
@@ -30,11 +35,11 @@ function formatAddress(addr: any): string {
 }
 
 // Reverse geocode to get "City, Region, Country" format
-async function reverseGeocodeCity(lat: number, lng: number): Promise<string> {
+async function reverseGeocodeCity(lat: number, lng: number, lang: string): Promise<string> {
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=10&addressdetails=1`,
-      { headers: { 'Accept-Language': 'en' } }
+      { headers: { 'Accept-Language': lang } }
     );
     const data = await res.json();
     const formatted = formatAddress(data.address);
@@ -45,11 +50,11 @@ async function reverseGeocodeCity(lat: number, lng: number): Promise<string> {
 }
 
 // Search for a city
-async function searchCity(query: string): Promise<{ name: string; lat: number; lon: number } | null> {
+async function searchCity(query: string, lang: string): Promise<{ name: string; lat: number; lon: number } | null> {
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&addressdetails=1`,
-      { headers: { 'Accept-Language': 'en' } }
+      { headers: { 'Accept-Language': lang } }
     );
     const data = await res.json();
     if (data.length > 0) {
@@ -81,6 +86,8 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
   initialLocation,
 }) => {
   const { toast } = useToast();
+  const { i18n } = useTranslation();
+  const lang = i18n.language || 'en';
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
@@ -94,11 +101,11 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
 
   const updateMarkerPosition = useCallback(async (lat: number, lng: number) => {
     setLoading(true);
-    const city = await reverseGeocodeCity(lat, lng);
+    const city = await reverseGeocodeCity(lat, lng, lang);
     setSelectedLocation({ address: city, latitude: lat, longitude: lng });
     setSearchQuery(city);
     setLoading(false);
-  }, []);
+  }, [lang]);
 
   // Initialize map when dialog opens
   useEffect(() => {
@@ -120,11 +127,24 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
 
       const L = await import('leaflet');
 
-      const defaultLat = 25.2048;
-      const defaultLng = 55.2708;
+      // Try to get user location first, fallback to Tunisia
+      let startLat = TUNISIA_LAT;
+      let startLng = TUNISIA_LNG;
+      
+      if ('geolocation' in navigator) {
+        try {
+          const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
+          });
+          startLat = pos.coords.latitude;
+          startLng = pos.coords.longitude;
+        } catch {
+          // Use Tunisia default
+        }
+      }
 
       const map = L.map(mapContainer.current, {
-        center: [defaultLat, defaultLng],
+        center: [startLat, startLng],
         zoom: 6,
         zoomControl: true,
       });
@@ -141,7 +161,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
         iconAnchor: [16, 32],
       });
 
-      const marker = L.marker([defaultLat, defaultLng], { icon, draggable: true }).addTo(map);
+      const marker = L.marker([startLat, startLng], { icon, draggable: true }).addTo(map);
       markerRef.current = marker;
       mapRef.current = map;
 
@@ -190,7 +210,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     setLoading(true);
-    const result = await searchCity(searchQuery);
+    const result = await searchCity(searchQuery, lang);
     if (result) {
       if (mapRef.current && markerRef.current) {
         mapRef.current.setView([result.lat, result.lon], 10);
