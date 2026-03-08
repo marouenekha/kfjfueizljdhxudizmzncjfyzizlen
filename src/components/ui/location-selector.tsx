@@ -125,13 +125,24 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
     const timer = setTimeout(async () => {
       if (!mapContainer.current || mapRef.current) return;
 
-      const L = await import('leaflet');
-
-      const defaultLat = 25.2048;
-      const defaultLng = 55.2708;
+      // Try to get user location first, fallback to Tunisia
+      let startLat = TUNISIA_LAT;
+      let startLng = TUNISIA_LNG;
+      
+      if ('geolocation' in navigator) {
+        try {
+          const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
+          });
+          startLat = pos.coords.latitude;
+          startLng = pos.coords.longitude;
+        } catch {
+          // Use Tunisia default
+        }
+      }
 
       const map = L.map(mapContainer.current, {
-        center: [defaultLat, defaultLng],
+        center: [startLat, startLng],
         zoom: 6,
         zoomControl: true,
       });
