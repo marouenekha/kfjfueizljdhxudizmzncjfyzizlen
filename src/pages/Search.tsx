@@ -16,6 +16,8 @@ export default function Search() {
   const [searchQuery, setSearchQuery] = useState("");
   const [profiles, setProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showLocationSelector, setShowLocationSelector] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState<string>("");
   
   useEffect(() => {
     fetchProfiles();
