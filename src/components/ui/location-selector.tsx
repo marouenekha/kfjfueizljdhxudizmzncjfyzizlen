@@ -25,10 +25,13 @@ async function reverseGeocodeCity(lat: number, lng: number): Promise<string> {
     );
     const data = await res.json();
     const addr = data.address;
-    const city = addr.city || addr.town || addr.village || '';
-    const state = addr.state || addr.county || '';
+    const city = addr.city || addr.town || addr.village || addr.municipality || addr.hamlet || '';
+    const state = addr.state || addr.governorate || addr.province || addr.region || addr.county || addr.state_district || '';
     const country = addr.country || '';
-    return [city, state, country].filter(Boolean).join(', ') || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    // Ensure we don't duplicate if city === state
+    const parts = [city, state, country].filter(Boolean);
+    const unique = parts.filter((v, i) => parts.indexOf(v) === i);
+    return unique.join(', ') || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   } catch {
     return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   }
