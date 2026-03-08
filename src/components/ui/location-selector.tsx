@@ -24,12 +24,9 @@ interface LocationSelectorProps {
 // Build "City, Region, Country" from Nominatim address
 function formatAddress(addr: any): string {
   const city = addr.city || addr.town || addr.village || addr.municipality || addr.hamlet || addr.suburb || addr.district || addr.county || '';
-  const region = addr.state || addr.governorate || addr.province || addr.region || addr.state_district || '';
   const country = addr.country || '';
-  // Build parts, skip region if same as city, always ensure 3 parts when possible
   const parts: string[] = [];
   if (city) parts.push(city);
-  if (region && region !== city) parts.push(region);
   if (country) parts.push(country);
   return parts.join(', ');
 }
