@@ -86,6 +86,8 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
   initialLocation,
 }) => {
   const { toast } = useToast();
+  const { i18n } = useTranslation();
+  const lang = i18n.language || 'en';
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
@@ -99,11 +101,11 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
 
   const updateMarkerPosition = useCallback(async (lat: number, lng: number) => {
     setLoading(true);
-    const city = await reverseGeocodeCity(lat, lng);
+    const city = await reverseGeocodeCity(lat, lng, lang);
     setSelectedLocation({ address: city, latitude: lat, longitude: lng });
     setSearchQuery(city);
     setLoading(false);
-  }, []);
+  }, [lang]);
 
   // Initialize map when dialog opens
   useEffect(() => {
