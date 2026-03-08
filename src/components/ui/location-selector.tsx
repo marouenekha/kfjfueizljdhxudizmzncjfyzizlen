@@ -16,6 +16,19 @@ interface LocationSelectorProps {
   initialLocation?: string;
 }
 
+// Build "City, Region, Country" from Nominatim address
+function formatAddress(addr: any): string {
+  const city = addr.city || addr.town || addr.village || addr.municipality || addr.hamlet || addr.suburb || addr.district || addr.county || '';
+  const region = addr.state || addr.governorate || addr.province || addr.region || addr.state_district || '';
+  const country = addr.country || '';
+  // Build parts, skip region if same as city, always ensure 3 parts when possible
+  const parts: string[] = [];
+  if (city) parts.push(city);
+  if (region && region !== city) parts.push(region);
+  if (country) parts.push(country);
+  return parts.join(', ');
+}
+
 // Reverse geocode to get "City, Region, Country" format
 async function reverseGeocodeCity(lat: number, lng: number): Promise<string> {
   try {
@@ -24,14 +37,8 @@ async function reverseGeocodeCity(lat: number, lng: number): Promise<string> {
       { headers: { 'Accept-Language': 'en' } }
     );
     const data = await res.json();
-    const addr = data.address;
-    const city = addr.city || addr.town || addr.village || addr.municipality || addr.hamlet || '';
-    const state = addr.state || addr.governorate || addr.province || addr.region || addr.county || addr.state_district || '';
-    const country = addr.country || '';
-    // Ensure we don't duplicate if city === state
-    const parts = [city, state, country].filter(Boolean);
-    const unique = parts.filter((v, i) => parts.indexOf(v) === i);
-    return unique.join(', ') || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    const formatted = formatAddress(data.address);
+    return formatted || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   } catch {
     return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   }
