@@ -246,12 +246,13 @@ export function PostCard({ post }: PostCardProps) {
 
       {/* Media */}
       {post.media_type === "video" && post.video_url && (
-        <div className="w-full bg-muted">
+        <div className="w-full bg-black relative">
           <video
             src={post.video_url}
             controls
-            className="w-full object-contain"
+            className="w-full max-h-[80vh] object-contain mx-auto"
             preload="metadata"
+            playsInline
           />
         </div>
       )}
