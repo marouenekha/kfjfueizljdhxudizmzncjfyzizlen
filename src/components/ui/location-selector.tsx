@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 
 interface LocationSelectorProps {
   open: boolean;
@@ -223,8 +222,8 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
           {/* Map */}
           <div
             ref={mapContainer}
-            className="h-56 rounded-lg overflow-hidden border border-border"
-            style={{ minHeight: 224 }}
+            className="rounded-lg overflow-hidden border border-border"
+            style={{ height: 250, width: '100%', position: 'relative', zIndex: 0 }}
           />
           <p className="text-xs text-muted-foreground text-center">
             Tap or drag the pin to select a city
