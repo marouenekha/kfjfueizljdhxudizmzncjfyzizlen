@@ -32,29 +32,43 @@ const defaultIcon = L.icon({
 const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`,
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=5&addressdetails=1`,
       { headers: { 'Accept-Language': 'en' } }
     );
     const data = await res.json();
     const addr = data.address;
-    return addr?.city || addr?.town || addr?.village || addr?.municipality || addr?.state || 'Unknown location';
+    return addr?.state || addr?.region || addr?.county || 'Unknown location';
   } catch {
     return 'Unknown location';
   }
 };
 
-const searchCity = async (query: string): Promise<{ name: string; lat: number; lon: number }[]> => {
+const searchRegion = async (query: string): Promise<{ name: string; lat: number; lon: number }[]> => {
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`,
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&featuretype=state`,
       { headers: { 'Accept-Language': 'en' } }
     );
-    const data = await res.json();
-    return data.map((item: any) => {
-      const addr = item.address;
-      const name = addr?.city || addr?.town || addr?.village || addr?.municipality || item.display_name.split(',')[0];
-      return { name, lat: parseFloat(item.lat), lon: parseFloat(item.lon) };
-    });
+    let data = await res.json();
+    if (data.length === 0) {
+      const fallbackRes = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`,
+        { headers: { 'Accept-Language': 'en' } }
+      );
+      data = await fallbackRes.json();
+    }
+    const seen = new Set<string>();
+    return data
+      .map((item: any) => {
+        const addr = item.address;
+        const name = addr?.state || addr?.region || item.display_name.split(',')[0];
+        return { name, lat: parseFloat(item.lat), lon: parseFloat(item.lon) };
+      })
+      .filter((item: { name: string }) => {
+        if (seen.has(item.name)) return false;
+        seen.add(item.name);
+        return true;
+      });
   } catch {
     return [];
   }
@@ -133,7 +147,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
 
       // If initial location, try to geocode it
       if (initialLocation) {
-        searchCity(initialLocation).then(results => {
+        searchRegion(initialLocation).then(results => {
           if (results.length > 0) {
             const { lat, lon } = results[0];
             map.setView([lat, lon], 10);
@@ -177,7 +191,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     setLoadingSearch(true);
-    const results = await searchCity(searchQuery);
+    const results = await searchRegion(searchQuery);
     setSearchResults(results);
     setLoadingSearch(false);
     if (results.length === 0) {
@@ -206,7 +220,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Select City</DialogTitle>
+          <DialogTitle>Select Region</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-3">
@@ -217,7 +231,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for a city..."
+                placeholder="Search for a region..."
                 className="pl-9"
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               />
@@ -256,7 +270,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
             style={{ zIndex: 0 }}
           />
           <p className="text-xs text-muted-foreground text-center">
-            Tap on the map or drag the pin to select a city
+            Tap on the map or drag the pin to select a region
           </p>
 
           {/* Selected City */}
@@ -275,7 +289,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
               Cancel
             </Button>
             <Button onClick={handleConfirm} disabled={!selectedLocation} className="flex-1">
-              Confirm City
+              Confirm Region
             </Button>
           </div>
         </div>
