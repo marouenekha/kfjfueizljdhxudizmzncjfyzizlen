@@ -1,9 +1,11 @@
-import { useState, useRef, useEffect } from 'react';
-import { MapPin, Navigation, Search } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { MapPin, Navigation, Search, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface LocationSelectorProps {
   open: boolean;
@@ -16,6 +18,41 @@ interface LocationSelectorProps {
   initialLocation?: string;
 }
 
+// Reverse geocode to get city name only
+async function reverseGeocodeCity(lat: number, lng: number): Promise<string> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=10&addressdetails=1`,
+      { headers: { 'Accept-Language': 'en' } }
+    );
+    const data = await res.json();
+    const addr = data.address;
+    return addr.city || addr.town || addr.village || addr.state || data.display_name?.split(',')[0] || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  } catch {
+    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  }
+}
+
+// Search for a city
+async function searchCity(query: string): Promise<{ name: string; lat: number; lon: number } | null> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&addressdetails=1`,
+      { headers: { 'Accept-Language': 'en' } }
+    );
+    const data = await res.json();
+    if (data.length > 0) {
+      const item = data[0];
+      const addr = item.address;
+      const name = addr.city || addr.town || addr.village || addr.state || item.display_name?.split(',')[0];
+      return { name, lat: parseFloat(item.lat), lon: parseFloat(item.lon) };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export const LocationSelector: React.FC<LocationSelectorProps> = ({
   open,
   onOpenChange,
@@ -24,62 +61,125 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
 }) => {
   const { toast } = useToast();
   const mapContainer = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markerRef = useRef<L.Marker | null>(null);
   const [searchQuery, setSearchQuery] = useState(initialLocation || '');
+  const [loading, setLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<{
     address: string;
     latitude: number;
     longitude: number;
   } | null>(null);
 
-  const getCurrentLocation = () => {
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          
-          // Reverse geocoding to get address (simplified - in production use proper geocoding service)
-          const address = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-          
-          setSelectedLocation({
-            address,
-            latitude,
-            longitude,
-          });
-          setSearchQuery(address);
-          
-          toast({
-            title: "Location found",
-            description: "Current location retrieved successfully",
-          });
-        },
-        (error) => {
-          toast({
-            title: "Location error",
-            description: "Could not get your current location",
-            variant: "destructive",
-          });
-        }
-      );
+  const updateMarker = useCallback(async (lat: number, lng: number) => {
+    setLoading(true);
+    const city = await reverseGeocodeCity(lat, lng);
+    setSelectedLocation({ address: city, latitude: lat, longitude: lng });
+    setSearchQuery(city);
+    setLoading(false);
+
+    if (markerRef.current) {
+      markerRef.current.setLatLng([lat, lng]);
     }
+    if (mapRef.current) {
+      mapRef.current.setView([lat, lng], mapRef.current.getZoom());
+    }
+  }, []);
+
+  // Initialize map
+  useEffect(() => {
+    if (!open || !mapContainer.current || mapRef.current) return;
+
+    const defaultLat = 25.2048;
+    const defaultLng = 55.2708;
+
+    const map = L.map(mapContainer.current, {
+      center: [defaultLat, defaultLng],
+      zoom: 6,
+      zoomControl: true,
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+    }).addTo(map);
+
+    // Custom icon
+    const icon = L.divIcon({
+      html: `<div style="color: hsl(var(--primary)); font-size: 32px; line-height: 1; transform: translate(-50%, -100%);">📍</div>`,
+      className: '',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+    });
+
+    const marker = L.marker([defaultLat, defaultLng], { icon, draggable: true }).addTo(map);
+    markerRef.current = marker;
+    mapRef.current = map;
+
+    // Drag end → update city
+    marker.on('dragend', () => {
+      const pos = marker.getLatLng();
+      updateMarker(pos.lat, pos.lng);
+    });
+
+    // Click map → move marker
+    map.on('click', (e: L.LeafletMouseEvent) => {
+      marker.setLatLng(e.latlng);
+      updateMarker(e.latlng.lat, e.latlng.lng);
+    });
+
+    // Fix map size after dialog animation
+    setTimeout(() => map.invalidateSize(), 300);
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+      markerRef.current = null;
+    };
+  }, [open, updateMarker]);
+
+  const getCurrentLocation = () => {
+    if (!('geolocation' in navigator)) return;
+    setLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        if (mapRef.current) {
+          mapRef.current.setView([latitude, longitude], 10);
+        }
+        updateMarker(latitude, longitude);
+      },
+      () => {
+        setLoading(false);
+        toast({
+          title: "Location error",
+          description: "Could not get your current location",
+          variant: "destructive",
+        });
+      }
+    );
   };
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
-    
-    // Simplified location search - in production, use proper geocoding service
-    // For now, simulate a search result
-    const mockLocation = {
-      address: searchQuery,
-      latitude: 37.7749 + (Math.random() - 0.5) * 0.1,
-      longitude: -122.4194 + (Math.random() - 0.5) * 0.1,
-    };
-    
-    setSelectedLocation(mockLocation);
-    
-    toast({
-      title: "Location found",
-      description: `Found location for "${searchQuery}"`,
-    });
+    setLoading(true);
+    const result = await searchCity(searchQuery);
+    if (result) {
+      if (mapRef.current) {
+        mapRef.current.setView([result.lat, result.lon], 10);
+      }
+      if (markerRef.current) {
+        markerRef.current.setLatLng([result.lat, result.lon]);
+      }
+      setSelectedLocation({ address: result.name, latitude: result.lat, longitude: result.lon });
+      setSearchQuery(result.name);
+    } else {
+      toast({
+        title: "Not found",
+        description: `Could not find "${searchQuery}"`,
+        variant: "destructive",
+      });
+    }
+    setLoading(false);
   };
 
   const handleConfirm = () => {
@@ -93,76 +193,60 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Select Location</DialogTitle>
+          <DialogTitle>Select City</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4">
-          {/* Search Input */}
+        <div className="space-y-3">
+          {/* Search */}
           <div className="flex gap-2">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search city, street, or area..."
+                placeholder="Search city..."
                 className="pl-9"
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               />
             </div>
-            <Button onClick={handleSearch} variant="outline">
-              Search
+            <Button onClick={handleSearch} variant="outline" disabled={loading}>
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search'}
             </Button>
           </div>
 
-          {/* Current Location Button */}
-          <Button
-            onClick={getCurrentLocation}
-            variant="outline"
-            className="w-full"
-          >
+          {/* GPS */}
+          <Button onClick={getCurrentLocation} variant="outline" className="w-full" disabled={loading}>
             <Navigation className="w-4 h-4 mr-2" />
             Use Current Location
           </Button>
 
-          {/* Map Placeholder */}
-          <div className="h-48 bg-muted rounded-lg flex items-center justify-center">
-            <div className="text-center text-muted-foreground">
-              <MapPin className="w-8 h-8 mx-auto mb-2" />
-              <p className="text-sm">Map integration</p>
-              <p className="text-xs">Drag to select location</p>
-            </div>
-          </div>
+          {/* Map */}
+          <div
+            ref={mapContainer}
+            className="h-56 rounded-lg overflow-hidden border border-border"
+            style={{ minHeight: 224 }}
+          />
+          <p className="text-xs text-muted-foreground text-center">
+            Tap or drag the pin to select a city
+          </p>
 
-          {/* Selected Location Display */}
+          {/* Selected city */}
           {selectedLocation && (
             <div className="p-3 bg-muted/50 rounded-lg">
-              <div className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 mt-0.5 text-primary" />
-                <div className="flex-1">
-                  <p className="font-medium text-sm">{selectedLocation.address}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {selectedLocation.latitude.toFixed(6)}, {selectedLocation.longitude.toFixed(6)}
-                  </p>
-                </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-primary" />
+                <p className="font-medium text-sm">{selectedLocation.address}</p>
               </div>
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex gap-2 pt-2">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="flex-1"
-            >
+          {/* Buttons */}
+          <div className="flex gap-2 pt-1">
+            <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
               Cancel
             </Button>
-            <Button
-              onClick={handleConfirm}
-              disabled={!selectedLocation}
-              className="flex-1"
-            >
-              Confirm Location
+            <Button onClick={handleConfirm} disabled={!selectedLocation} className="flex-1">
+              Confirm City
             </Button>
           </div>
         </div>
