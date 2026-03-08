@@ -208,7 +208,9 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg [&_.leaflet-container]:touch-auto [&_.leaflet-container]:touch-manipulation"
+        onPointerDownOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Select City</DialogTitle>
         </DialogHeader>
