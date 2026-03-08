@@ -24,10 +24,10 @@ interface LocationSelectorProps {
 // Build "City, Region, Country" from Nominatim address
 function formatAddress(addr: any): string {
   const city = addr.city || addr.town || addr.village || addr.municipality || addr.hamlet || addr.suburb || addr.district || addr.county || '';
-  const country = addr.country || '';
+  const region = addr.state || addr.governorate || addr.province || addr.region || addr.state_district || '';
   const parts: string[] = [];
   if (city) parts.push(city);
-  if (country) parts.push(country);
+  if (region && region !== city) parts.push(region);
   return parts.join(', ');
 }
 
