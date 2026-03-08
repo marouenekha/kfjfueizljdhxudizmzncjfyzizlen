@@ -49,7 +49,10 @@ export default function Search() {
         service.toLowerCase().includes(searchQuery.toLowerCase())
       );
     
-    return matchesSearch;
+    const matchesRegion = selectedRegion === "" ||
+      profile.location?.toLowerCase().includes(selectedRegion.toLowerCase());
+    
+    return matchesSearch && matchesRegion;
   });
 
   const handleProfileClick = (profileId: string) => {
