@@ -243,7 +243,9 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
           <div
             ref={mapContainer}
             className="rounded-lg overflow-hidden border border-border"
-            style={{ height: 250, width: '100%', position: 'relative', zIndex: 0 }}
+            style={{ height: 250, width: '100%', position: 'relative', zIndex: 10, touchAction: 'none' }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
           />
           <p className="text-xs text-muted-foreground text-center">
             Tap or drag the pin to select a city
