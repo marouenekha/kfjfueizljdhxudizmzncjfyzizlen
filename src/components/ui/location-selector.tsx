@@ -289,7 +289,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
               Cancel
             </Button>
             <Button onClick={handleConfirm} disabled={!selectedLocation} className="flex-1">
-              Confirm City
+              Confirm Region
             </Button>
           </div>
         </div>
