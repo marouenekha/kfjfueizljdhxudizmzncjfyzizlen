@@ -159,7 +159,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
         iconAnchor: [16, 32],
       });
 
-      const marker = L.marker([defaultLat, defaultLng], { icon, draggable: true }).addTo(map);
+      const marker = L.marker([startLat, startLng], { icon, draggable: true }).addTo(map);
       markerRef.current = marker;
       mapRef.current = map;
 
