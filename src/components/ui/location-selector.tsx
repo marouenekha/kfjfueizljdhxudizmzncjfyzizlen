@@ -112,7 +112,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
     const timer = setTimeout(() => {
       if (!mapContainerRef.current || mapRef.current) return;
 
-      const defaultCenter: [number, number] = [33.5731, -7.5898];
+      const defaultCenter: [number, number] = [34.0, 9.0];
       const map = L.map(mapContainerRef.current, {
         center: defaultCenter,
         zoom: 6,
