@@ -4,6 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
+
+// Tunisia default coordinates
+const TUNISIA_LAT = 33.8869;
+const TUNISIA_LNG = 9.5375;
 
 interface LocationSelectorProps {
   open: boolean;
