@@ -220,7 +220,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Select City</DialogTitle>
+          <DialogTitle>Select Region</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-3">
