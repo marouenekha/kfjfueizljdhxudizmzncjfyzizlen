@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 
 interface LocationSelectorProps {
   open: boolean;
