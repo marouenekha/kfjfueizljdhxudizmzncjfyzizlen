@@ -87,52 +87,70 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
 
   // Initialize map
   useEffect(() => {
-    if (!open || !mapContainer.current || mapRef.current) return;
+    if (!open || !mapContainer.current) return;
+
+    // Destroy previous map if exists
+    if (mapRef.current) {
+      mapRef.current.remove();
+      mapRef.current = null;
+      markerRef.current = null;
+    }
 
     const defaultLat = 25.2048;
     const defaultLng = 55.2708;
 
-    const map = L.map(mapContainer.current, {
-      center: [defaultLat, defaultLng],
-      zoom: 6,
-      zoomControl: true,
-    });
+    // Delay map creation to ensure dialog is fully rendered
+    const timer = setTimeout(() => {
+      if (!mapContainer.current) return;
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap',
-    }).addTo(map);
+      const map = L.map(mapContainer.current, {
+        center: [defaultLat, defaultLng],
+        zoom: 6,
+        zoomControl: true,
+      });
 
-    // Custom icon
-    const icon = L.divIcon({
-      html: `<div style="color: hsl(var(--primary)); font-size: 32px; line-height: 1; transform: translate(-50%, -100%);">📍</div>`,
-      className: '',
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-    });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap',
+      }).addTo(map);
 
-    const marker = L.marker([defaultLat, defaultLng], { icon, draggable: true }).addTo(map);
-    markerRef.current = marker;
-    mapRef.current = map;
+      // Custom icon
+      const icon = L.divIcon({
+        html: `<div style="font-size: 32px; line-height: 1; transform: translate(-50%, -100%);">📍</div>`,
+        className: '',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+      });
 
-    // Drag end → update city
-    marker.on('dragend', () => {
-      const pos = marker.getLatLng();
-      updateMarker(pos.lat, pos.lng);
-    });
+      const marker = L.marker([defaultLat, defaultLng], { icon, draggable: true }).addTo(map);
+      markerRef.current = marker;
+      mapRef.current = map;
 
-    // Click map → move marker
-    map.on('click', (e: L.LeafletMouseEvent) => {
-      marker.setLatLng(e.latlng);
-      updateMarker(e.latlng.lat, e.latlng.lng);
-    });
+      // Drag end → update city
+      marker.on('dragend', () => {
+        const pos = marker.getLatLng();
+        updateMarker(pos.lat, pos.lng);
+      });
 
-    // Fix map size after dialog animation
-    setTimeout(() => map.invalidateSize(), 300);
+      // Click map → move marker
+      map.on('click', (e: L.LeafletMouseEvent) => {
+        marker.setLatLng(e.latlng);
+        updateMarker(e.latlng.lat, e.latlng.lng);
+      });
+
+      // Multiple invalidateSize calls to handle dialog animation
+      map.invalidateSize();
+      setTimeout(() => map.invalidateSize(), 100);
+      setTimeout(() => map.invalidateSize(), 300);
+      setTimeout(() => map.invalidateSize(), 500);
+    }, 200);
 
     return () => {
-      map.remove();
-      mapRef.current = null;
-      markerRef.current = null;
+      clearTimeout(timer);
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+        markerRef.current = null;
+      }
     };
   }, [open, updateMarker]);
 
