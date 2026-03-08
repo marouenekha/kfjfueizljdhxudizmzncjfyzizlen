@@ -45,7 +45,10 @@ async function searchCity(query: string): Promise<{ name: string; lat: number; l
     if (data.length > 0) {
       const item = data[0];
       const addr = item.address;
-      const name = addr.city || addr.town || addr.village || addr.state || item.display_name?.split(',')[0];
+      const city = addr.city || addr.town || addr.village || '';
+      const state = addr.state || addr.county || '';
+      const country = addr.country || '';
+      const name = [city, state, country].filter(Boolean).join(', ');
       return { name, lat: parseFloat(item.lat), lon: parseFloat(item.lon) };
     }
     return null;
