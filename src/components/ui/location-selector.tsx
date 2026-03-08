@@ -270,7 +270,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
             style={{ zIndex: 0 }}
           />
           <p className="text-xs text-muted-foreground text-center">
-            Tap on the map or drag the pin to select a city
+            Tap on the map or drag the pin to select a region
           </p>
 
           {/* Selected City */}
