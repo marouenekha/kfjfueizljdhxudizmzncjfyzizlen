@@ -191,12 +191,26 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
     if (next) loadComments();
   };
 
-  const handleShare = async () => {
+  const handleShare = () => {
+    setShowShareDialog(true);
+  };
+
+  const handleDelete = async () => {
     try {
-      await navigator.share?.({ text: post.content || "", url: window.location.href });
-    } catch {
-      navigator.clipboard?.writeText(window.location.href);
+      const { error } = await supabase
+        .from("posts")
+        .delete()
+        .eq("id", post.id);
+
+      if (error) throw error;
+
+      toast.success("Post deleted successfully");
+      onPostDeleted?.();
+    } catch (error: any) {
+      console.error("Error deleting post:", error);
+      toast.error("Failed to delete post");
     }
+    setShowDeleteDialog(false);
   };
 
   const handleContact = () => {
