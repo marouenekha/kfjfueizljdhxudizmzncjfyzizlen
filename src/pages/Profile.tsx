@@ -286,7 +286,7 @@ export default function Profile() {
   if (!authUser) {
     return (
       <Layout title="Profile">
-        <div className="container-mobile py-8 text-center space-y-4">
+        <div className="w-full max-w-2xl mx-auto px-4 py-8 text-center space-y-4">
           <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center">
             <Users className="w-8 h-8 text-muted-foreground" />
           </div>
