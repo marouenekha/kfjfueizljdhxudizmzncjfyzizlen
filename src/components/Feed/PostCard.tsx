@@ -190,7 +190,7 @@ export function PostCard({ post }: PostCardProps) {
           className="w-10 h-10 cursor-pointer ring-2 ring-primary/20"
           onClick={() => post.user_id && navigate(`/profile?user=${post.user_id}`)}
         >
-          <AvatarImage src={post.user_avatar || undefined} />
+          <AvatarImage src={(post.user_id === authUser?.id ? authUser?.profile?.avatar_url : post.user_avatar) || undefined} />
           <AvatarFallback className="bg-primary/10 text-primary font-semibold">
             {post.user_name?.[0] || "U"}
           </AvatarFallback>
