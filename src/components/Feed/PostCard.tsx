@@ -35,7 +35,6 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { EditPostDialog } from "./EditPostDialog";
 import { SharePostDialog } from "./SharePostDialog";
 import { toast } from "sonner";
 
