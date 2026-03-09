@@ -256,9 +256,32 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
           </div>
           <p className="text-[11px] text-muted-foreground">{timeAgo}</p>
         </div>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-          <MoreHorizontal className="w-5 h-5" />
-        </Button>
+        {authUser?.id === post.user_id ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                <MoreHorizontal className="w-5 h-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
+                <Edit3 className="w-4 h-4 mr-2" />
+                Edit Post
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setShowDeleteDialog(true)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Post
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" disabled>
+            <MoreHorizontal className="w-5 h-5" />
+          </Button>
+        )}
       </div>
 
       {/* Content above media */}
