@@ -80,6 +80,9 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentCount, setCommentCount] = useState(0);
   const [expanded, setExpanded] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const images = post.images || [];
   const isCarousel = post.media_type === "carousel" && images.length > 1;
