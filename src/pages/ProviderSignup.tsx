@@ -70,7 +70,7 @@ export default function ProviderSignup() {
 
   return (
     <Layout title="Become a Provider" showMobileNav={false}>
-      <div className="container-mobile py-4 max-w-2xl mx-auto">
+      <div className="w-full max-w-2xl mx-auto px-4 py-4">
         <Button 
           variant="ghost" 
           onClick={() => navigate('/')}

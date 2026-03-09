@@ -388,7 +388,7 @@ export default function Messages() {
 
   return (
     <Layout title={t('messages')}>
-      <div className="container-mobile space-y-4 py-4">
+      <div className="w-full max-w-2xl mx-auto px-4 space-y-4 py-4">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />

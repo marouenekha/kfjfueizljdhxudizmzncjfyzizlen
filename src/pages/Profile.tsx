@@ -301,7 +301,7 @@ export default function Profile() {
   }
   return (
     <Layout title="Profile">
-      <div className="container-mobile pb-4">
+      <div className="w-full max-w-2xl mx-auto px-4 pb-4">
         {/* Profile Header - No Cover Image */}
         <div className="pt-4 space-y-6">
           {/* Profile Picture & Basic Info */}
