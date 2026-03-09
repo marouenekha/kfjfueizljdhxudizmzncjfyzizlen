@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Header } from "./Header";
 import { MobileNav } from "./MobileNav";
-import { DesktopSidebar } from "./DesktopSidebar";
+import { DesktopTopNav } from "./DesktopTopNav";
 
 interface LayoutProps {
   children: ReactNode;
@@ -19,30 +19,27 @@ export const Layout = ({
   showMenu = false 
 }: LayoutProps) => {
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Desktop sidebar — only shown on md+ */}
-      <DesktopSidebar />
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Desktop top navbar */}
+      <DesktopTopNav />
 
-      {/* Main column */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile header — hidden on desktop */}
-        {showHeader && (
-          <div className="md:hidden">
-            <Header title={title} showMenu={showMenu} />
-          </div>
-        )}
+      {/* Mobile header */}
+      {showHeader && (
+        <div className="md:hidden">
+          <Header title={title} showMenu={showMenu} />
+        </div>
+      )}
 
-        <main className={`flex-1 ${showMobileNav ? 'pb-20 md:pb-0' : ''}`}>
-          {children}
-        </main>
+      <main className={`flex-1 ${showMobileNav ? 'pb-20 md:pb-0' : ''}`}>
+        {children}
+      </main>
 
-        {/* Mobile bottom nav — hidden on desktop */}
-        {showMobileNav && (
-          <div className="md:hidden">
-            <MobileNav />
-          </div>
-        )}
-      </div>
+      {/* Mobile bottom nav */}
+      {showMobileNav && (
+        <div className="md:hidden">
+          <MobileNav />
+        </div>
+      )}
     </div>
   );
 };
