@@ -13,10 +13,31 @@ import {
   Share2,
   Send,
   MoreHorizontal,
+  Edit3,
+  Trash2,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { EditPostDialog } from "./EditPostDialog";
+import { SharePostDialog } from "./SharePostDialog";
+import { toast } from "sonner";
 
 interface Post {
   id: string;
@@ -34,6 +55,8 @@ interface Post {
 
 interface PostCardProps {
   post: Post;
+  onPostUpdated?: () => void;
+  onPostDeleted?: () => void;
 }
 
 interface Comment {
@@ -44,7 +67,7 @@ interface Comment {
   created_at: string;
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) {
   const navigate = useNavigate();
   const { user: authUser } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -57,6 +80,9 @@ export function PostCard({ post }: PostCardProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentCount, setCommentCount] = useState(0);
   const [expanded, setExpanded] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const images = post.images || [];
   const isCarousel = post.media_type === "carousel" && images.length > 1;
@@ -165,12 +191,26 @@ export function PostCard({ post }: PostCardProps) {
     if (next) loadComments();
   };
 
-  const handleShare = async () => {
+  const handleShare = () => {
+    setShowShareDialog(true);
+  };
+
+  const handleDelete = async () => {
     try {
-      await navigator.share?.({ text: post.content || "", url: window.location.href });
-    } catch {
-      navigator.clipboard?.writeText(window.location.href);
+      const { error } = await supabase
+        .from("posts")
+        .delete()
+        .eq("id", post.id);
+
+      if (error) throw error;
+
+      toast.success("Post deleted successfully");
+      onPostDeleted?.();
+    } catch (error: any) {
+      console.error("Error deleting post:", error);
+      toast.error("Failed to delete post");
     }
+    setShowDeleteDialog(false);
   };
 
   const handleContact = () => {
@@ -216,9 +256,32 @@ export function PostCard({ post }: PostCardProps) {
           </div>
           <p className="text-[11px] text-muted-foreground">{timeAgo}</p>
         </div>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-          <MoreHorizontal className="w-5 h-5" />
-        </Button>
+        {authUser?.id === post.user_id ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                <MoreHorizontal className="w-5 h-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
+                <Edit3 className="w-4 h-4 mr-2" />
+                Edit Post
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setShowDeleteDialog(true)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Post
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" disabled>
+            <MoreHorizontal className="w-5 h-5" />
+          </Button>
+        )}
       </div>
 
       {/* Content above media */}
@@ -389,6 +452,46 @@ export function PostCard({ post }: PostCardProps) {
           </div>
         </div>
       )}
+
+      {/* Edit Dialog */}
+      <EditPostDialog
+        post={post}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        onPostUpdated={() => {
+          onPostUpdated?.();
+          loadLikes();
+          loadCommentCount();
+        }}
+      />
+
+      {/* Share Dialog */}
+      <SharePostDialog
+        post={post}
+        open={showShareDialog}
+        onOpenChange={setShowShareDialog}
+      />
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Post</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this post? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

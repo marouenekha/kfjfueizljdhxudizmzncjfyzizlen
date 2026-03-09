@@ -63,7 +63,12 @@ export default function Feed() {
         ) : (
           <div className="space-y-0 -mx-4 border-t border-border">
             {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
+              <PostCard 
+                key={post.id} 
+                post={post} 
+                onPostUpdated={fetchPosts}
+                onPostDeleted={fetchPosts}
+              />
             ))}
           </div>
         )}
