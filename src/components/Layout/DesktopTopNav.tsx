@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationsPopover } from "./NotificationsPopover";
+import { useTranslation } from "react-i18next";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,16 +12,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const navItems = [
-  { to: "/feed", icon: Home, label: "Home" },
-  { to: "/search", icon: Search, label: "Search" },
-  { to: "/messages", icon: MessageCircle, label: "Messages" },
-  { to: "/profile", icon: User, label: "Profile" },
-];
-
 export const DesktopTopNav = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { t } = useTranslation();
+
+  const navItems = [
+    { to: "/feed", icon: Home, label: t('home') },
+    { to: "/search", icon: Search, label: t('search') },
+    { to: "/messages", icon: MessageCircle, label: t('messages') },
+    { to: "/profile", icon: User, label: t('profile') },
+  ];
 
   return (
     <header className="hidden md:block sticky top-0 z-50 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 border-b border-border">
@@ -54,7 +56,7 @@ export const DesktopTopNav = () => {
         {/* Right actions */}
         <div className="flex items-center gap-2">
           <Button size="sm" onClick={() => navigate("/create-post")}>
-            <Plus className="w-4 h-4 mr-1" /> Post
+            <Plus className="w-4 h-4 mr-1" /> {t('post')}
           </Button>
 
           <NotificationsPopover />
@@ -68,11 +70,11 @@ export const DesktopTopNav = () => {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => navigate("/settings")}>
                 <Settings className="w-4 h-4 mr-2" />
-                Settings
+                {t('settings')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={logout}>
                 <LogOut className="w-4 h-4 mr-2" />
-                Logout
+                {t('logout')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

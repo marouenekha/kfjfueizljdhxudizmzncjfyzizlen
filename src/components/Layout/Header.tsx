@@ -2,6 +2,7 @@ import { Settings, LogOut } from "lucide-react";
 import { NotificationsPopover } from "./NotificationsPopover";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +26,7 @@ export const Header = ({
 }: HeaderProps) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { t } = useTranslation();
   
   return (
     <header className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
@@ -41,11 +43,11 @@ export const Header = ({
                 <DropdownMenuContent align="start">
                   <DropdownMenuItem onClick={() => navigate('/settings')}>
                     <Settings className="w-4 h-4 mr-2" />
-                    Settings
+                    {t('settings')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={logout}>
                     <LogOut className="w-4 h-4 mr-2" />
-                    Logout
+                    {t('logout')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

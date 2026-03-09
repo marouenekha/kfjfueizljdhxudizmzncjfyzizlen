@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { 
   Search, Wrench, ImageIcon, Video, Images, X, ChevronLeft, Loader2 
 } from "lucide-react";
@@ -20,6 +21,7 @@ export default function CreatePost() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const { uploadImage, uploading } = useImageUpload("posts");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -33,7 +35,6 @@ export default function CreatePost() {
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Crop queue state
   const [cropQueue, setCropQueue] = useState<string[]>([]);
   const [cropQueueFiles, setCropQueueFiles] = useState<File[]>([]);
   const [cropIndex, setCropIndex] = useState(0);
@@ -44,22 +45,18 @@ export default function CreatePost() {
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
-
     const selectedFiles = mediaType === "image" ? [files[0]] : files;
     const urls = selectedFiles.map(f => URL.createObjectURL(f));
-
     setCropQueueFiles(selectedFiles);
     setCropQueue(urls);
     setCropIndex(0);
     setCropperOpen(true);
-
     e.target.value = "";
   };
 
   const handleCropComplete = (blob: Blob) => {
     const file = new File([blob], `cropped-${Date.now()}-${cropIndex}.jpg`, { type: "image/jpeg" });
     const preview = URL.createObjectURL(blob);
-
     if (mediaType === "image") {
       setImageFiles([file]);
       setImagePreviews([preview]);
@@ -67,10 +64,7 @@ export default function CreatePost() {
       setImageFiles(prev => [...prev, file]);
       setImagePreviews(prev => [...prev, preview]);
     }
-
-    // Clean up the original object URL
     URL.revokeObjectURL(cropQueue[cropIndex]);
-
     const nextIndex = cropIndex + 1;
     if (nextIndex < cropQueue.length) {
       setCropIndex(nextIndex);
@@ -84,7 +78,6 @@ export default function CreatePost() {
 
   const handleCropperClose = (open: boolean) => {
     if (!open) {
-      // Clean up remaining URLs
       cropQueue.forEach((url, i) => { if (i >= cropIndex) URL.revokeObjectURL(url); });
       setCropperOpen(false);
       setCropQueue([]);
@@ -123,12 +116,10 @@ export default function CreatePost() {
 
   const handleSubmit = async () => {
     if (!user || !postType || !content.trim()) return;
-
     setSubmitting(true);
     try {
       let imageUrls: string[] = [];
       let videoUrl: string | null = null;
-
       if (mediaType === "video" && videoFile) {
         const url = await uploadImage(videoFile);
         if (url) videoUrl = url;
@@ -138,7 +129,6 @@ export default function CreatePost() {
           if (url) imageUrls.push(url);
         }
       }
-
       const { error } = await supabase.from("posts").insert({
         user_id: user.id,
         user_name: user.profile?.name || "User",
@@ -150,12 +140,11 @@ export default function CreatePost() {
         media_type: mediaType || "image",
         video_url: videoUrl,
       });
-
       if (error) throw error;
-      toast({ title: "Post created!", description: "Your post is now live." });
+      toast({ title: t('postCreated'), description: t('postCreatedDesc') });
       navigate("/feed");
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: t('error'), description: error.message, variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -164,15 +153,15 @@ export default function CreatePost() {
   const canSubmit = postType && content.trim().length > 0 && !submitting && !uploading;
 
   return (
-    <Layout title="Create Post">
+    <Layout title={t('createPost')}>
       <div className="w-full max-w-2xl mx-auto px-4 py-4 space-y-6">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
-          <ChevronLeft className="w-4 h-4 mr-1" /> Back
+          <ChevronLeft className="w-4 h-4 mr-1" /> {t('back')}
         </Button>
 
         {/* Step 1: Post Type */}
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold">What are you looking for?</h2>
+          <h2 className="text-lg font-semibold">{t('whatLookingFor')}</h2>
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => setPostType("find")}
@@ -181,8 +170,8 @@ export default function CreatePost() {
               }`}
             >
               <Search className="w-8 h-8 mx-auto text-primary" />
-              <p className="font-semibold text-sm">Find a Service</p>
-              <p className="text-xs text-muted-foreground">I need help</p>
+              <p className="font-semibold text-sm">{t('findAService')}</p>
+              <p className="text-xs text-muted-foreground">{t('iNeedHelp')}</p>
             </button>
             <button
               onClick={() => setPostType("provide")}
@@ -191,8 +180,8 @@ export default function CreatePost() {
               }`}
             >
               <Wrench className="w-8 h-8 mx-auto text-secondary" />
-              <p className="font-semibold text-sm">Provide a Service</p>
-              <p className="text-xs text-muted-foreground">I offer help</p>
+              <p className="font-semibold text-sm">{t('provideAService')}</p>
+              <p className="text-xs text-muted-foreground">{t('iOfferHelp')}</p>
             </button>
           </div>
         </div>
@@ -200,26 +189,25 @@ export default function CreatePost() {
         {/* Step 2: Media Type */}
         {postType && (
           <div className="space-y-3 animate-fade-in">
-            <h2 className="text-lg font-semibold">Add Media (optional)</h2>
+            <h2 className="text-lg font-semibold">{t('addMedia')}</h2>
             <div className="flex gap-2">
               <Badge variant={mediaType === "image" ? "default" : "outline"} className="cursor-pointer px-4 py-2" onClick={() => selectMediaType("image")}>
-                <ImageIcon className="w-4 h-4 mr-1" /> Image
+                <ImageIcon className="w-4 h-4 mr-1" /> {t('image')}
               </Badge>
               <Badge variant={mediaType === "video" ? "default" : "outline"} className="cursor-pointer px-4 py-2" onClick={() => selectMediaType("video")}>
-                <Video className="w-4 h-4 mr-1" /> Video
+                <Video className="w-4 h-4 mr-1" /> {t('video')}
               </Badge>
               <Badge variant={mediaType === "carousel" ? "default" : "outline"} className="cursor-pointer px-4 py-2" onClick={() => selectMediaType("carousel")}>
-                <Images className="w-4 h-4 mr-1" /> Carousel
+                <Images className="w-4 h-4 mr-1" /> {t('carousel')}
               </Badge>
             </div>
 
-            {/* Image upload */}
             {mediaType === "image" && (
               <div className="space-y-3">
                 {imagePreviews.length === 0 ? (
                   <button onClick={() => fileInputRef.current?.click()} className="w-full aspect-square border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors">
                     <ImageIcon className="w-10 h-10 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Tap to add image (1:1)</p>
+                    <p className="text-sm text-muted-foreground">{t('tapToAddImage')}</p>
                   </button>
                 ) : (
                   <div className="relative aspect-square rounded-xl overflow-hidden">
@@ -233,13 +221,12 @@ export default function CreatePost() {
               </div>
             )}
 
-            {/* Video upload */}
             {mediaType === "video" && (
               <div className="space-y-3">
                 {!videoPreview ? (
                   <button onClick={() => videoInputRef.current?.click()} className="w-full aspect-[9/16] max-h-[400px] border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors">
                     <Video className="w-10 h-10 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Tap to add video (9:16)</p>
+                    <p className="text-sm text-muted-foreground">{t('tapToAddVideo')}</p>
                   </button>
                 ) : (
                   <div className="relative aspect-[9/16] max-h-[400px] rounded-xl overflow-hidden">
@@ -253,7 +240,6 @@ export default function CreatePost() {
               </div>
             )}
 
-            {/* Carousel upload */}
             {mediaType === "carousel" && (
               <div className="space-y-3">
                 <div className="flex gap-0 overflow-x-auto snap-x snap-mandatory pb-2">
@@ -267,10 +253,10 @@ export default function CreatePost() {
                   ))}
                 </div>
                 <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="w-full">
-                  <Images className="w-4 h-4 mr-2" /> Add Images
+                  <Images className="w-4 h-4 mr-2" /> {t('addImages')}
                 </Button>
                 {imagePreviews.length > 0 && (
-                  <p className="text-xs text-muted-foreground text-center">{imagePreviews.length} image(s) — swipe to preview</p>
+                  <p className="text-xs text-muted-foreground text-center">{imagePreviews.length} {t('imageCount')}</p>
                 )}
                 <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageSelect} />
               </div>
@@ -281,9 +267,9 @@ export default function CreatePost() {
         {/* Step 3: Text */}
         {postType && (
           <div className="space-y-2 animate-fade-in">
-            <h2 className="text-lg font-semibold">Description</h2>
+            <h2 className="text-lg font-semibold">{t('description')}</h2>
             <Textarea
-              placeholder="Describe the service you're looking for or offering..."
+              placeholder={t('describeService')}
               value={content}
               onChange={(e) => { if (e.target.value.length <= MAX_CHARS) setContent(e.target.value); }}
               className="min-h-[120px] resize-none"
@@ -298,15 +284,14 @@ export default function CreatePost() {
         {postType && (
           <Button onClick={handleSubmit} disabled={!canSubmit} className="w-full" size="lg">
             {submitting || uploading ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Publishing...</>
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('publishing')}</>
             ) : (
-              "Publish Post"
+              t('publishPost')
             )}
           </Button>
         )}
       </div>
 
-      {/* Cropper dialog */}
       {cropQueue.length > 0 && (
         <ImageCropper
           open={cropperOpen}
@@ -314,7 +299,7 @@ export default function CreatePost() {
           imageUrl={cropQueue[cropIndex]}
           onCropComplete={handleCropComplete}
           shape="square"
-          label={cropQueue.length > 1 ? `Image ${cropIndex + 1} of ${cropQueue.length}` : "Crop Image"}
+          label={cropQueue.length > 1 ? t('imageOf', { current: cropIndex + 1, total: cropQueue.length }) : t('cropImage')}
         />
       )}
     </Layout>

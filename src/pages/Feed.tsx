@@ -5,9 +5,11 @@ import { PostCard } from "@/components/Feed/PostCard";
 import { supabase } from "@/integrations/supabase/client";
 import { Users, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 export default function Feed() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,11 +39,11 @@ export default function Feed() {
       <div className="w-full max-w-2xl mx-auto px-4 py-6 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Feed</h1>
-            <p className="text-sm text-muted-foreground">Discover services</p>
+            <h1 className="text-2xl font-bold">{t('feed')}</h1>
+            <p className="text-sm text-muted-foreground">{t('discoverServices')}</p>
           </div>
           <Button size="sm" onClick={() => navigate("/create-post")}>
-            <Plus className="w-4 h-4 mr-1" /> Post
+            <Plus className="w-4 h-4 mr-1" /> {t('post')}
           </Button>
         </div>
 
@@ -54,11 +56,11 @@ export default function Feed() {
             <div className="w-20 h-20 bg-muted rounded-full mx-auto flex items-center justify-center">
               <Users className="w-10 h-10 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold">No posts yet</h3>
+            <h3 className="text-xl font-semibold">{t('noPostsYet')}</h3>
             <p className="text-muted-foreground max-w-md mx-auto">
-              Be the first to post a service request or offer!
+              {t('beFirstToPost')}
             </p>
-            <Button onClick={() => navigate("/create-post")}>Create Post</Button>
+            <Button onClick={() => navigate("/create-post")}>{t('createPost')}</Button>
           </div>
         ) : (
           <div className="space-y-0 -mx-4 border-t border-border">

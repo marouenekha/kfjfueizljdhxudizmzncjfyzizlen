@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { 
   Search, Wrench, ImageIcon, Video, Images, X, ChevronLeft, Loader2 
 } from "lucide-react";
@@ -22,6 +23,7 @@ export default function EditPost() {
   const postId = searchParams.get("id");
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const { uploadImage, uploading } = useImageUpload("posts");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -38,7 +40,6 @@ export default function EditPost() {
   const [existingVideoUrl, setExistingVideoUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Crop queue state
   const [cropQueue, setCropQueue] = useState<string[]>([]);
   const [cropQueueFiles, setCropQueueFiles] = useState<File[]>([]);
   const [cropIndex, setCropIndex] = useState(0);
@@ -46,108 +47,70 @@ export default function EditPost() {
 
   const MAX_CHARS = 500;
 
-  // Load existing post data
   useEffect(() => {
-    if (!postId) {
-      navigate("/feed");
-      return;
-    }
+    if (!postId) { navigate("/feed"); return; }
     loadPost();
   }, [postId]);
 
   const loadPost = async () => {
     if (!postId) return;
-    
-    const { data, error } = await supabase
-      .from("posts")
-      .select("*")
-      .eq("id", postId)
-      .single();
-
+    const { data, error } = await supabase.from("posts").select("*").eq("id", postId).single();
     if (error || !data) {
-      toast({ title: "Error", description: "Post not found", variant: "destructive" });
-      navigate("/feed");
-      return;
+      toast({ title: t('error'), description: t('postNotFound'), variant: "destructive" });
+      navigate("/feed"); return;
     }
-
-    // Check ownership
     if (data.user_id !== user?.id) {
-      toast({ title: "Error", description: "You can only edit your own posts", variant: "destructive" });
-      navigate("/feed");
-      return;
+      toast({ title: t('error'), description: t('canOnlyEditOwn'), variant: "destructive" });
+      navigate("/feed"); return;
     }
-
     setPostType(data.post_type as PostType);
     setContent(data.content || "");
-    
     if (data.media_type === "video" && data.video_url) {
-      setMediaType("video");
-      setExistingVideoUrl(data.video_url);
+      setMediaType("video"); setExistingVideoUrl(data.video_url);
     } else if (data.images && data.images.length > 0) {
       setMediaType(data.images.length > 1 ? "carousel" : "image");
       setExistingImages(data.images);
     }
-    
     setLoading(false);
   };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
-
     const selectedFiles = mediaType === "image" ? [files[0]] : files;
     const urls = selectedFiles.map(f => URL.createObjectURL(f));
-
     setCropQueueFiles(selectedFiles);
     setCropQueue(urls);
     setCropIndex(0);
     setCropperOpen(true);
-
     e.target.value = "";
   };
 
   const handleCropComplete = (blob: Blob) => {
     const file = new File([blob], `cropped-${Date.now()}-${cropIndex}.jpg`, { type: "image/jpeg" });
     const preview = URL.createObjectURL(blob);
-
     if (mediaType === "image") {
-      setImageFiles([file]);
-      setImagePreviews([preview]);
-      setExistingImages([]);
+      setImageFiles([file]); setImagePreviews([preview]); setExistingImages([]);
     } else {
-      setImageFiles(prev => [...prev, file]);
-      setImagePreviews(prev => [...prev, preview]);
+      setImageFiles(prev => [...prev, file]); setImagePreviews(prev => [...prev, preview]);
     }
-
     URL.revokeObjectURL(cropQueue[cropIndex]);
-
     const nextIndex = cropIndex + 1;
-    if (nextIndex < cropQueue.length) {
-      setCropIndex(nextIndex);
-    } else {
-      setCropperOpen(false);
-      setCropQueue([]);
-      setCropQueueFiles([]);
-      setCropIndex(0);
-    }
+    if (nextIndex < cropQueue.length) { setCropIndex(nextIndex); }
+    else { setCropperOpen(false); setCropQueue([]); setCropQueueFiles([]); setCropIndex(0); }
   };
 
   const handleCropperClose = (open: boolean) => {
     if (!open) {
       cropQueue.forEach((url, i) => { if (i >= cropIndex) URL.revokeObjectURL(url); });
-      setCropperOpen(false);
-      setCropQueue([]);
-      setCropQueueFiles([]);
-      setCropIndex(0);
+      setCropperOpen(false); setCropQueue([]); setCropQueueFiles([]); setCropIndex(0);
     }
   };
 
   const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setVideoFile(file);
-    setVideoPreview(URL.createObjectURL(file));
-    setExistingVideoUrl(null);
+    setVideoFile(file); setVideoPreview(URL.createObjectURL(file)); setExistingVideoUrl(null);
     e.target.value = "";
   };
 
@@ -163,29 +126,20 @@ export default function EditPost() {
 
   const removeVideo = () => {
     if (videoPreview) URL.revokeObjectURL(videoPreview);
-    setVideoFile(null);
-    setVideoPreview(null);
-    setExistingVideoUrl(null);
+    setVideoFile(null); setVideoPreview(null); setExistingVideoUrl(null);
   };
 
   const selectMediaType = (type: MediaType) => {
-    setMediaType(type);
-    setImageFiles([]);
-    setImagePreviews([]);
-    setExistingImages([]);
-    setVideoFile(null);
-    setVideoPreview(null);
-    setExistingVideoUrl(null);
+    setMediaType(type); setImageFiles([]); setImagePreviews([]);
+    setExistingImages([]); setVideoFile(null); setVideoPreview(null); setExistingVideoUrl(null);
   };
 
   const handleSubmit = async () => {
     if (!user || !postId || !content.trim()) return;
-
     setSubmitting(true);
     try {
       let imageUrls: string[] = [...existingImages];
       let videoUrl: string | null = existingVideoUrl;
-
       if (mediaType === "video" && videoFile) {
         const url = await uploadImage(videoFile);
         if (url) videoUrl = url;
@@ -195,36 +149,25 @@ export default function EditPost() {
           if (url) imageUrls.push(url);
         }
       }
-
-      const { error } = await supabase
-        .from("posts")
-        .update({
-          content: content.trim(),
-          images: imageUrls.length > 0 ? imageUrls : null,
-          post_type: postType,
-          media_type: mediaType || "image",
-          video_url: videoUrl,
-        })
-        .eq("id", postId);
-
+      const { error } = await supabase.from("posts").update({
+        content: content.trim(), images: imageUrls.length > 0 ? imageUrls : null,
+        post_type: postType, media_type: mediaType || "image", video_url: videoUrl,
+      }).eq("id", postId);
       if (error) throw error;
-      toast({ title: "Post updated!", description: "Your changes have been saved." });
+      toast({ title: t('postUpdated'), description: t('postUpdatedDesc') });
       navigate("/feed");
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } finally {
-      setSubmitting(false);
-    }
+      toast({ title: t('error'), description: error.message, variant: "destructive" });
+    } finally { setSubmitting(false); }
   };
 
   const canSubmit = content.trim().length > 0 && !submitting && !uploading;
-
   const allImages = [...existingImages, ...imagePreviews];
   const hasVideo = existingVideoUrl || videoPreview;
 
   if (loading) {
     return (
-      <Layout title="Edit Post">
+      <Layout title={t('editPost')}>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -233,70 +176,56 @@ export default function EditPost() {
   }
 
   return (
-    <Layout title="Edit Post">
+    <Layout title={t('editPost')}>
       <div className="w-full max-w-2xl mx-auto px-4 py-4 space-y-6">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
-          <ChevronLeft className="w-4 h-4 mr-1" /> Back
+          <ChevronLeft className="w-4 h-4 mr-1" /> {t('back')}
         </Button>
 
-        {/* Step 1: Post Type */}
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold">What are you looking for?</h2>
+          <h2 className="text-lg font-semibold">{t('whatLookingFor')}</h2>
           <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => setPostType("find")}
-              className={`p-4 rounded-xl border-2 text-center transition-all space-y-2 ${
-                postType === "find" ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
-              }`}
-            >
+            <button onClick={() => setPostType("find")}
+              className={`p-4 rounded-xl border-2 text-center transition-all space-y-2 ${postType === "find" ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"}`}>
               <Search className="w-8 h-8 mx-auto text-primary" />
-              <p className="font-semibold text-sm">Find a Service</p>
-              <p className="text-xs text-muted-foreground">I need help</p>
+              <p className="font-semibold text-sm">{t('findAService')}</p>
+              <p className="text-xs text-muted-foreground">{t('iNeedHelp')}</p>
             </button>
-            <button
-              onClick={() => setPostType("provide")}
-              className={`p-4 rounded-xl border-2 text-center transition-all space-y-2 ${
-                postType === "provide" ? "border-secondary bg-secondary/10" : "border-border hover:border-muted-foreground"
-              }`}
-            >
+            <button onClick={() => setPostType("provide")}
+              className={`p-4 rounded-xl border-2 text-center transition-all space-y-2 ${postType === "provide" ? "border-secondary bg-secondary/10" : "border-border hover:border-muted-foreground"}`}>
               <Wrench className="w-8 h-8 mx-auto text-secondary" />
-              <p className="font-semibold text-sm">Provide a Service</p>
-              <p className="text-xs text-muted-foreground">I offer help</p>
+              <p className="font-semibold text-sm">{t('provideAService')}</p>
+              <p className="text-xs text-muted-foreground">{t('iOfferHelp')}</p>
             </button>
           </div>
         </div>
 
-        {/* Step 2: Media Type */}
         {postType && (
           <div className="space-y-3 animate-fade-in">
-            <h2 className="text-lg font-semibold">Add Media (optional)</h2>
+            <h2 className="text-lg font-semibold">{t('addMedia')}</h2>
             <div className="flex gap-2">
               <Badge variant={mediaType === "image" ? "default" : "outline"} className="cursor-pointer px-4 py-2" onClick={() => selectMediaType("image")}>
-                <ImageIcon className="w-4 h-4 mr-1" /> Image
+                <ImageIcon className="w-4 h-4 mr-1" /> {t('image')}
               </Badge>
               <Badge variant={mediaType === "video" ? "default" : "outline"} className="cursor-pointer px-4 py-2" onClick={() => selectMediaType("video")}>
-                <Video className="w-4 h-4 mr-1" /> Video
+                <Video className="w-4 h-4 mr-1" /> {t('video')}
               </Badge>
               <Badge variant={mediaType === "carousel" ? "default" : "outline"} className="cursor-pointer px-4 py-2" onClick={() => selectMediaType("carousel")}>
-                <Images className="w-4 h-4 mr-1" /> Carousel
+                <Images className="w-4 h-4 mr-1" /> {t('carousel')}
               </Badge>
             </div>
 
-            {/* Image upload */}
             {mediaType === "image" && (
               <div className="space-y-3">
                 {allImages.length === 0 ? (
                   <button onClick={() => fileInputRef.current?.click()} className="w-full aspect-square border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors">
                     <ImageIcon className="w-10 h-10 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Tap to add image (1:1)</p>
+                    <p className="text-sm text-muted-foreground">{t('tapToAddImage')}</p>
                   </button>
                 ) : (
                   <div className="relative aspect-square rounded-xl overflow-hidden">
                     <img src={existingImages[0] || imagePreviews[0]} className="w-full h-full object-cover" alt="Preview" />
-                    <button 
-                      onClick={() => existingImages.length > 0 ? removeExistingImage(0) : removeImage(0)} 
-                      className="absolute top-2 right-2 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center"
-                    >
+                    <button onClick={() => existingImages.length > 0 ? removeExistingImage(0) : removeImage(0)} className="absolute top-2 right-2 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
@@ -305,13 +234,12 @@ export default function EditPost() {
               </div>
             )}
 
-            {/* Video upload */}
             {mediaType === "video" && (
               <div className="space-y-3">
                 {!hasVideo ? (
                   <button onClick={() => videoInputRef.current?.click()} className="w-full aspect-[9/16] max-h-[400px] border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors">
                     <Video className="w-10 h-10 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Tap to add video (9:16)</p>
+                    <p className="text-sm text-muted-foreground">{t('tapToAddVideo')}</p>
                   </button>
                 ) : (
                   <div className="relative aspect-[9/16] max-h-[400px] rounded-xl overflow-hidden">
@@ -325,7 +253,6 @@ export default function EditPost() {
               </div>
             )}
 
-            {/* Carousel upload */}
             {mediaType === "carousel" && (
               <div className="space-y-3">
                 {allImages.length > 0 && (
@@ -349,10 +276,10 @@ export default function EditPost() {
                   </div>
                 )}
                 <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="w-full">
-                  <Images className="w-4 h-4 mr-2" /> Add Images
+                  <Images className="w-4 h-4 mr-2" /> {t('addImages')}
                 </Button>
                 {allImages.length > 0 && (
-                  <p className="text-xs text-muted-foreground text-center">{allImages.length} image(s) — swipe to preview</p>
+                  <p className="text-xs text-muted-foreground text-center">{allImages.length} {t('imageCount')}</p>
                 )}
                 <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageSelect} />
               </div>
@@ -360,12 +287,11 @@ export default function EditPost() {
           </div>
         )}
 
-        {/* Step 3: Text */}
         {postType && (
           <div className="space-y-2 animate-fade-in">
-            <h2 className="text-lg font-semibold">Description</h2>
+            <h2 className="text-lg font-semibold">{t('description')}</h2>
             <Textarea
-              placeholder="Describe the service you're looking for or offering..."
+              placeholder={t('describeService')}
               value={content}
               onChange={(e) => { if (e.target.value.length <= MAX_CHARS) setContent(e.target.value); }}
               className="min-h-[120px] resize-none"
@@ -376,19 +302,17 @@ export default function EditPost() {
           </div>
         )}
 
-        {/* Submit */}
         {postType && (
           <Button onClick={handleSubmit} disabled={!canSubmit} className="w-full" size="lg">
             {submitting || uploading ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Save Changes</>
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('saveChanges')}</>
             ) : (
-              "Save Changes"
+              t('saveChanges')
             )}
           </Button>
         )}
       </div>
 
-      {/* Cropper dialog */}
       {cropQueue.length > 0 && (
         <ImageCropper
           open={cropperOpen}
@@ -396,7 +320,7 @@ export default function EditPost() {
           imageUrl={cropQueue[cropIndex]}
           onCropComplete={handleCropComplete}
           shape="square"
-          label={cropQueue.length > 1 ? `Image ${cropIndex + 1} of ${cropQueue.length}` : "Crop Image"}
+          label={cropQueue.length > 1 ? t('imageOf', { current: cropIndex + 1, total: cropQueue.length }) : t('cropImage')}
         />
       )}
     </Layout>
