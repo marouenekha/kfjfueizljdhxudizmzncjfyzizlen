@@ -67,7 +67,7 @@ interface Comment {
   created_at: string;
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) {
   const navigate = useNavigate();
   const { user: authUser } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
