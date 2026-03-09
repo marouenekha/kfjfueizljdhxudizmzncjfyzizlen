@@ -165,7 +165,7 @@ export default function CreatePost() {
 
   return (
     <Layout title="Create Post">
-      <div className="container-mobile py-4 space-y-6">
+      <div className="w-full max-w-2xl mx-auto px-4 py-4 space-y-6">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
           <ChevronLeft className="w-4 h-4 mr-1" /> Back
         </Button>
