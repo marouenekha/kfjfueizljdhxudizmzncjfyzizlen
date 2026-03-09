@@ -13,10 +13,31 @@ import {
   Share2,
   Send,
   MoreHorizontal,
+  Edit3,
+  Trash2,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { EditPostDialog } from "./EditPostDialog";
+import { SharePostDialog } from "./SharePostDialog";
+import { toast } from "sonner";
 
 interface Post {
   id: string;
