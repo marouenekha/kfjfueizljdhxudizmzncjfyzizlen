@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-import { toast } from "@/hooks/use-toast";
 import { cleanupAuthState } from "@/lib/authCleanup";
+
+// Use sonner's toast directly to avoid any React hook conflicts
+import { toast } from "sonner";
 
 export interface Profile {
   id: string;
@@ -47,15 +49,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Listen for auth changes FIRST to avoid missing events
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
-        // Set minimal user synchronously
         setUser({
           id: session.user.id,
           email: session.user.email || "",
         });
-        // Defer any Supabase calls to avoid deadlocks
         setTimeout(() => {
           loadUserProfile(session.user);
         }, 0);
@@ -65,7 +64,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
     });
 
-    // THEN, get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser({
@@ -109,34 +107,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Clean up any existing auth state to avoid limbo sessions
       cleanupAuthState();
-      // Attempt a global sign out (ignore errors)
       try {
         await supabase.auth.signOut({ scope: "global" } as any);
       } catch {}
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in.",
-      });
-
-      // Force a clean reload to ensure fresh session state
+      toast.success("Welcome back!", { description: "You have successfully logged in." });
       window.location.href = "/feed";
     } catch (error: any) {
       console.error("Login failed:", error);
-      toast({
-        title: "Login failed",
-        description: error.message || "An error occurred during login",
-        variant: "destructive",
-      });
+      toast.error("Login failed", { description: error.message || "An error occurred during login" });
       throw error;
     } finally {
       setIsLoading(false);
@@ -146,29 +129,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signup = async (userData: { email: string; password: string; name?: string; isProvider?: boolean }) => {
     setIsLoading(true);
     try {
-      // Clean up any existing auth state before sign up
       cleanupAuthState();
       try {
         await supabase.auth.signOut({ scope: "global" } as any);
       } catch {}
 
       const redirectUrl = `${window.location.origin}/`;
-
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
         options: {
-          data: {
-            name: userData.name || '',
-            is_provider: userData.isProvider || false,
-          },
+          data: { name: userData.name || '', is_provider: userData.isProvider || false },
           emailRedirectTo: redirectUrl,
         }
       });
 
       if (error) throw error;
 
-      // Create profile after signup
       if (data.user) {
         await supabase.from('profiles').insert({
           user_id: data.user.id,
@@ -178,17 +155,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
       }
 
-      toast({
-        title: "Account created!",
-        description: "Please check your email to verify your account.",
-      });
+      toast.success("Account created!", { description: "Please check your email to verify your account." });
     } catch (error: any) {
       console.error("Signup failed:", error);
-      toast({
-        title: "Signup failed",
-        description: error.message || "An error occurred during signup",
-        variant: "destructive",
-      });
+      toast.error("Signup failed", { description: error.message || "An error occurred during signup" });
       throw error;
     } finally {
       setIsLoading(false);
@@ -197,32 +167,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      // Clean up auth storage and attempt a global sign out
       cleanupAuthState();
       try {
         await supabase.auth.signOut({ scope: "global" } as any);
       } catch {}
-      
-      toast({
-        title: "Goodbye!",
-        description: "You have been logged out successfully.",
-      });
 
-      // Hard redirect to ensure a clean state
+      toast.success("Goodbye!", { description: "You have been logged out successfully." });
       window.location.href = "/auth";
     } catch (error: any) {
       console.error("Logout failed:", error);
-      toast({
-        title: "Logout failed",
-        description: error.message || "An error occurred during logout",
-        variant: "destructive",
-      });
+      toast.error("Logout failed", { description: error.message || "An error occurred during logout" });
     }
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user?.profile) return;
-    
+
     setIsLoading(true);
     try {
       const { error } = await supabase
@@ -232,40 +192,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) throw error;
 
-      // Update local user state
-      setUser({
-        ...user,
-        profile: { ...user.profile, ...updates }
-      });
-
-      toast({
-        title: "Profile updated!",
-        description: "Your profile has been successfully updated.",
-      });
+      setUser({ ...user, profile: { ...user.profile, ...updates } });
+      toast.success("Profile updated!", { description: "Your profile has been successfully updated." });
     } catch (error: any) {
       console.error("Profile update failed:", error);
-      toast({
-        title: "Update failed",
-        description: error.message || "An error occurred while updating your profile",
-        variant: "destructive",
-      });
+      toast.error("Update failed", { description: error.message || "An error occurred while updating your profile" });
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const value: AuthContextType = {
-    user,
-    isLoading,
-    login,
-    signup,
-    logout,
-    updateProfile
-  };
-
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, isLoading, login, signup, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );
