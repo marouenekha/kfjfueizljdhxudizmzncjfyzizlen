@@ -452,17 +452,6 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
         </div>
       )}
 
-      {/* Edit Dialog */}
-      <EditPostDialog
-        post={post}
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-        onPostUpdated={() => {
-          onPostUpdated?.();
-          loadLikes();
-          loadCommentCount();
-        }}
-      />
 
       {/* Share Dialog */}
       <SharePostDialog

@@ -63,6 +63,11 @@ const App = () => (
                 <CreatePost />
               </ProtectedRoute>
             } />
+            <Route path="/edit-post" element={
+              <ProtectedRoute>
+                <EditPost />
+              </ProtectedRoute>
+            } />
             <Route path="/provider-signup" element={<ProviderSignup />} />
             <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
