@@ -242,7 +242,7 @@ export default function Messages() {
 
     return (
       <Layout title={t('messages')} showMobileNav={false}>
-        <div className="flex flex-col h-[calc(100vh-56px)]">
+        <div className="flex flex-col h-[calc(100vh-56px)] md:h-screen max-w-2xl mx-auto w-full">
         {/* Chat Header */}
         <div className="flex-shrink-0 z-40 bg-background border-b border-border">
           <div className="flex items-center justify-between p-3 sm:p-4">
