@@ -35,7 +35,6 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { EditPostDialog } from "./EditPostDialog";
 import { SharePostDialog } from "./SharePostDialog";
 import { toast } from "sonner";
 
@@ -80,7 +79,7 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentCount, setCommentCount] = useState(0);
   const [expanded, setExpanded] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
+  
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -264,7 +263,7 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
+              <DropdownMenuItem onClick={() => navigate(`/edit-post?id=${post.id}`)}>
                 <Edit3 className="w-4 h-4 mr-2" />
                 Edit Post
               </DropdownMenuItem>
@@ -453,17 +452,6 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
         </div>
       )}
 
-      {/* Edit Dialog */}
-      <EditPostDialog
-        post={post}
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-        onPostUpdated={() => {
-          onPostUpdated?.();
-          loadLikes();
-          loadCommentCount();
-        }}
-      />
 
       {/* Share Dialog */}
       <SharePostDialog
