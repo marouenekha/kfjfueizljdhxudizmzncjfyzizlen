@@ -1,16 +1,19 @@
 import { NavLink } from "react-router-dom";
 import { Home, Search, MessageCircle, User, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  { to: "/feed", icon: Home, label: "Home" },
-  { to: "/search", icon: Search, label: "Search" },
-  { to: "/create-post", icon: Plus, label: "Post" },
-  { to: "/messages", icon: MessageCircle, label: "Messages" },
-  { to: "/profile", icon: User, label: "Profile" },
-];
+import { useTranslation } from "react-i18next";
 
 export const MobileNav = () => {
+  const { t } = useTranslation();
+
+  const navItems = [
+    { to: "/feed", icon: Home, label: t('home') },
+    { to: "/search", icon: Search, label: t('search') },
+    { to: "/create-post", icon: Plus, label: t('post') },
+    { to: "/messages", icon: MessageCircle, label: t('messages') },
+    { to: "/profile", icon: User, label: t('profile') },
+  ];
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 safe-area-pb">
       <div className="flex items-center justify-around py-2 px-2">

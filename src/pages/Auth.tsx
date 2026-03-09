@@ -21,11 +21,7 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    name: '',
-    isProvider: false
+    email: '', password: '', confirmPassword: '', name: '', isProvider: false
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
@@ -35,13 +31,13 @@ const Auth = () => {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.email) newErrors.email = 'Email requis';
-    else if (!validateEmail(formData.email)) newErrors.email = 'Email invalide';
-    if (!formData.password) newErrors.password = 'Mot de passe requis';
-    else if (!validatePassword(formData.password)) newErrors.password = 'Le mot de passe doit contenir au moins 6 caractères';
+    if (!formData.email) newErrors.email = t('emailRequired');
+    else if (!validateEmail(formData.email)) newErrors.email = t('emailInvalid');
+    if (!formData.password) newErrors.password = t('passwordRequired');
+    else if (!validatePassword(formData.password)) newErrors.password = t('passwordMinLength');
     if (!isLogin) {
-      if (!formData.name) newErrors.name = 'Nom requis';
-      if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
+      if (!formData.name) newErrors.name = t('nameRequired');
+      if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = t('passwordsDontMatch');
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -52,28 +48,19 @@ const Auth = () => {
     if (!validateForm()) return;
     setLoading(true);
     try {
-      if (isLogin) {
-        await login(formData.email, formData.password);
-      } else {
-        await signup({ email: formData.email, password: formData.password, name: formData.name, isProvider: formData.isProvider });
-      }
+      if (isLogin) { await login(formData.email, formData.password); }
+      else { await signup({ email: formData.email, password: formData.password, name: formData.name, isProvider: formData.isProvider }); }
       navigate('/feed');
-    } catch (error) {
-      // handled in auth context
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { /* handled in auth context */ }
+    finally { setLoading(false); }
   };
 
   const handleSocialLogin = async (provider: 'google' | 'facebook') => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: { redirectTo: `${window.location.origin}/feed` },
-      });
+      const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}/feed` } });
       if (error) throw error;
     } catch (error: any) {
-      toast({ title: 'Login failed', description: error.message || `Could not sign in with ${provider}`, variant: 'destructive' });
+      toast({ title: t('loginFailed'), description: error.message, variant: 'destructive' });
     }
   };
 
@@ -83,36 +70,27 @@ const Auth = () => {
   };
 
   const resetForm = () => {
-    setIsLogin(!isLogin);
-    setErrors({});
+    setIsLogin(!isLogin); setErrors({});
     setFormData({ email: '', password: '', confirmPassword: '', name: '', isProvider: false });
   };
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-background to-secondary/20">
-      {/* Left branding panel — desktop only */}
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center bg-primary/5 p-12">
         <div className="max-w-md space-y-6 text-center">
           <h1 className="text-4xl font-bold gradient-text">ServiceHub</h1>
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            Trouvez les meilleurs prestataires locaux ou proposez vos services à votre communauté.
-          </p>
+          <p className="text-lg text-muted-foreground leading-relaxed">{t('brandDescription')}</p>
           <div className="grid grid-cols-3 gap-4 pt-4">
-            {['🔧 Services', '⭐ Avis', '💬 Messages'].map((item) => (
-              <div key={item} className="bg-card/60 backdrop-blur rounded-xl p-4 text-sm font-medium text-foreground shadow-sm">
-                {item}
-              </div>
+            {[t('services'), t('reviews'), t('messagesShort')].map((item) => (
+              <div key={item} className="bg-card/60 backdrop-blur rounded-xl p-4 text-sm font-medium text-foreground shadow-sm">{item}</div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Right form panel */}
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-12">
         <div className="w-full max-w-sm sm:max-w-md">
-          <div className="flex justify-center mb-4">
-            <LanguageSwitcher variant="compact" />
-          </div>
+          <div className="flex justify-center mb-4"><LanguageSwitcher variant="compact" /></div>
 
           <Card className="shadow-xl border-0 bg-card/95 backdrop-blur-sm">
             <CardHeader className="space-y-1 text-center px-4 sm:px-6">
@@ -125,14 +103,9 @@ const Auth = () => {
             </CardHeader>
 
             <CardContent className="space-y-4 px-4 sm:px-6">
-              {/* Social */}
               <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" onClick={() => handleSocialLogin('google')} disabled={loading}>
-                  <Chrome className="w-4 h-4 mr-2" /> Google
-                </Button>
-                <Button variant="outline" onClick={() => handleSocialLogin('facebook')} disabled={loading}>
-                  <Facebook className="w-4 h-4 mr-2" /> Facebook
-                </Button>
+                <Button variant="outline" onClick={() => handleSocialLogin('google')} disabled={loading}><Chrome className="w-4 h-4 mr-2" /> Google</Button>
+                <Button variant="outline" onClick={() => handleSocialLogin('facebook')} disabled={loading}><Facebook className="w-4 h-4 mr-2" /> Facebook</Button>
               </div>
 
               <div className="relative">
@@ -142,7 +115,6 @@ const Auth = () => {
                 </div>
               </div>
 
-              {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 {!isLogin && (
                   <div className="space-y-2">
@@ -159,7 +131,7 @@ const Auth = () => {
                   <Label htmlFor="email" className="text-sm font-medium">{t('email')}</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input id="email" type="email" placeholder="votre@email.com" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} className="pl-9" disabled={loading} />
+                    <Input id="email" type="email" placeholder={t('email')} value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} className="pl-9" disabled={loading} />
                   </div>
                   {errors.email && <Alert variant="destructive" className="py-2"><AlertDescription className="text-xs">{errors.email}</AlertDescription></Alert>}
                 </div>
@@ -191,7 +163,7 @@ const Auth = () => {
                   {loading ? (
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                      <span>Chargement...</span>
+                      <span>{t('loading')}</span>
                     </div>
                   ) : (isLogin ? t('login') : t('signup'))}
                 </Button>
@@ -213,9 +185,7 @@ const Auth = () => {
             </CardContent>
           </Card>
 
-          <p className="text-center text-xs text-muted-foreground mt-4 px-4">
-            En vous connectant, vous acceptez nos conditions d'utilisation et notre politique de confidentialité.
-          </p>
+          <p className="text-center text-xs text-muted-foreground mt-4 px-4">{t('termsAgreement')}</p>
         </div>
       </div>
     </div>
