@@ -452,6 +452,46 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
           </div>
         </div>
       )}
+
+      {/* Edit Dialog */}
+      <EditPostDialog
+        post={post}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        onPostUpdated={() => {
+          onPostUpdated?.();
+          loadLikes();
+          loadCommentCount();
+        }}
+      />
+
+      {/* Share Dialog */}
+      <SharePostDialog
+        post={post}
+        open={showShareDialog}
+        onOpenChange={setShowShareDialog}
+      />
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Post</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this post? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
