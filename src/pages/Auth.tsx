@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
   const { t } = useTranslation();
@@ -95,11 +96,21 @@ const Auth = () => {
   };
 
   const handleSocialLogin = async (provider: 'google' | 'facebook') => {
-    // Note: Social login would need to be configured in Supabase dashboard
-    toast({
-      title: 'Coming Soon',
-      description: `${provider} login will be available soon`,
-    });
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/feed`,
+        },
+      });
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: 'Login failed',
+        description: error.message || `Could not sign in with ${provider}`,
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
