@@ -263,7 +263,7 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
+              <DropdownMenuItem onClick={() => navigate(`/edit-post?id=${post.id}`)}>
                 <Edit3 className="w-4 h-4 mr-2" />
                 Edit Post
               </DropdownMenuItem>
