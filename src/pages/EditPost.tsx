@@ -361,27 +361,31 @@ export default function EditPost() {
         )}
 
         {/* Step 3: Text */}
-        <div className="space-y-2 animate-fade-in">
-          <h2 className="text-lg font-semibold">Description</h2>
-          <Textarea
-            placeholder="Describe the service you're looking for or offering..."
-            value={content}
-            onChange={(e) => { if (e.target.value.length <= MAX_CHARS) setContent(e.target.value); }}
-            className="min-h-[120px] resize-none"
-          />
-          <p className={`text-xs text-right ${content.length > MAX_CHARS - 50 ? "text-destructive" : "text-muted-foreground"}`}>
-            {content.length}/{MAX_CHARS}
-          </p>
-        </div>
+        {postType && (
+          <div className="space-y-2 animate-fade-in">
+            <h2 className="text-lg font-semibold">Description</h2>
+            <Textarea
+              placeholder="Describe the service you're looking for or offering..."
+              value={content}
+              onChange={(e) => { if (e.target.value.length <= MAX_CHARS) setContent(e.target.value); }}
+              className="min-h-[120px] resize-none"
+            />
+            <p className={`text-xs text-right ${content.length > MAX_CHARS - 50 ? "text-destructive" : "text-muted-foreground"}`}>
+              {content.length}/{MAX_CHARS}
+            </p>
+          </div>
+        )}
 
         {/* Submit */}
-        <Button onClick={handleSubmit} disabled={!canSubmit} className="w-full" size="lg">
-          {submitting || uploading ? (
-            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
-          ) : (
-            "Save Changes"
-          )}
-        </Button>
+        {postType && (
+          <Button onClick={handleSubmit} disabled={!canSubmit} className="w-full" size="lg">
+            {submitting || uploading ? (
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Save Changes</>
+            ) : (
+              "Save Changes"
+            )}
+          </Button>
+        )}
       </div>
 
       {/* Cropper dialog */}
