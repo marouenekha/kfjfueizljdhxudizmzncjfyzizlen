@@ -119,6 +119,14 @@ export const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({ open, onOp
 
       if (error) throw error;
 
+      // Sync new avatar & name to all existing posts
+      if (avatarUrl || name) {
+        await supabase
+          .from('posts')
+          .update({ user_avatar: avatarUrl, user_name: name })
+          .eq('user_id', user.id);
+      }
+
       // Refetch user data to update the context
       const { data: updatedProfile } = await supabase
         .from('profiles')
