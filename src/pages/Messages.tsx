@@ -242,7 +242,7 @@ export default function Messages() {
 
     return (
       <Layout title={t('messages')} showMobileNav={false}>
-        <div className="flex flex-col h-[calc(100vh-56px)]">
+        <div className="flex flex-col h-[calc(100vh-56px)] md:h-screen max-w-2xl mx-auto w-full">
         {/* Chat Header */}
         <div className="flex-shrink-0 z-40 bg-background border-b border-border">
           <div className="flex items-center justify-between p-3 sm:p-4">
@@ -388,7 +388,7 @@ export default function Messages() {
 
   return (
     <Layout title={t('messages')}>
-      <div className="container-mobile space-y-4 py-4">
+      <div className="w-full max-w-2xl mx-auto px-4 space-y-4 py-4">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />

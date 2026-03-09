@@ -275,7 +275,7 @@ export default function Profile() {
   if (authLoading || (authUser && !authUser.profile)) {
     return (
       <Layout title="Profile">
-        <div className="container-mobile py-8 text-center space-y-4">
+        <div className="w-full max-w-2xl mx-auto px-4 py-8 text-center space-y-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           <p className="text-muted-foreground">Loading profile...</p>
         </div>
@@ -286,7 +286,7 @@ export default function Profile() {
   if (!authUser) {
     return (
       <Layout title="Profile">
-        <div className="container-mobile py-8 text-center space-y-4">
+        <div className="w-full max-w-2xl mx-auto px-4 py-8 text-center space-y-4">
           <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center">
             <Users className="w-8 h-8 text-muted-foreground" />
           </div>
@@ -301,7 +301,7 @@ export default function Profile() {
   }
   return (
     <Layout title="Profile">
-      <div className="container-mobile pb-4">
+      <div className="w-full max-w-2xl mx-auto px-4 pb-4">
         {/* Profile Header - No Cover Image */}
         <div className="pt-4 space-y-6">
           {/* Profile Picture & Basic Info */}
