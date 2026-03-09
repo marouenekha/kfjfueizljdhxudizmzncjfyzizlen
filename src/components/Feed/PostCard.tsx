@@ -55,6 +55,8 @@ interface Post {
 
 interface PostCardProps {
   post: Post;
+  onPostUpdated?: () => void;
+  onPostDeleted?: () => void;
 }
 
 interface Comment {
