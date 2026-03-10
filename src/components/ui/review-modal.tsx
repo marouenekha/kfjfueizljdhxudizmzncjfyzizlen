@@ -84,7 +84,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
           <div className="space-y-2">
             <label className="text-sm font-medium">{t('comment')}</label>
             <Textarea
-              placeholder="Share your experience..."
+              placeholder={t('shareExperience')}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               className="min-h-20"

@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface JobManagerProps {
   otherUserId: string;
@@ -25,9 +26,19 @@ interface Job {
   created_at: string;
 }
 
+const STATUS_KEY_MAP: Record<string, string> = {
+  requested: 'jobStatusRequested',
+  accepted: 'jobStatusAccepted',
+  in_progress: 'jobStatusInProgress',
+  completed: 'jobStatusCompleted',
+  cancelled: 'jobStatusCancelled',
+  refused: 'jobStatusRefused',
+};
+
 export const JobManager: React.FC<JobManagerProps> = ({ otherUserId, otherUserName }) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [showJobs, setShowJobs] = useState(false);
   const [showRequestDialog, setShowRequestDialog] = useState(false);
@@ -39,123 +50,63 @@ export const JobManager: React.FC<JobManagerProps> = ({ otherUserId, otherUserNa
   const [reviewComment, setReviewComment] = useState('');
 
   useEffect(() => {
-    if (user) {
-      fetchJobs();
-    }
+    if (user) fetchJobs();
   }, [user, otherUserId]);
 
   const fetchJobs = async () => {
     if (!user) return;
-
     try {
       const { data, error } = await supabase
-        .from('jobs')
-        .select('*')
+        .from('jobs').select('*')
         .or(`and(requester_id.eq.${user.id},provider_id.eq.${otherUserId}),and(requester_id.eq.${otherUserId},provider_id.eq.${user.id})`)
         .order('created_at', { ascending: false });
-
       if (error) throw error;
       setJobs((data || []) as Job[]);
     } catch (error: any) {
-      toast({
-        title: "Error fetching jobs",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: t('errorFetchingJobs'), description: error.message, variant: "destructive" });
     }
   };
 
   const requestJob = async () => {
     if (!user || !jobTitle.trim()) return;
-
     try {
-      const { error } = await supabase
-        .from('jobs')
-        .insert({
-          requester_id: user.id,
-          provider_id: otherUserId,
-          title: jobTitle.trim(),
-          description: jobDescription.trim() || null,
-          status: 'requested',
-        });
-
+      const { error } = await supabase.from('jobs').insert({
+        requester_id: user.id, provider_id: otherUserId,
+        title: jobTitle.trim(), description: jobDescription.trim() || null, status: 'requested',
+      });
       if (error) throw error;
-
-      toast({
-        title: "Job requested",
-        description: `Job request sent to ${otherUserName}`,
-      });
-
-      setJobTitle('');
-      setJobDescription('');
-      setShowRequestDialog(false);
-      fetchJobs();
+      toast({ title: t('jobRequested'), description: t('jobRequestSent', { name: otherUserName }) });
+      setJobTitle(''); setJobDescription(''); setShowRequestDialog(false); fetchJobs();
     } catch (error: any) {
-      toast({
-        title: "Error requesting job",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: t('errorRequestingJob'), description: error.message, variant: "destructive" });
     }
   };
 
   const updateJobStatus = async (jobId: string, newStatus: Job['status']) => {
     try {
-      const { error } = await supabase
-        .from('jobs')
-        .update({ 
-          status: newStatus,
-          ...(newStatus === 'completed' ? { completed_at: new Date().toISOString() } : {})
-        })
-        .eq('id', jobId);
-
+      const { error } = await supabase.from('jobs').update({
+        status: newStatus,
+        ...(newStatus === 'completed' ? { completed_at: new Date().toISOString() } : {})
+      }).eq('id', jobId);
       if (error) throw error;
-
-      toast({
-        title: "Job updated",
-        description: `Job ${newStatus.replace('_', ' ')}`,
-      });
-
+      toast({ title: t('jobUpdated'), description: t(STATUS_KEY_MAP[newStatus] || newStatus) });
       fetchJobs();
     } catch (error: any) {
-      toast({
-        title: "Error updating job",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: t('errorUpdatingJob'), description: error.message, variant: "destructive" });
     }
   };
 
   const submitReview = async () => {
     if (!user || !selectedJobId || !rating) return;
-
     try {
-      const { error } = await supabase
-        .from('ratings')
-        .upsert({
-          rater_id: user.id,
-          rated_id: otherUserId,
-          rating,
-          comment: reviewComment.trim() || null,
-        });
-
+      const { error } = await supabase.from('ratings').upsert({
+        rater_id: user.id, rated_id: otherUserId, rating, comment: reviewComment.trim() || null,
+      });
       if (error) throw error;
-
-      toast({
-        title: "Review submitted",
-        description: `You rated ${otherUserName} ${rating} star${rating !== 1 ? 's' : ''}`,
-      });
-
-      setRating(0);
-      setReviewComment('');
-      setSelectedJobId('');
-      setShowReviewDialog(false);
+      toast({ title: t('reviewSubmitted'), description: t('reviewSubmittedDesc', { name: otherUserName, rating }) });
+      setRating(0); setReviewComment(''); setSelectedJobId(''); setShowReviewDialog(false);
     } catch (error: any) {
-      toast({
-        title: "Error submitting review",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: t('errorSubmittingReview'), description: error.message, variant: "destructive" });
     }
   };
 
@@ -186,63 +137,35 @@ export const JobManager: React.FC<JobManagerProps> = ({ otherUserId, otherUserNa
 
   return (
     <div className="space-y-3">
-      {/* Job Request Button */}
       <Dialog open={showRequestDialog} onOpenChange={setShowRequestDialog}>
         <DialogTrigger asChild>
           <Button variant="outline" className="w-full">
             <Briefcase className="w-4 h-4 mr-2" />
-            Request Job
+            {t('requestJob')}
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Request Job from {otherUserName}</DialogTitle>
+            <DialogTitle>{t('requestJobFrom', { name: otherUserName })}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <Input
-              placeholder="Job Title"
-              value={jobTitle}
-              onChange={(e) => setJobTitle(e.target.value)}
-            />
-            <Textarea
-              placeholder="Job Description (optional)"
-              value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-              rows={3}
-            />
+            <Input placeholder={t('jobTitle')} value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} />
+            <Textarea placeholder={t('jobDescriptionOptional')} value={jobDescription} onChange={(e) => setJobDescription(e.target.value)} rows={3} />
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowRequestDialog(false)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={requestJob}
-                disabled={!jobTitle.trim()}
-                className="flex-1"
-              >
-                Send Request
-              </Button>
+              <Button variant="outline" onClick={() => setShowRequestDialog(false)} className="flex-1">{t('cancel')}</Button>
+              <Button onClick={requestJob} disabled={!jobTitle.trim()} className="flex-1">{t('sendRequest')}</Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Show/Hide Jobs Toggle */}
       {jobs.length > 0 && (
-        <Button
-          variant="ghost"
-          onClick={() => setShowJobs(!showJobs)}
-          className="w-full justify-center"
-        >
+        <Button variant="ghost" onClick={() => setShowJobs(!showJobs)} className="w-full justify-center">
           {showJobs ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
-          {showJobs ? 'Hide Jobs' : 'Show Jobs'} ({jobs.length})
+          {showJobs ? t('hideJobs') : t('showJobs')} ({jobs.length})
         </Button>
       )}
 
-      {/* Jobs List */}
       {showJobs && jobs.length > 0 && (
         <div className="space-y-2">
           <Separator />
@@ -251,73 +174,35 @@ export const JobManager: React.FC<JobManagerProps> = ({ otherUserId, otherUserNa
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <h4 className="font-medium text-sm">{job.title}</h4>
-                  {job.description && (
-                    <p className="text-xs text-muted-foreground mt-1">{job.description}</p>
-                  )}
+                  {job.description && <p className="text-xs text-muted-foreground mt-1">{job.description}</p>}
                   <p className="text-xs text-muted-foreground mt-1">
-                    {user?.id === job.requester_id ? 'Requested by you' : `Requested by ${otherUserName}`}
+                    {user?.id === job.requester_id ? t('requestedByYou') : t('requestedBy', { name: otherUserName })}
                   </p>
                 </div>
                 <Badge variant={getStatusColor(job.status)} className="ml-2">
                   {getStatusIcon(job.status)}
-                  <span className="ml-1 capitalize">{job.status.replace('_', ' ')}</span>
+                  <span className="ml-1 capitalize">{t(STATUS_KEY_MAP[job.status] || job.status)}</span>
                 </Badge>
               </div>
 
-              {/* Job Actions */}
               <div className="flex gap-2">
                 {canAcceptRefuse(job) && (
                   <>
-                    <Button
-                      size="sm"
-                      onClick={() => updateJobStatus(job.id, 'in_progress')}
-                    >
-                      Accept
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => updateJobStatus(job.id, 'refused')}
-                    >
-                      Refuse
-                    </Button>
+                    <Button size="sm" onClick={() => updateJobStatus(job.id, 'in_progress')}>{t('accept')}</Button>
+                    <Button size="sm" variant="outline" onClick={() => updateJobStatus(job.id, 'refused')}>{t('refuse')}</Button>
                   </>
                 )}
-
                 {canEndJob(job) && (
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      updateJobStatus(job.id, 'completed');
-                      setSelectedJobId(job.id);
-                      setTimeout(() => setShowReviewDialog(true), 1000);
-                    }}
-                  >
-                    End Job
+                  <Button size="sm" onClick={() => { updateJobStatus(job.id, 'completed'); setSelectedJobId(job.id); setTimeout(() => setShowReviewDialog(true), 1000); }}>
+                    {t('endJob')}
                   </Button>
                 )}
-
                 {canCancelJob(job) && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => updateJobStatus(job.id, 'cancelled')}
-                  >
-                    Cancel Job
-                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => updateJobStatus(job.id, 'cancelled')}>{t('cancelJob')}</Button>
                 )}
-
                 {canReview(job) && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setSelectedJobId(job.id);
-                      setShowReviewDialog(true);
-                    }}
-                  >
-                    <Star className="w-3 h-3 mr-1" />
-                    Review
+                  <Button size="sm" variant="outline" onClick={() => { setSelectedJobId(job.id); setShowReviewDialog(true); }}>
+                    <Star className="w-3 h-3 mr-1" />{t('review')}
                   </Button>
                 )}
               </div>
@@ -326,54 +211,23 @@ export const JobManager: React.FC<JobManagerProps> = ({ otherUserId, otherUserNa
         </div>
       )}
 
-      {/* Review Dialog */}
       <Dialog open={showReviewDialog} onOpenChange={setShowReviewDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Review {otherUserName}</DialogTitle>
+            <DialogTitle>{t('reviewUser', { name: otherUserName })}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {/* Star Rating */}
             <div className="flex justify-center space-x-1">
               {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => setRating(star)}
-                  className="p-1"
-                >
-                  <Star
-                    className={`w-8 h-8 ${
-                      star <= rating
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300"
-                    }`}
-                  />
+                <button key={star} onClick={() => setRating(star)} className="p-1">
+                  <Star className={`w-8 h-8 ${star <= rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`} />
                 </button>
               ))}
             </div>
-            
-            <Textarea
-              placeholder="Share your experience (optional)"
-              value={reviewComment}
-              onChange={(e) => setReviewComment(e.target.value)}
-              maxLength={300}
-            />
-            
+            <Textarea placeholder={t('shareExperience')} value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} maxLength={300} />
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowReviewDialog(false)}
-                className="flex-1"
-              >
-                Skip
-              </Button>
-              <Button
-                onClick={submitReview}
-                disabled={!rating}
-                className="flex-1"
-              >
-                Submit Review
-              </Button>
+              <Button variant="outline" onClick={() => setShowReviewDialog(false)} className="flex-1">{t('skip')}</Button>
+              <Button onClick={submitReview} disabled={!rating} className="flex-1">{t('submitReview')}</Button>
             </div>
           </div>
         </DialogContent>
