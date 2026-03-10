@@ -254,7 +254,7 @@ export default function Profile() {
                         <span className="text-sm font-medium">{review.rater_name}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(review.created_at), { addSuffix: true })}</span>
+                        <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(review.created_at), { addSuffix: true, locale: dateFnsLocale })}</span>
                         {review.rater_id === authUser?.id && (
                           <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive" onClick={() => handleDeleteReview(review.id)}>
                             <Trash2 className="w-3.5 h-3.5" />

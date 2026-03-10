@@ -66,7 +66,7 @@ export const NotificationsPopover = () => {
                   <Avatar className="w-8 h-8 shrink-0 mt-0.5"><AvatarImage src={notif.actorAvatar || undefined} /><AvatarFallback className="text-xs">{notif.actorName[0]}</AvatarFallback></Avatar>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm"><span className="font-medium">{notif.actorName}</span> {notif.message}</p>
-                    <div className="flex items-center gap-1.5 mt-0.5">{getIcon(notif.type)}<span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true })}</span></div>
+                    <div className="flex items-center gap-1.5 mt-0.5">{getIcon(notif.type)}<span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true, locale: dateFnsLocale })}</span></div>
                   </div>
                 </button>
               ))}
