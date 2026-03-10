@@ -84,7 +84,7 @@ export default function Messages() {
     const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
     if (date.toDateString() === today.toDateString()) return formatTime(timestamp);
     if (date.toDateString() === yesterday.toDateString()) return t('yesterday');
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString(i18n.language === 'ar' ? 'ar' : i18n.language === 'fr' ? 'fr' : 'en-US', { month: 'short', day: 'numeric' });
   };
 
   const handleSendMessage = async () => {
