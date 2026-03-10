@@ -26,8 +26,6 @@ export default {
   resetLinkSent: "Reset link sent!",
   resetLinkSentDescription: "Check your email for the password reset link.",
   resetPassword: "Reset Password",
-  newPassword: "New Password",
-  confirmNewPassword: "Confirm New Password",
   passwordResetSuccess: "Password reset successfully!",
   passwordResetSuccessDescription: "You can now log in with your new password.",
   passwordResetError: "Password reset failed",

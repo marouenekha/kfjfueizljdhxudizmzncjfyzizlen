@@ -26,8 +26,6 @@ export default {
   resetLinkSent: "تم إرسال الرابط!",
   resetLinkSentDescription: "تحقق من بريدك الإلكتروني للعثور على رابط إعادة التعيين.",
   resetPassword: "إعادة تعيين كلمة المرور",
-  newPassword: "كلمة المرور الجديدة",
-  confirmNewPassword: "تأكيد كلمة المرور الجديدة",
   passwordResetSuccess: "تم إعادة تعيين كلمة المرور!",
   passwordResetSuccessDescription: "يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.",
   passwordResetError: "فشل إعادة تعيين كلمة المرور",

@@ -26,8 +26,6 @@ export default {
   resetLinkSent: "Lien envoyé !",
   resetLinkSentDescription: "Vérifiez votre email pour le lien de réinitialisation.",
   resetPassword: "Réinitialiser le mot de passe",
-  newPassword: "Nouveau mot de passe",
-  confirmNewPassword: "Confirmer le nouveau mot de passe",
   passwordResetSuccess: "Mot de passe réinitialisé !",
   passwordResetSuccessDescription: "Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
   passwordResetError: "Échec de la réinitialisation",
