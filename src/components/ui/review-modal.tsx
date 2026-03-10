@@ -51,7 +51,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
         <div className="space-y-6 py-4">
           <div className="text-center">
             <p className="text-sm text-muted-foreground mb-4">
-              How was your experience with {providerName}?
+              {t('howWasExperience', { name: providerName })}
             </p>
           </div>
 
