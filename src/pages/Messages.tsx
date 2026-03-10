@@ -13,7 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { JobManager } from "@/components/JobManager";
 
 export default function Messages() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
