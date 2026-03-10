@@ -19,7 +19,8 @@ import { useTranslation } from "react-i18next";
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateFnsLocale = i18n.language === 'ar' ? ar : i18n.language === 'fr' ? fr : undefined;
   const [searchParams] = useSearchParams();
   const { user: authUser, isLoading: authLoading } = useAuth();
   const [isFollowing, setIsFollowing] = useState(false);
