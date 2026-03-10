@@ -177,7 +177,7 @@ const Auth = () => {
 
               {isLogin && (
                 <div className="text-center">
-                  <button type="button" className="text-xs text-muted-foreground hover:text-foreground transition-colors" disabled={loading}>
+                  <button type="button" onClick={handleForgotPassword} className="text-xs text-muted-foreground hover:text-foreground transition-colors" disabled={loading || forgotLoading}>
                     {t('forgotPassword')}
                   </button>
                 </div>
