@@ -330,6 +330,28 @@ export default {
   postNotFound: "Publication non trouvée",
   canOnlyEditOwn: "Vous ne pouvez modifier que vos propres publications",
 
+  // EditPostDialog
+  pleaseAddContent: "Veuillez ajouter du contenu à votre publication",
+  postUpdatedSuccess: "Publication mise à jour avec succès !",
+  failedToUpdatePost: "Échec de la mise à jour de la publication",
+  findService: "Chercher un service",
+  provideService: "Proposer un service",
+  contentLabel: "Contenu",
+  describeServiceRequest: "Décrivez votre demande ou offre de service...",
+  currentImages: "Images actuelles",
+  imageEditingSoon: "La modification d'images sera bientôt disponible",
+
+  // Review Modal
+  howWasExperience: "Comment était votre expérience avec {{name}} ?",
+
+  // Job Manager status
+  jobStatusRequested: "demandé",
+  jobStatusAccepted: "accepté",
+  jobStatusInProgress: "en cours",
+  jobStatusCompleted: "terminé",
+  jobStatusCancelled: "annulé",
+  jobStatusRefused: "refusé",
+
   // Services list
   cleaning: "Nettoyage",
   plumbing: "Plomberie",

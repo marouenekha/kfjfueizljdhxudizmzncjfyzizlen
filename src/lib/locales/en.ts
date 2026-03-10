@@ -330,6 +330,28 @@ export default {
   postNotFound: "Post not found",
   canOnlyEditOwn: "You can only edit your own posts",
 
+  // EditPostDialog
+  pleaseAddContent: "Please add some content to your post",
+  postUpdatedSuccess: "Post updated successfully!",
+  failedToUpdatePost: "Failed to update post",
+  findService: "Find Service",
+  provideService: "Provide Service",
+  contentLabel: "Content",
+  describeServiceRequest: "Describe your service request or offer...",
+  currentImages: "Current Images",
+  imageEditingSoon: "Image editing will be available soon",
+
+  // Review Modal
+  howWasExperience: "How was your experience with {{name}}?",
+
+  // Job Manager status
+  jobStatusRequested: "requested",
+  jobStatusAccepted: "accepted",
+  jobStatusInProgress: "in progress",
+  jobStatusCompleted: "completed",
+  jobStatusCancelled: "cancelled",
+  jobStatusRefused: "refused",
+
   // Services list
   cleaning: "Cleaning",
   plumbing: "Plumbing",
