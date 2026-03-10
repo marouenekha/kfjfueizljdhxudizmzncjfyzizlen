@@ -24,7 +24,31 @@ const Auth = () => {
     email: '', password: '', confirmPassword: '', name: '', isProvider: false
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [forgotLoading, setForgotLoading] = useState(false);
   const { toast } = useToast();
+
+  const handleForgotPassword = async () => {
+    if (!formData.email) {
+      setErrors({ email: t('emailRequired') });
+      return;
+    }
+    if (!validateEmail(formData.email)) {
+      setErrors({ email: t('emailInvalid') });
+      return;
+    }
+    setForgotLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast({ title: t('resetLinkSent'), description: t('resetLinkSentDescription') });
+    } catch (error: any) {
+      toast({ title: t('passwordResetError'), description: error.message, variant: 'destructive' });
+    } finally {
+      setForgotLoading(false);
+    }
+  };
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePassword = (password: string) => password.length >= 6;

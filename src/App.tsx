@@ -70,6 +70,7 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/provider-signup" element={<ProviderSignup />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
