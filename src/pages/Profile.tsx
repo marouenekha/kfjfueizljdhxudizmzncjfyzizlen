@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Edit, Star, MapPin, Calendar, Award, Users, MessageCircle, FileText, Loader2, UserPlus, UserCheck, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { ar } from "date-fns/locale/ar";
+import { fr } from "date-fns/locale/fr";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/Layout/Layout";
 import { Button } from "@/components/ui/button";
