@@ -76,7 +76,7 @@ export default function Messages() {
 
   const filteredConversations = conversations.filter(c => c.user.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
-  const formatTime = (timestamp: string) => new Date(timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const formatTime = (timestamp: string) => new Date(timestamp).toLocaleTimeString(i18n.language === 'ar' ? 'ar' : i18n.language === 'fr' ? 'fr' : 'en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
 
   const formatDate = (timestamp: string) => {
     const date = new Date(timestamp);
