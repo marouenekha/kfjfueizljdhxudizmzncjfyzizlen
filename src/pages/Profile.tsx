@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Edit, Star, MapPin, Calendar, Award, Users, MessageCircle, FileText, Loader2, UserPlus, UserCheck, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { ar } from "date-fns/locale/ar";
+import { fr } from "date-fns/locale/fr";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/Layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -17,7 +19,8 @@ import { useTranslation } from "react-i18next";
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateFnsLocale = i18n.language === 'ar' ? ar : i18n.language === 'fr' ? fr : undefined;
   const [searchParams] = useSearchParams();
   const { user: authUser, isLoading: authLoading } = useAuth();
   const [isFollowing, setIsFollowing] = useState(false);
@@ -251,7 +254,7 @@ export default function Profile() {
                         <span className="text-sm font-medium">{review.rater_name}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(review.created_at), { addSuffix: true })}</span>
+                        <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(review.created_at), { addSuffix: true, locale: dateFnsLocale })}</span>
                         {review.rater_id === authUser?.id && (
                           <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive" onClick={() => handleDeleteReview(review.id)}>
                             <Trash2 className="w-3.5 h-3.5" />

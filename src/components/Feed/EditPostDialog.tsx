@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Wrench, X, ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface EditPostDialogProps {
   post: {
@@ -30,6 +31,7 @@ export function EditPostDialog({
   onOpenChange,
   onPostUpdated,
 }: EditPostDialogProps) {
+  const { t } = useTranslation();
   const [content, setContent] = useState(post.content || "");
   const [postType, setPostType] = useState<"find" | "provide">(
     post.post_type as "find" | "provide"
@@ -43,7 +45,7 @@ export function EditPostDialog({
 
   const handleSave = async () => {
     if (!content.trim()) {
-      toast.error("Please add some content to your post");
+      toast.error(t('pleaseAddContent'));
       return;
     }
 
@@ -59,12 +61,12 @@ export function EditPostDialog({
 
       if (error) throw error;
 
-      toast.success("Post updated successfully!");
+      toast.success(t('postUpdatedSuccess'));
       onPostUpdated();
       onOpenChange(false);
     } catch (error: any) {
       console.error("Error updating post:", error);
-      toast.error("Failed to update post");
+      toast.error(t('failedToUpdatePost'));
     } finally {
       setIsLoading(false);
     }
@@ -74,7 +76,7 @@ export function EditPostDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit Post</DialogTitle>
+          <DialogTitle>{t('editPost')}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -89,7 +91,7 @@ export function EditPostDialog({
               }`}
             >
               <Search className="w-4 h-4" />
-              Find Service
+              {t('findService')}
             </button>
             <button
               onClick={() => setPostType("provide")}
@@ -100,17 +102,17 @@ export function EditPostDialog({
               }`}
             >
               <Wrench className="w-4 h-4" />
-              Provide Service
+              {t('provideService')}
             </button>
           </div>
 
           {/* Content */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Content</label>
+            <label className="text-sm font-medium">{t('contentLabel')}</label>
             <Textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Describe your service request or offer..."
+              placeholder={t('describeServiceRequest')}
               className="min-h-[120px] resize-none"
               maxLength={500}
             />
@@ -124,21 +126,21 @@ export function EditPostDialog({
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center gap-2">
                 <ImageIcon className="w-4 h-4" />
-                Current Images
+                {t('currentImages')}
               </label>
               <div className="grid grid-cols-2 gap-2">
                 {post.images.map((url, index) => (
                   <div key={index} className="aspect-square bg-muted rounded-lg overflow-hidden">
                     <img
                       src={url}
-                      alt={`Image ${index + 1}`}
+                      alt={`${t('image')} ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </div>
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                Image editing will be available soon
+                {t('imageEditingSoon')}
               </p>
             </div>
           )}
@@ -150,14 +152,14 @@ export function EditPostDialog({
               onClick={() => onOpenChange(false)}
               className="flex-1"
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               onClick={handleSave}
               disabled={isLoading}
               className="flex-1"
             >
-              {isLoading ? "Saving..." : "Save Changes"}
+              {isLoading ? t('saving') : t('saveChanges')}
             </Button>
           </div>
         </div>

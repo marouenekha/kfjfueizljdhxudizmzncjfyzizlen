@@ -34,6 +34,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { formatDistanceToNow } from "date-fns";
+import { ar } from "date-fns/locale/ar";
+import { fr } from "date-fns/locale/fr";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { SharePostDialog } from "./SharePostDialog";
@@ -70,7 +72,8 @@ interface Comment {
 export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) {
   const navigate = useNavigate();
   const { user: authUser } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateFnsLocale = i18n.language === 'ar' ? ar : i18n.language === 'fr' ? fr : undefined;
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -88,7 +91,7 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
   const images = post.images || [];
   const isCarousel = post.media_type === "carousel" && images.length > 1;
   const timeAgo = post.created_at
-    ? formatDistanceToNow(new Date(post.created_at), { addSuffix: true })
+    ? formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: dateFnsLocale })
     : "";
 
   useEffect(() => {

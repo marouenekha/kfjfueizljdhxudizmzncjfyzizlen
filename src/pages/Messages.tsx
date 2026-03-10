@@ -13,7 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { JobManager } from "@/components/JobManager";
 
 export default function Messages() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -76,7 +76,7 @@ export default function Messages() {
 
   const filteredConversations = conversations.filter(c => c.user.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
-  const formatTime = (timestamp: string) => new Date(timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const formatTime = (timestamp: string) => new Date(timestamp).toLocaleTimeString(i18n.language === 'ar' ? 'ar' : i18n.language === 'fr' ? 'fr' : 'en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
 
   const formatDate = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -84,7 +84,7 @@ export default function Messages() {
     const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
     if (date.toDateString() === today.toDateString()) return formatTime(timestamp);
     if (date.toDateString() === yesterday.toDateString()) return t('yesterday');
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString(i18n.language === 'ar' ? 'ar' : i18n.language === 'fr' ? 'fr' : 'en-US', { month: 'short', day: 'numeric' });
   };
 
   const handleSendMessage = async () => {

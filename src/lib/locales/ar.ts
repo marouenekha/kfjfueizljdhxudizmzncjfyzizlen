@@ -330,6 +330,28 @@ export default {
   postNotFound: "المنشور غير موجود",
   canOnlyEditOwn: "يمكنك فقط تعديل منشوراتك",
 
+  // EditPostDialog
+  pleaseAddContent: "يرجى إضافة محتوى لمنشورك",
+  postUpdatedSuccess: "تم تحديث المنشور بنجاح!",
+  failedToUpdatePost: "فشل تحديث المنشور",
+  findService: "البحث عن خدمة",
+  provideService: "تقديم خدمة",
+  contentLabel: "المحتوى",
+  describeServiceRequest: "صف طلب الخدمة أو عرضك...",
+  currentImages: "الصور الحالية",
+  imageEditingSoon: "تعديل الصور سيكون متاحاً قريباً",
+
+  // Review Modal
+  howWasExperience: "كيف كانت تجربتك مع {{name}}؟",
+
+  // Job Manager status
+  jobStatusRequested: "مطلوب",
+  jobStatusAccepted: "مقبول",
+  jobStatusInProgress: "قيد التنفيذ",
+  jobStatusCompleted: "مكتمل",
+  jobStatusCancelled: "ملغى",
+  jobStatusRefused: "مرفوض",
+
   // Services list
   cleaning: "تنظيف",
   plumbing: "سباكة",
