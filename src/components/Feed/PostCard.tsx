@@ -34,6 +34,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { formatDistanceToNow } from "date-fns";
+import { ar } from "date-fns/locale/ar";
+import { fr } from "date-fns/locale/fr";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { SharePostDialog } from "./SharePostDialog";
