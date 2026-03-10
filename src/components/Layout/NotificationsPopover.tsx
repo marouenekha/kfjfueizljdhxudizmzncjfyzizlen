@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Bell, UserPlus, Star, MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { ar } from "date-fns/locale/ar";
+import { fr } from "date-fns/locale/fr";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
