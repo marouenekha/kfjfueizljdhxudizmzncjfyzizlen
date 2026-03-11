@@ -374,4 +374,15 @@ export default {
   tutoring: "تدريس",
   petCare: "رعاية حيوانات",
   photography: "تصوير",
+
+  // Profile Roles
+  profileRoleLabel: "نوع الملف الشخصي",
+  role_provider: "مقدم خدمة",
+  role_seller: "بائع",
+  role_both: "كلاهما",
+  profileRoleHint: "اختر ما تقدمه: خدمات أو منتجات أو كلاهما.",
+  seller: "بائع",
+  store: "متجر",
+  noStoreItems: "لا توجد منتجات بعد",
+  noStoreItemsDesc: "ستظهر المنتجات والعناصر المعروضة للبيع هنا.",
 };
