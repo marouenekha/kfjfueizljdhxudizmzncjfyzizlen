@@ -29,6 +29,7 @@ export const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({ open, onOp
   const [serviceTypes, setServiceTypes] = useState<string[]>([]); const [loading, setLoading] = useState(false);
   const [showCropper, setShowCropper] = useState(false); const [cropImageUrl, setCropImageUrl] = useState('');
   const [showLocationSelector, setShowLocationSelector] = useState(false);
+  const [profileRole, setProfileRole] = useState<string>("provider");
   const [selectedLocation, setSelectedLocation] = useState<{ address: string; latitude: number; longitude: number; } | null>(null);
 
   const serviceKeys = ["cleaning", "plumbing", "electrical", "painting", "carpentry", "gardening", "moving", "tutoring", "petCare", "photography"];
