@@ -68,10 +68,11 @@ export const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({ open, onOp
     try {
       const { error } = await supabase.from('profiles').upsert({
         user_id: user.id, name, bio, location: selectedLocation?.address || location,
-        avatar_url: avatarUrl, phone, is_provider: isProvider,
+        avatar_url: avatarUrl, phone, is_provider: isProvider || profileRole === 'provider' || profileRole === 'both',
         service_types: serviceTypes.length > 0 ? serviceTypes : null,
         latitude: selectedLocation?.latitude || null, longitude: selectedLocation?.longitude || null,
-      }, { onConflict: 'user_id' });
+        profile_role: profileRole,
+      } as any, { onConflict: 'user_id' });
       if (error) throw error;
       if (avatarUrl || name) await supabase.from('posts').update({ user_avatar: avatarUrl, user_name: name }).eq('user_id', user.id);
       window.location.reload();
