@@ -290,7 +290,7 @@ export default function Profile() {
             </div>
           )}
 
-          {activeTab === "store" && <StoreTab />}
+          {activeTab === "store" && <StoreTab userId={user?.id || ""} isOwnProfile={isOwnProfile} />}
           
           {activeTab === "reviews" && (
             <>

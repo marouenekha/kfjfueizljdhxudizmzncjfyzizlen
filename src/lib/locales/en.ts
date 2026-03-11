@@ -338,6 +338,7 @@ export default {
 
   // Common
   error: "Error",
+  edit: "Edit",
   postNotFound: "Post not found",
   canOnlyEditOwn: "You can only edit your own posts",
 
@@ -385,4 +386,17 @@ export default {
   store: "Store",
   noStoreItems: "No store items yet",
   noStoreItemsDesc: "Products and items for sale will appear here.",
+  addProduct: "Add Product",
+  editProduct: "Edit Product",
+  productTitle: "Title",
+  productTitlePlaceholder: "Product name...",
+  productDescription: "Description",
+  productDescriptionPlaceholder: "Describe your product...",
+  productPrice: "Price",
+  productImages: "Images",
+  productAdded: "Product added!",
+  productUpdated: "Product updated!",
+  productDeleted: "Product deleted",
+  searchProducts: "Search products…",
+  noSearchResults: "No products found",
 };
