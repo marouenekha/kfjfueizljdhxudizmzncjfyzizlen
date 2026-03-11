@@ -398,7 +398,4 @@ export default {
   productDeleted: "Product deleted",
   searchProducts: "Search products…",
   noSearchResults: "No products found",
-  edit: "Edit",
-  delete: "Delete",
-  error: "Error",
 };
