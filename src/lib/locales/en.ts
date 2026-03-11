@@ -338,6 +338,7 @@ export default {
 
   // Common
   error: "Error",
+  edit: "Edit",
   postNotFound: "Post not found",
   canOnlyEditOwn: "You can only edit your own posts",
 
