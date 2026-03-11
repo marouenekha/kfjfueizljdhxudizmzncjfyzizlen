@@ -374,4 +374,15 @@ export default {
   tutoring: "Tutorat",
   petCare: "Soins d'animaux",
   photography: "Photographie",
+
+  // Profile Roles
+  profileRoleLabel: "Type de profil",
+  role_provider: "Prestataire",
+  role_seller: "Vendeur",
+  role_both: "Les deux",
+  profileRoleHint: "Choisissez ce que vous proposez : services, produits ou les deux.",
+  seller: "Vendeur",
+  store: "Boutique",
+  noStoreItems: "Pas encore d'articles",
+  noStoreItemsDesc: "Les produits et articles en vente apparaîtront ici.",
 };

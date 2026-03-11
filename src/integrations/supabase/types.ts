@@ -206,6 +206,7 @@ export type Database = {
           longitude: number | null
           name: string | null
           phone: string | null
+          profile_role: string | null
           service_types: string[] | null
           updated_at: string
           user_id: string
@@ -222,6 +223,7 @@ export type Database = {
           longitude?: number | null
           name?: string | null
           phone?: string | null
+          profile_role?: string | null
           service_types?: string[] | null
           updated_at?: string
           user_id: string
@@ -238,6 +240,7 @@ export type Database = {
           longitude?: number | null
           name?: string | null
           phone?: string | null
+          profile_role?: string | null
           service_types?: string[] | null
           updated_at?: string
           user_id?: string

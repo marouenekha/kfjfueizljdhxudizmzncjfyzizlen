@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Edit, Star, MapPin, Calendar, Award, Users, MessageCircle, FileText, Loader2, UserPlus, UserCheck, Trash2 } from "lucide-react";
+import { Edit, Star, MapPin, Calendar, Award, Users, MessageCircle, FileText, Loader2, UserPlus, UserCheck, Trash2, ShoppingBag } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale/ar";
 import { fr } from "date-fns/locale/fr";
@@ -8,13 +8,14 @@ import { Layout } from "@/components/Layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RatingDisplay } from "@/components/ui/rating-display";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileEditDialog } from "@/components/ProfileEditDialog";
 import { RatingModal } from "@/components/RatingModal";
 import { PostCard } from "@/components/Feed/PostCard";
+import { SwipeableTabs } from "@/components/Profile/SwipeableTabs";
+import { StoreTab } from "@/components/Profile/StoreTab";
 import { useTranslation } from "react-i18next";
 
 export default function Profile() {
@@ -36,6 +37,7 @@ export default function Profile() {
   const [postsLoading, setPostsLoading] = useState(true);
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("posts");
   const viewingUserId = searchParams.get('user');
   const isOwnProfile = !viewingUserId || viewingUserId === authUser?.id;
   
@@ -43,8 +45,44 @@ export default function Profile() {
     id: authUser.id, name: authUser.profile.name || "User", avatar: authUser.profile.avatar_url,
     bio: authUser.profile.bio || "", location: authUser.profile.location || "",
     isProvider: authUser.profile.is_provider, serviceTypes: authUser.profile.service_types || [],
-    phone: authUser.profile.phone, joinedDate: new Date().toISOString(), isOnline: true
+    phone: authUser.profile.phone, joinedDate: new Date().toISOString(), isOnline: true,
+    profileRole: (authUser.profile as any).profile_role || "provider",
   } : null) : userProfile;
+
+  // Determine visible tabs based on profile role
+  const getVisibleTabs = () => {
+    const role = user?.profileRole || 'provider';
+    const tabs: { key: string; label: string }[] = [];
+
+    // Posts always visible
+    if (userPosts.length > 0 || isOwnProfile) {
+      tabs.push({ key: "posts", label: t("posts") });
+    }
+
+    // Portfolio: visible for provider and both
+    if (role === 'provider' || role === 'both') {
+      tabs.push({ key: "portfolio", label: t("portfolio") });
+    }
+
+    // Store: visible for seller and both
+    if (role === 'seller' || role === 'both') {
+      tabs.push({ key: "store", label: t("store") });
+    }
+
+    // Reviews always visible
+    tabs.push({ key: "reviews", label: t("reviews") });
+
+    return tabs;
+  };
+
+  const visibleTabs = getVisibleTabs();
+
+  // Reset active tab if current one is not in visible tabs
+  useEffect(() => {
+    if (visibleTabs.length > 0 && !visibleTabs.find(t => t.key === activeTab)) {
+      setActiveTab(visibleTabs[0].key);
+    }
+  }, [user?.profileRole, visibleTabs.length]);
 
   useEffect(() => {
     const targetId = viewingUserId && viewingUserId !== authUser?.id ? viewingUserId : authUser?.id;
@@ -93,7 +131,8 @@ export default function Profile() {
         id: viewingUserId, name: data.name || "User", avatar: data.avatar_url,
         bio: data.bio || "", location: data.location || "",
         isProvider: data.is_provider, serviceTypes: data.service_types || [],
-        phone: data.phone, joinedDate: data.created_at, isOnline: false
+        phone: data.phone, joinedDate: data.created_at, isOnline: false,
+        profileRole: (data as any).profile_role || "provider",
       });
       fetchUserRating(viewingUserId); fetchFollowerCount(viewingUserId); fetchJobsCompleted(viewingUserId);
     } catch (error) { console.error('Error:', error); setUserProfile(null); }
@@ -154,6 +193,25 @@ export default function Profile() {
     </div></Layout>);
   }
 
+  const renderRoleBadge = () => {
+    const role = user?.profileRole;
+    if (role === 'both') {
+      return (
+        <>
+          <Badge variant="secondary" className="text-xs"><Award className="w-3 h-3 mr-1" />{t('provider')}</Badge>
+          <Badge variant="outline" className="text-xs"><ShoppingBag className="w-3 h-3 mr-1" />{t('seller')}</Badge>
+        </>
+      );
+    }
+    if (role === 'seller') {
+      return <Badge variant="outline" className="text-xs"><ShoppingBag className="w-3 h-3 mr-1" />{t('seller')}</Badge>;
+    }
+    if (user?.isProvider) {
+      return <Badge variant="secondary" className="text-xs"><Award className="w-3 h-3 mr-1" />{t('provider')}</Badge>;
+    }
+    return null;
+  };
+
   return (
     <Layout title={t('profile')}>
       <div className="w-full max-w-2xl mx-auto px-4 pb-4">
@@ -169,9 +227,9 @@ export default function Profile() {
             <div className="flex-1 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <h1 className="text-xl sm:text-2xl font-bold">{user?.name}</h1>
-                    {user?.isProvider && <Badge variant="secondary" className="text-xs"><Award className="w-3 h-3 mr-1" />{t('provider')}</Badge>}
+                    {renderRoleBadge()}
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
                     {user?.location && <div className="flex items-center gap-1"><MapPin className="w-4 h-4" /><span>{user.location}</span></div>}
@@ -197,7 +255,7 @@ export default function Profile() {
           </div>
 
           {user?.bio && <p className="text-sm leading-relaxed">{user.bio}</p>}
-          {user?.serviceTypes && user.serviceTypes.length > 0 && (
+          {user?.serviceTypes && user.serviceTypes.length > 0 && (user?.profileRole === 'provider' || user?.profileRole === 'both') && (
             <div className="flex flex-wrap gap-2">{user.serviceTypes.map((s: string) => <Badge key={s} variant="outline" className="text-xs">{s}</Badge>)}</div>
           )}
 
@@ -212,64 +270,64 @@ export default function Profile() {
           </div>
         </div>
 
-        <Tabs defaultValue="posts" className="mt-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="posts">{t('posts')}</TabsTrigger>
-            <TabsTrigger value="portfolio">{t('portfolio')}</TabsTrigger>
-            <TabsTrigger value="reviews">{t('reviews')}</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="posts" className="mt-4">
-            {postsLoading ? <div className="text-center py-12"><Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" /></div>
-            : userPosts.length === 0 ? (
-              <div className="text-center py-12 space-y-4">
-                <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center"><FileText className="w-8 h-8 text-muted-foreground" /></div>
-                <h3 className="text-lg font-semibold">{t('noPostExists')}</h3>
-              </div>
-            ) : <div className="space-y-4">{userPosts.map((post) => <PostCard key={post.id} post={post} />)}</div>}
-          </TabsContent>
+        <SwipeableTabs tabs={visibleTabs} activeTab={activeTab} onTabChange={setActiveTab}>
+          {activeTab === "posts" && (
+            <>
+              {postsLoading ? <div className="text-center py-12"><Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" /></div>
+              : userPosts.length === 0 ? (
+                <div className="text-center py-12 space-y-4">
+                  <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center"><FileText className="w-8 h-8 text-muted-foreground" /></div>
+                  <h3 className="text-lg font-semibold">{t('noPostExists')}</h3>
+                </div>
+              ) : <div className="space-y-4">{userPosts.map((post) => <PostCard key={post.id} post={post} />)}</div>}
+            </>
+          )}
 
-          <TabsContent value="portfolio" className="mt-4">
+          {activeTab === "portfolio" && (
             <div className="text-center py-12 space-y-4">
               <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center"><FileText className="w-8 h-8 text-muted-foreground" /></div>
               <h3 className="text-lg font-semibold">{t('noPortfolioItems')}</h3>
             </div>
-          </TabsContent>
+          )}
+
+          {activeTab === "store" && <StoreTab />}
           
-          <TabsContent value="reviews" className="mt-4">
-            {reviewsLoading ? <div className="text-center py-12"><Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" /></div>
-            : reviews.length === 0 ? (
-              <div className="text-center py-12 space-y-4">
-                <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center"><Star className="w-8 h-8 text-muted-foreground" /></div>
-                <h3 className="text-lg font-semibold">{t('noReviews')}</h3>
-                <p className="text-muted-foreground max-w-md mx-auto">{isOwnProfile ? t('noReviewsOwn') : t('noReviewsOther')}</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {reviews.map((review) => (
-                  <div key={review.id} className="border rounded-lg p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Avatar className="w-8 h-8"><AvatarImage src={review.rater_avatar} /><AvatarFallback className="text-xs">{review.rater_name?.[0] || 'U'}</AvatarFallback></Avatar>
-                        <span className="text-sm font-medium">{review.rater_name}</span>
+          {activeTab === "reviews" && (
+            <>
+              {reviewsLoading ? <div className="text-center py-12"><Loader2 className="w-8 h-8 animate-spin mx-auto text-muted-foreground" /></div>
+              : reviews.length === 0 ? (
+                <div className="text-center py-12 space-y-4">
+                  <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center"><Star className="w-8 h-8 text-muted-foreground" /></div>
+                  <h3 className="text-lg font-semibold">{t('noReviews')}</h3>
+                  <p className="text-muted-foreground max-w-md mx-auto">{isOwnProfile ? t('noReviewsOwn') : t('noReviewsOther')}</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="border rounded-lg p-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="w-8 h-8"><AvatarImage src={review.rater_avatar} /><AvatarFallback className="text-xs">{review.rater_name?.[0] || 'U'}</AvatarFallback></Avatar>
+                          <span className="text-sm font-medium">{review.rater_name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(review.created_at), { addSuffix: true, locale: dateFnsLocale })}</span>
+                          {review.rater_id === authUser?.id && (
+                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive" onClick={() => handleDeleteReview(review.id)}>
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(review.created_at), { addSuffix: true, locale: dateFnsLocale })}</span>
-                        {review.rater_id === authUser?.id && (
-                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive" onClick={() => handleDeleteReview(review.id)}>
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        )}
-                      </div>
+                      <div className="flex gap-0.5">{[1,2,3,4,5].map((s) => <Star key={s} className={`w-4 h-4 ${s <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'}`} />)}</div>
+                      {review.comment && <p className="text-sm text-muted-foreground">{review.comment}</p>}
                     </div>
-                    <div className="flex gap-0.5">{[1,2,3,4,5].map((s) => <Star key={s} className={`w-4 h-4 ${s <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'}`} />)}</div>
-                    {review.comment && <p className="text-sm text-muted-foreground">{review.comment}</p>}
-                  </div>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </SwipeableTabs>
         
         <ProfileEditDialog open={showEditDialog} onOpenChange={setShowEditDialog} />
         {user && !isOwnProfile && (

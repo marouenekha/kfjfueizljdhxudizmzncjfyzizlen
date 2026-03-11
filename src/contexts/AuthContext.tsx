@@ -17,6 +17,7 @@ export interface Profile {
   verified: boolean;
   bio?: string;
   phone?: string;
+  profile_role?: string;
 }
 
 export interface User {

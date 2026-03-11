@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS profile_role text DEFAULT 'provider' CHECK (profile_role IN ('provider', 'seller', 'both'));

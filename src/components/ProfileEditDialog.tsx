@@ -29,6 +29,7 @@ export const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({ open, onOp
   const [serviceTypes, setServiceTypes] = useState<string[]>([]); const [loading, setLoading] = useState(false);
   const [showCropper, setShowCropper] = useState(false); const [cropImageUrl, setCropImageUrl] = useState('');
   const [showLocationSelector, setShowLocationSelector] = useState(false);
+  const [profileRole, setProfileRole] = useState<string>("provider");
   const [selectedLocation, setSelectedLocation] = useState<{ address: string; latitude: number; longitude: number; } | null>(null);
 
   const serviceKeys = ["cleaning", "plumbing", "electrical", "painting", "carpentry", "gardening", "moving", "tutoring", "petCare", "photography"];
@@ -39,6 +40,7 @@ export const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({ open, onOp
       setName(p.name || ""); setBio(p.bio || ""); setLocation(p.location || "");
       setAvatarUrl(p.avatar_url || ""); setPhone(p.phone || "");
       setIsProvider(p.is_provider || false); setServiceTypes(p.service_types || []);
+      setProfileRole((p as any).profile_role || "provider");
       if ((p as any).latitude && (p as any).longitude) {
         setSelectedLocation({ address: p.location || '', latitude: (p as any).latitude, longitude: (p as any).longitude });
       }
@@ -66,10 +68,11 @@ export const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({ open, onOp
     try {
       const { error } = await supabase.from('profiles').upsert({
         user_id: user.id, name, bio, location: selectedLocation?.address || location,
-        avatar_url: avatarUrl, phone, is_provider: isProvider,
+        avatar_url: avatarUrl, phone, is_provider: isProvider || profileRole === 'provider' || profileRole === 'both',
         service_types: serviceTypes.length > 0 ? serviceTypes : null,
         latitude: selectedLocation?.latitude || null, longitude: selectedLocation?.longitude || null,
-      }, { onConflict: 'user_id' });
+        profile_role: profileRole,
+      } as any, { onConflict: 'user_id' });
       if (error) throw error;
       if (avatarUrl || name) await supabase.from('posts').update({ user_avatar: avatarUrl, user_name: name }).eq('user_id', user.id);
       window.location.reload();
@@ -107,21 +110,46 @@ export const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({ open, onOp
                 </div>
               </div>
               <div><Label htmlFor="phone">{t('phone')}</Label><Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={t('yourPhoneNumber')} /></div>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="provider" checked={isProvider} onCheckedChange={(checked) => setIsProvider(checked === true)} />
-                  <Label htmlFor="provider" className="text-sm">{t('imServiceProvider')}</Label>
+              
+              {/* Profile Role Selection */}
+              <div className="space-y-2">
+                <Label>{t('profileRoleLabel')}</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {(['provider', 'seller', 'both'] as const).map((role) => (
+                    <button
+                      key={role}
+                      type="button"
+                      onClick={() => setProfileRole(role)}
+                      className={`px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
+                        profileRole === role
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-background text-foreground border-border hover:bg-accent'
+                      }`}
+                    >
+                      {t(`role_${role}`)}
+                    </button>
+                  ))}
                 </div>
-                {isProvider && (
-                  <div><Label>{t('serviceTypes')}</Label>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {serviceKeys.map((key) => (
-                        <Badge key={key} variant={serviceTypes.includes(t(key)) ? "default" : "outline"} className="cursor-pointer" onClick={() => toggleServiceType(t(key))}>{t(key)}</Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <p className="text-xs text-muted-foreground">{t('profileRoleHint')}</p>
               </div>
+
+              {(profileRole === 'provider' || profileRole === 'both') && (
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="provider" checked={isProvider} onCheckedChange={(checked) => setIsProvider(checked === true)} />
+                    <Label htmlFor="provider" className="text-sm">{t('imServiceProvider')}</Label>
+                  </div>
+                  {isProvider && (
+                    <div><Label>{t('serviceTypes')}</Label>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {serviceKeys.map((key) => (
+                          <Badge key={key} variant={serviceTypes.includes(t(key)) ? "default" : "outline"} className="cursor-pointer" onClick={() => toggleServiceType(t(key))}>{t(key)}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             <div className="flex gap-2 pt-2">
               <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1">{t('cancel')}</Button>

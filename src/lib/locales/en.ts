@@ -374,4 +374,15 @@ export default {
   tutoring: "Tutoring",
   petCare: "Pet Care",
   photography: "Photography",
+
+  // Profile Roles
+  profileRoleLabel: "Profile Type",
+  role_provider: "Service Provider",
+  role_seller: "Seller",
+  role_both: "Both",
+  profileRoleHint: "Choose what you offer: services, products, or both.",
+  seller: "Seller",
+  store: "Store",
+  noStoreItems: "No store items yet",
+  noStoreItemsDesc: "Products and items for sale will appear here.",
 };
