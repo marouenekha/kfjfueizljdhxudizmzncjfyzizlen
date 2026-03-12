@@ -16,6 +16,7 @@ import { RatingModal } from "@/components/RatingModal";
 import { PostCard } from "@/components/Feed/PostCard";
 import { SwipeableTabs } from "@/components/Profile/SwipeableTabs";
 import { StoreTab } from "@/components/Profile/StoreTab";
+import { PortfolioTab } from "@/components/Profile/PortfolioTab";
 import { useTranslation } from "react-i18next";
 
 export default function Profile() {
