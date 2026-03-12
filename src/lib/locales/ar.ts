@@ -398,4 +398,21 @@ export default {
   productDeleted: "تم حذف المنتج",
   searchProducts: "البحث في المنتجات…",
   noSearchResults: "لم يتم العثور على منتجات",
+
+  // Creation screen
+  create: "إنشاء",
+  storeProduct: "منتج",
+  createPortfolioItem: "عنصر معرض أعمال جديد",
+  createStoreProduct: "منتج متجر جديد",
+  projectImages: "صور المشروع",
+  projectVideo: "فيديو المشروع",
+  addVideoOptional: "إضافة فيديو (اختياري)",
+  projectTitleLabel: "عنوان المشروع",
+  projectTitlePlaceholder: "مثال: تجديد مطبخ...",
+  portfolioDescPlaceholder: "صف مشروعك أو عملك المنجز...",
+  tagsOptional: "وسوم (اختياري)",
+  tagsPlaceholder: "مثال: تصميم، تجديد، هوية بصرية",
+  publishPortfolio: "نشر المشروع",
+  portfolioItemCreated: "تم إنشاء المشروع!",
+  portfolioItemCreatedDesc: "تمت إضافة مشروعك إلى معرض أعمالك.",
 };
