@@ -65,6 +65,11 @@ const App = () => (
                 <CreatePost />
               </ProtectedRoute>
             } />
+            <Route path="/create" element={
+              <ProtectedRoute>
+                <Create />
+              </ProtectedRoute>
+            } />
             <Route path="/edit-post" element={
               <ProtectedRoute>
                 <EditPost />

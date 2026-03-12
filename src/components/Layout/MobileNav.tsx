@@ -9,7 +9,7 @@ export const MobileNav = () => {
   const navItems = [
     { to: "/feed", icon: Home, label: t('home') },
     { to: "/search", icon: Search, label: t('search') },
-    { to: "/create-post", icon: Plus, label: t('post') },
+    { to: "/create", icon: Plus, label: t('create') },
     { to: "/messages", icon: MessageCircle, label: t('messages') },
     { to: "/profile", icon: User, label: t('profile') },
   ];
