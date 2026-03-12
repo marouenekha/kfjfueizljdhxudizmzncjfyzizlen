@@ -415,4 +415,5 @@ export default {
   publishPortfolio: "Publier le projet",
   portfolioItemCreated: "Projet créé !",
   portfolioItemCreatedDesc: "Votre projet a été ajouté à votre portfolio.",
+  portfolioItemDeleted: "Projet supprimé",
 };
