@@ -415,4 +415,5 @@ export default {
   publishPortfolio: "نشر المشروع",
   portfolioItemCreated: "تم إنشاء المشروع!",
   portfolioItemCreatedDesc: "تمت إضافة مشروعك إلى معرض أعمالك.",
+  portfolioItemDeleted: "تم حذف المشروع",
 };

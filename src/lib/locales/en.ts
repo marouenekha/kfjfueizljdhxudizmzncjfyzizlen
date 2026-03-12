@@ -416,4 +416,5 @@ export default {
   publishPortfolio: "Publish Portfolio Item",
   portfolioItemCreated: "Portfolio item created!",
   portfolioItemCreatedDesc: "Your project has been added to your portfolio.",
+  portfolioItemDeleted: "Portfolio item deleted",
 };

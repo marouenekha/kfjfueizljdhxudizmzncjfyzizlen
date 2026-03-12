@@ -16,6 +16,7 @@ import { RatingModal } from "@/components/RatingModal";
 import { PostCard } from "@/components/Feed/PostCard";
 import { SwipeableTabs } from "@/components/Profile/SwipeableTabs";
 import { StoreTab } from "@/components/Profile/StoreTab";
+import { PortfolioTab } from "@/components/Profile/PortfolioTab";
 import { useTranslation } from "react-i18next";
 
 export default function Profile() {
@@ -283,12 +284,7 @@ export default function Profile() {
             </>
           )}
 
-          {activeTab === "portfolio" && (
-            <div className="text-center py-12 space-y-4">
-              <div className="w-16 h-16 bg-muted rounded-full mx-auto flex items-center justify-center"><FileText className="w-8 h-8 text-muted-foreground" /></div>
-              <h3 className="text-lg font-semibold">{t('noPortfolioItems')}</h3>
-            </div>
-          )}
+          {activeTab === "portfolio" && <PortfolioTab userId={user?.id || ""} isOwnProfile={isOwnProfile} />}
 
           {activeTab === "store" && <StoreTab userId={user?.id || ""} isOwnProfile={isOwnProfile} />}
           
