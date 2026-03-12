@@ -399,4 +399,21 @@ export default {
   productDeleted: "Product deleted",
   searchProducts: "Search products…",
   noSearchResults: "No products found",
+
+  // Creation screen
+  create: "Create",
+  storeProduct: "Product",
+  createPortfolioItem: "New Portfolio Item",
+  createStoreProduct: "New Store Product",
+  projectImages: "Project Images",
+  projectVideo: "Project Video",
+  addVideoOptional: "Add video (optional)",
+  projectTitleLabel: "Project Title",
+  projectTitlePlaceholder: "e.g. Kitchen Renovation...",
+  portfolioDescPlaceholder: "Describe your project or completed work...",
+  tagsOptional: "Tags (optional)",
+  tagsPlaceholder: "e.g. design, renovation, branding",
+  publishPortfolio: "Publish Portfolio Item",
+  portfolioItemCreated: "Portfolio item created!",
+  portfolioItemCreatedDesc: "Your project has been added to your portfolio.",
 };
