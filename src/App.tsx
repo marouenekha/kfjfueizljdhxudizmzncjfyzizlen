@@ -14,6 +14,7 @@ import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
 import ProviderSignup from "./pages/ProviderSignup";
 import CreatePost from "./pages/CreatePost";
+import Create from "./pages/Create";
 import EditPost from "./pages/EditPost";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
