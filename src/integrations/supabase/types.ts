@@ -198,8 +198,12 @@ export type Database = {
           id: string
           images: string[] | null
           media_type: string
+          original_user_avatar: string | null
+          original_user_id: string | null
+          original_user_name: string | null
           post_type: string
           role: string | null
+          shared_post_id: string | null
           user_avatar: string | null
           user_id: string | null
           user_name: string
@@ -211,8 +215,12 @@ export type Database = {
           id?: string
           images?: string[] | null
           media_type?: string
+          original_user_avatar?: string | null
+          original_user_id?: string | null
+          original_user_name?: string | null
           post_type?: string
           role?: string | null
+          shared_post_id?: string | null
           user_avatar?: string | null
           user_id?: string | null
           user_name: string
@@ -224,14 +232,26 @@ export type Database = {
           id?: string
           images?: string[] | null
           media_type?: string
+          original_user_avatar?: string | null
+          original_user_id?: string | null
+          original_user_name?: string | null
           post_type?: string
           role?: string | null
+          shared_post_id?: string | null
           user_avatar?: string | null
           user_id?: string | null
           user_name?: string
           video_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "posts_shared_post_id_fkey"
+            columns: ["shared_post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
