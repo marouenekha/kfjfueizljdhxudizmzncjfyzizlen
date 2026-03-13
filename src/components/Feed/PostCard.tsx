@@ -248,7 +248,10 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
         <div className="px-4 pb-2">
           <p className="text-sm leading-relaxed whitespace-pre-wrap">
             <span className="font-semibold mr-1 cursor-pointer hover:underline"
-              onClick={() => post.user_id && navigate(`/profile?user=${post.user_id}`)}>{post.user_name}</span>
+              onClick={() => {
+                const profileId = post.shared_post_id ? post.original_user_id : post.user_id;
+                if (profileId) navigate(`/profile?user=${profileId}`);
+              }}>{post.shared_post_id ? post.original_user_name : post.user_name}</span>
             {displayContent}
           </p>
           {contentTruncated && (
