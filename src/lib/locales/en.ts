@@ -418,11 +418,17 @@ export default {
   portfolioItemCreatedDesc: "Your project has been added to your portfolio.",
   portfolioItemDeleted: "Portfolio item deleted",
 
-  // Repost
+  // Repost / Share
   repostToProfile: "Repost to Profile",
   repostDesc: "Share this post on your profile",
-  reposted: "Reposted!",
+  reposted: "Shared to your profile!",
   repostedDesc: "This post now appears on your profile",
   repostedBy: "Reposted by",
-  failedToRepost: "Failed to repost",
+  failedToRepost: "Failed to share",
+  shareNow: "Share Now",
+  shareWithText: "Write something & share",
+  sharedAPost: "shared a post",
+  sayAboutThis: "Say something about this...",
+  you: "You",
+  addTextToShare: "Add some text to share",
 };
