@@ -417,11 +417,17 @@ export default {
   portfolioItemCreatedDesc: "تمت إضافة مشروعك إلى معرض أعمالك.",
   portfolioItemDeleted: "تم حذف المشروع",
 
-  // Repost
+  // Repost / Share
   repostToProfile: "إعادة النشر على الملف الشخصي",
   repostDesc: "شارك هذا المنشور على ملفك الشخصي",
-  reposted: "تم إعادة النشر!",
+  reposted: "تم المشاركة على ملفك الشخصي!",
   repostedDesc: "يظهر هذا المنشور الآن على ملفك الشخصي",
   repostedBy: "أعاد النشر",
-  failedToRepost: "فشل في إعادة النشر",
+  failedToRepost: "فشل في المشاركة",
+  shareNow: "مشاركة الآن",
+  shareWithText: "اكتب شيئاً وشارك",
+  sharedAPost: "شارك منشوراً",
+  sayAboutThis: "قل شيئاً عن هذا...",
+  you: "أنت",
+  addTextToShare: "أضف نصاً للمشاركة",
 };
