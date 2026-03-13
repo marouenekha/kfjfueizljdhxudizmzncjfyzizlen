@@ -416,4 +416,12 @@ export default {
   portfolioItemCreated: "تم إنشاء المشروع!",
   portfolioItemCreatedDesc: "تمت إضافة مشروعك إلى معرض أعمالك.",
   portfolioItemDeleted: "تم حذف المشروع",
+
+  // Repost
+  repostToProfile: "إعادة النشر على الملف الشخصي",
+  repostDesc: "شارك هذا المنشور على ملفك الشخصي",
+  reposted: "تم إعادة النشر!",
+  repostedDesc: "يظهر هذا المنشور الآن على ملفك الشخصي",
+  repostedBy: "أعاد النشر",
+  failedToRepost: "فشل في إعادة النشر",
 };

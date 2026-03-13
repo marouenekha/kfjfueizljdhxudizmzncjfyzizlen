@@ -416,4 +416,12 @@ export default {
   portfolioItemCreated: "Projet créé !",
   portfolioItemCreatedDesc: "Votre projet a été ajouté à votre portfolio.",
   portfolioItemDeleted: "Projet supprimé",
+
+  // Repost
+  repostToProfile: "Repartager sur le profil",
+  repostDesc: "Partager ce post sur votre profil",
+  reposted: "Repartagé !",
+  repostedDesc: "Ce post apparaît maintenant sur votre profil",
+  repostedBy: "Repartagé par",
+  failedToRepost: "Échec du repartage",
 };

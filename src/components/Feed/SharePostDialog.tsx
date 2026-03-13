@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Send, Copy, ExternalLink, Users, MessageCircle } from "lucide-react";
+import { Search, Send, Copy, ExternalLink, Users, MessageCircle, Repeat2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -18,9 +18,10 @@ interface Profile {
 }
 
 interface SharePostDialogProps {
-  post: { id: string; user_name: string; content: string | null; post_type: string; };
+  post: { id: string; user_id: string | null; user_name: string; user_avatar: string | null; content: string | null; post_type: string; images: string[] | null; media_type: string; video_url: string | null; role: string | null; };
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onPostReposted?: () => void;
 }
 
 export function SharePostDialog({ post, open, onOpenChange }: SharePostDialogProps) {
