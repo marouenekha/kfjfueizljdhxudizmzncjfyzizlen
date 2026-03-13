@@ -188,12 +188,28 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
 
   return (
     <div className="bg-card border-b border-border">
+      {/* Repost indicator */}
+      {post.shared_post_id && (
+        <div className="flex items-center gap-1.5 px-4 pt-2 text-xs text-muted-foreground">
+          <Repeat2 className="w-3.5 h-3.5" />
+          <span>{post.user_name} {t('repostedBy').toLowerCase()}</span>
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3">
         <Avatar className="w-10 h-10 cursor-pointer ring-2 ring-primary/20"
-          onClick={() => post.user_id && navigate(`/profile?user=${post.user_id}`)}>
-          <AvatarImage src={(post.user_id === authUser?.id ? authUser?.profile?.avatar_url : post.user_avatar) || undefined} />
-          <AvatarFallback className="bg-primary/10 text-primary font-semibold">{post.user_name?.[0] || "U"}</AvatarFallback>
+          onClick={() => {
+            const profileId = post.shared_post_id ? post.original_user_id : post.user_id;
+            if (profileId) navigate(`/profile?user=${profileId}`);
+          }}>
+          <AvatarImage src={
+            post.shared_post_id
+              ? post.original_user_avatar || undefined
+              : (post.user_id === authUser?.id ? authUser?.profile?.avatar_url : post.user_avatar) || undefined
+          } />
+          <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+            {(post.shared_post_id ? post.original_user_name : post.user_name)?.[0] || "U"}
+          </AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
