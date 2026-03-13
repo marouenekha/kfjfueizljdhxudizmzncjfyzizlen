@@ -93,6 +93,40 @@ export function SharePostDialog({ post, open, onOpenChange, onPostReposted }: Sh
     } catch { /* User cancelled */ }
   };
 
+  const handleRepost = async () => {
+    if (!user?.id) return;
+    setIsReposting(true);
+    try {
+      const originalPostId = (post as any).shared_post_id || post.id;
+      const originalUserId = (post as any).original_user_id || post.user_id;
+      const originalUserName = (post as any).original_user_name || post.user_name;
+      const originalUserAvatar = (post as any).original_user_avatar || post.user_avatar;
+
+      const { error } = await supabase.from("posts").insert({
+        user_id: user.id,
+        user_name: user.profile?.name || "User",
+        user_avatar: user.profile?.avatar_url || null,
+        role: user.profile?.is_provider ? "provider" : "client",
+        content: post.content,
+        images: post.images,
+        post_type: post.post_type,
+        media_type: post.media_type,
+        video_url: post.video_url,
+        shared_post_id: originalPostId,
+        original_user_id: originalUserId,
+        original_user_name: originalUserName,
+        original_user_avatar: originalUserAvatar,
+      } as any);
+      if (error) throw error;
+      toast.success(t('reposted'));
+      onOpenChange(false);
+      onPostReposted?.();
+    } catch (error: any) {
+      console.error("Error reposting:", error);
+      toast.error(t('failedToRepost'));
+    } finally { setIsReposting(false); }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
