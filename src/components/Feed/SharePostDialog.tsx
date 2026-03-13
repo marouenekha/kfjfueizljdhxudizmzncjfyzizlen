@@ -24,7 +24,7 @@ interface SharePostDialogProps {
   onPostReposted?: () => void;
 }
 
-export function SharePostDialog({ post, open, onOpenChange }: SharePostDialogProps) {
+export function SharePostDialog({ post, open, onOpenChange, onPostReposted }: SharePostDialogProps) {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,6 +32,7 @@ export function SharePostDialog({ post, open, onOpenChange }: SharePostDialogPro
   const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>([]);
   const [selectedProfiles, setSelectedProfiles] = useState<Profile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isReposting, setIsReposting] = useState(false);
 
   useEffect(() => { if (open) fetchProfiles(); }, [open]);
 
