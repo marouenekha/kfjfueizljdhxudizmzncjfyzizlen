@@ -135,6 +135,14 @@ export function SharePostDialog({ post, open, onOpenChange, onPostReposted }: Sh
         </DialogHeader>
 
         <div className="space-y-4 flex-1 overflow-hidden">
+          {/* Repost button */}
+          {user?.id !== post.user_id && (
+            <Button variant="outline" onClick={handleRepost} disabled={isReposting} className="w-full justify-start gap-2">
+              <Repeat2 className="w-4 h-4" />
+              {isReposting ? t('publishing') : t('repostToProfile')}
+            </Button>
+          )}
+
           <div className="space-y-2">
             <h4 className="text-sm font-medium">{t('quickShare')}</h4>
             <div className="grid grid-cols-2 gap-2">
