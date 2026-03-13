@@ -186,6 +186,40 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
   const contentTruncated = post.content && post.content.length > 120 && !expanded;
   const displayContent = contentTruncated ? post.content!.slice(0, 120) + "..." : post.content;
 
+  const renderMedia = () => (
+    <>
+      {post.media_type === "video" && post.video_url && (
+        <div className="w-full bg-black relative">
+          <video src={post.video_url} controls className="w-full max-h-[80vh] object-contain mx-auto" preload="metadata" playsInline />
+        </div>
+      )}
+      {post.media_type === "image" && images.length === 1 && (
+        <div className="aspect-square bg-muted"><img src={images[0]} className="w-full h-full object-cover" alt="Post" /></div>
+      )}
+      {isCarousel && (
+        <div className="relative" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+          <div className="overflow-hidden">
+            <div className="flex transition-transform duration-300 ease-out" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
+              {images.map((url, i) => (
+                <div key={i} className="w-full flex-shrink-0 aspect-square bg-muted"><img src={url} className="w-full h-full object-cover" alt={`Slide ${i + 1}`} /></div>
+              ))}
+            </div>
+          </div>
+          {currentSlide > 0 && (
+            <button onClick={prevSlide} className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center shadow-sm"><ChevronLeft className="w-4 h-4" /></button>
+          )}
+          {currentSlide < images.length - 1 && (
+            <button onClick={nextSlide} className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center shadow-sm"><ChevronRight className="w-4 h-4" /></button>
+          )}
+          <div className="absolute top-3 right-3 bg-foreground/60 text-background text-xs px-2 py-0.5 rounded-full">{currentSlide + 1}/{images.length}</div>
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
+            {images.map((_, i) => (<div key={i} className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentSlide ? "bg-primary" : "bg-background/50"}`} />))}
+          </div>
+        </div>
+      )}
+    </>
+  );
+
   return (
     <div className="bg-card border-b border-border">
       {/* Repost header - shows who shared it (like Facebook) */}
