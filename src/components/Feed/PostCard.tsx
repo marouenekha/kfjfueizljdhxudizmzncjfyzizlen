@@ -54,6 +54,10 @@ interface Post {
   media_type: string;
   video_url: string | null;
   created_at: string | null;
+  shared_post_id?: string | null;
+  original_user_id?: string | null;
+  original_user_name?: string | null;
+  original_user_avatar?: string | null;
 }
 
 interface PostCardProps {
