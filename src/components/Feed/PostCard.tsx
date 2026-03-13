@@ -343,7 +343,7 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
         </div>
       )}
 
-      <SharePostDialog post={post} open={showShareDialog} onOpenChange={setShowShareDialog} />
+      <SharePostDialog post={post} open={showShareDialog} onOpenChange={setShowShareDialog} onPostReposted={onPostUpdated} />
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
