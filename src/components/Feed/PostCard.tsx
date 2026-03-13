@@ -214,7 +214,10 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-sm cursor-pointer hover:underline"
-              onClick={() => post.user_id && navigate(`/profile?user=${post.user_id}`)}>{post.user_name}</span>
+              onClick={() => {
+                const profileId = post.shared_post_id ? post.original_user_id : post.user_id;
+                if (profileId) navigate(`/profile?user=${profileId}`);
+              }}>{post.shared_post_id ? post.original_user_name : post.user_name}</span>
             <Badge variant={post.post_type === "find" ? "default" : "secondary"} className="text-[10px] px-1.5 py-0 shrink-0 rounded-full">
               {post.post_type === "find" ? (<><Search className="w-3 h-3 mr-0.5" /> {t('find')}</>) : (<><Wrench className="w-3 h-3 mr-0.5" /> {t('provide')}</>)}
             </Badge>
