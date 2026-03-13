@@ -417,4 +417,12 @@ export default {
   portfolioItemCreated: "Portfolio item created!",
   portfolioItemCreatedDesc: "Your project has been added to your portfolio.",
   portfolioItemDeleted: "Portfolio item deleted",
+
+  // Repost
+  repostToProfile: "Repost to Profile",
+  repostDesc: "Share this post on your profile",
+  reposted: "Reposted!",
+  repostedDesc: "This post now appears on your profile",
+  repostedBy: "Reposted by",
+  failedToRepost: "Failed to repost",
 };

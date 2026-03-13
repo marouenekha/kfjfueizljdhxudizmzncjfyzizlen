@@ -49,18 +49,29 @@ export default function Create() {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const minSwipeDistance = 50;
 
-  const onTouchStart = (e: React.TouchEvent) => { setTouchEnd(null); setTouchStart(e.targetTouches[0].clientX); };
+  const touchStartY = useRef<number | null>(null);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    // Don't capture swipe if starting on an interactive element (input, textarea, button, scrollable)
+    const target = e.target as HTMLElement;
+    if (target.closest('input, textarea, button, video, [data-no-swipe], .overflow-x-auto, .snap-x')) return;
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+    touchStartY.current = e.targetTouches[0].clientY;
+  };
   const onTouchMove = (e: React.TouchEvent) => { setTouchEnd(e.targetTouches[0].clientX); };
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    if (Math.abs(distance) > minSwipeDistance) {
-      if (distance > 0 && activeIndex < availablePages.length - 1) {
+    if (!touchStart || !touchEnd || touchStartY.current === null) return;
+    const distanceX = touchStart - touchEnd;
+    // Only trigger page change for clearly horizontal swipes
+    if (Math.abs(distanceX) > minSwipeDistance) {
+      if (distanceX > 0 && activeIndex < availablePages.length - 1) {
         setActivePage(availablePages[activeIndex + 1]);
-      } else if (distance < 0 && activeIndex > 0) {
+      } else if (distanceX < 0 && activeIndex > 0) {
         setActivePage(availablePages[activeIndex - 1]);
       }
     }
+    touchStartY.current = null;
   };
 
   // ===== POST STATE =====
