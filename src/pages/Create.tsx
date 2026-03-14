@@ -266,10 +266,12 @@ export default function Create() {
   // ===== STORE HANDLERS =====
   const handleStoreImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    files.forEach(f => {
-      setStoreImages(prev => [...prev, f]);
-      setStoreImagePreviews(prev => [...prev, URL.createObjectURL(f)]);
-    });
+    if (files.length === 0) return;
+    const urls = files.map(f => URL.createObjectURL(f));
+    setCropTarget("store");
+    setCropQueue(urls);
+    setCropIndex(0);
+    setCropperOpen(true);
     e.target.value = "";
   };
 
