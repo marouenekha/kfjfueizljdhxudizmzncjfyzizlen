@@ -126,8 +126,8 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
   const nextSlide = () => setCurrentSlide((p) => (p + 1) % images.length);
   const prevSlide = () => setCurrentSlide((p) => (p === 0 ? images.length - 1 : p - 1));
 
-  const onTouchStart = (e: React.TouchEvent) => { setTouchEnd(null); setTouchStart(e.targetTouches[0].clientX); };
-  const onTouchMove = (e: React.TouchEvent) => setTouchEnd(e.targetTouches[0].clientX);
+  const onTouchStart = (e: React.TouchEvent) => { e.stopPropagation(); setTouchEnd(null); setTouchStart(e.targetTouches[0].clientX); };
+  const onTouchMove = (e: React.TouchEvent) => { e.stopPropagation(); setTouchEnd(e.targetTouches[0].clientX); };
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
     const diff = touchStart - touchEnd;
