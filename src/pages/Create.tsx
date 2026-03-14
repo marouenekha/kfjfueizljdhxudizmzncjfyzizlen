@@ -507,22 +507,33 @@ export default function Create() {
             <div className="space-y-5 animate-fade-in">
               <h2 className="text-lg font-semibold">{t('createStoreProduct')}</h2>
 
-              {/* Product Images */}
+              {/* Product Images - same carousel style as posts */}
               <div>
                 <Label>{t('productImages')}</Label>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {storeImagePreviews.map((url, i) => (
-                    <div key={i} className="relative w-24 h-24 rounded-lg overflow-hidden border border-border">
-                      <img src={url} alt="" className="w-full h-full object-cover" />
-                      <button onClick={() => removeStoreImage(i)} className="absolute top-1 right-1 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">
-                        <X className="w-3 h-3" />
-                      </button>
+                <div className="space-y-3 mt-2">
+                  {storeImagePreviews.length === 0 ? (
+                    <button onClick={() => storeFileRef.current?.click()} className="w-full aspect-square border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors">
+                      <ImagePlus className="w-10 h-10 text-muted-foreground" /><p className="text-sm text-muted-foreground">{t('tapToAddImage')}</p>
+                    </button>
+                  ) : storeImagePreviews.length === 1 ? (
+                    <div className="relative aspect-square rounded-xl overflow-hidden">
+                      <img src={storeImagePreviews[0]} className="w-full h-full object-cover" alt="Preview" />
+                      <button onClick={() => removeStoreImage(0)} className="absolute top-2 right-2 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center"><X className="w-4 h-4" /></button>
                     </div>
-                  ))}
-                  <button onClick={() => storeFileRef.current?.click()}
-                    className="w-24 h-24 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground transition-colors gap-1">
-                    {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><ImagePlus className="w-5 h-5" /><span className="text-[10px]">{t('addImages')}</span></>}
-                  </button>
+                  ) : (
+                    <div className="flex gap-0 overflow-x-auto snap-x snap-mandatory pb-2" data-no-swipe>
+                      {storeImagePreviews.map((preview, index) => (
+                        <div key={index} className="relative flex-shrink-0 w-full aspect-square snap-center">
+                          <img src={preview} className="w-full h-full object-cover" alt={`Preview ${index + 1}`} />
+                          <button onClick={() => removeStoreImage(index)} className="absolute top-2 right-2 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center"><X className="w-4 h-4" /></button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <Button variant="outline" onClick={() => storeFileRef.current?.click()} className="w-full">
+                    <Images className="w-4 h-4 mr-2" /> {t('addImages')}
+                  </Button>
+                  {storeImagePreviews.length > 1 && <p className="text-xs text-muted-foreground text-center">{storeImagePreviews.length} {t('imageCount')}</p>}
                 </div>
                 <input ref={storeFileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleStoreImageSelect} />
               </div>
