@@ -54,7 +54,10 @@ export default function Create() {
   const onTouchStart = (e: React.TouchEvent) => {
     // Don't capture swipe if starting on an interactive element (input, textarea, button, scrollable)
     const target = e.target as HTMLElement;
-    if (target.closest('input, textarea, button, video, [data-no-swipe], .overflow-x-auto, .snap-x')) return;
+    if (target.closest('video, [data-no-swipe], .overflow-x-auto, .snap-x')) return;
+    // Allow swipe on inputs/textareas only if they are not focused
+    const activeEl = document.activeElement;
+    if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA') && target.closest('input, textarea')) return;
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
     touchStartY.current = e.targetTouches[0].clientY;
