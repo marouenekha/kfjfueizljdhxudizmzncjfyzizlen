@@ -298,12 +298,6 @@ export default function Create() {
   return (
     <Layout title={t('create')}>
       <div className="w-full max-w-2xl mx-auto px-4 py-4">
-        {/* Header */}
-        <div className="flex items-center gap-2 mb-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
-            <ChevronLeft className="w-4 h-4 mr-1" /> {t('back')}
-          </Button>
-        </div>
 
         {/* Tab indicators */}
         <div className="relative border-b border-border mb-4">
