@@ -209,10 +209,12 @@ export default function Create() {
   // ===== PORTFOLIO HANDLERS =====
   const handlePortfolioImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    files.forEach(f => {
-      setPortfolioImages(prev => [...prev, f]);
-      setPortfolioImagePreviews(prev => [...prev, URL.createObjectURL(f)]);
-    });
+    if (files.length === 0) return;
+    const urls = files.map(f => URL.createObjectURL(f));
+    setCropTarget("portfolio");
+    setCropQueue(urls);
+    setCropIndex(0);
+    setCropperOpen(true);
     e.target.value = "";
   };
 
