@@ -91,6 +91,7 @@ export default function Create() {
   const [cropQueue, setCropQueue] = useState<string[]>([]);
   const [cropIndex, setCropIndex] = useState(0);
   const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropTarget, setCropTarget] = useState<"post" | "portfolio" | "store">("post");
   const MAX_CHARS = 500;
 
   // ===== PORTFOLIO STATE =====
