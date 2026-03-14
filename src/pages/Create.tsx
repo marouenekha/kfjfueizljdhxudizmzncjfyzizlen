@@ -131,11 +131,19 @@ export default function Create() {
   const handleCropComplete = (blob: Blob) => {
     const file = new File([blob], `cropped-${Date.now()}-${cropIndex}.jpg`, { type: "image/jpeg" });
     const preview = URL.createObjectURL(blob);
-    if (mediaType === "image") {
-      setImageFiles([file]); setImagePreviews([preview]);
-    } else {
-      setImageFiles(prev => [...prev, file]); setImagePreviews(prev => [...prev, preview]);
+
+    if (cropTarget === "post") {
+      if (mediaType === "image") {
+        setImageFiles([file]); setImagePreviews([preview]);
+      } else {
+        setImageFiles(prev => [...prev, file]); setImagePreviews(prev => [...prev, preview]);
+      }
+    } else if (cropTarget === "portfolio") {
+      setPortfolioImages(prev => [...prev, file]); setPortfolioImagePreviews(prev => [...prev, preview]);
+    } else if (cropTarget === "store") {
+      setStoreImages(prev => [...prev, file]); setStoreImagePreviews(prev => [...prev, preview]);
     }
+
     URL.revokeObjectURL(cropQueue[cropIndex]);
     const nextIndex = cropIndex + 1;
     if (nextIndex < cropQueue.length) { setCropIndex(nextIndex); }
