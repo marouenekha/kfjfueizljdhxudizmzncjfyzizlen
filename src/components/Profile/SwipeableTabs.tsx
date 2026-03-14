@@ -33,6 +33,8 @@ export const SwipeableTabs = ({ tabs, activeTab, onTabChange, children }: Swipea
   }, [activeIndex]);
 
   const onTouchStart = (e: React.TouchEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('.overflow-x-auto, .snap-x, [data-no-swipe], video')) return;
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
