@@ -121,6 +121,7 @@ export default function Create() {
     if (files.length === 0) return;
     const selectedFiles = mediaType === "image" ? [files[0]] : files;
     const urls = selectedFiles.map(f => URL.createObjectURL(f));
+    setCropTarget("post");
     setCropQueue(urls);
     setCropIndex(0);
     setCropperOpen(true);
