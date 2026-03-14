@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import {
-  Search, Wrench, ImageIcon, Video, Images, X, ChevronLeft, Loader2,
+  Search, Wrench, ImageIcon, Video, Images, X, Loader2,
   ImagePlus, Tag
 } from "lucide-react";
 
