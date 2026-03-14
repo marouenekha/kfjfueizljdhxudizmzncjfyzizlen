@@ -91,6 +91,7 @@ export default function Create() {
   const [cropQueue, setCropQueue] = useState<string[]>([]);
   const [cropIndex, setCropIndex] = useState(0);
   const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropTarget, setCropTarget] = useState<"post" | "portfolio" | "store">("post");
   const MAX_CHARS = 500;
 
   // ===== PORTFOLIO STATE =====
@@ -120,6 +121,7 @@ export default function Create() {
     if (files.length === 0) return;
     const selectedFiles = mediaType === "image" ? [files[0]] : files;
     const urls = selectedFiles.map(f => URL.createObjectURL(f));
+    setCropTarget("post");
     setCropQueue(urls);
     setCropIndex(0);
     setCropperOpen(true);
@@ -129,11 +131,19 @@ export default function Create() {
   const handleCropComplete = (blob: Blob) => {
     const file = new File([blob], `cropped-${Date.now()}-${cropIndex}.jpg`, { type: "image/jpeg" });
     const preview = URL.createObjectURL(blob);
-    if (mediaType === "image") {
-      setImageFiles([file]); setImagePreviews([preview]);
-    } else {
-      setImageFiles(prev => [...prev, file]); setImagePreviews(prev => [...prev, preview]);
+
+    if (cropTarget === "post") {
+      if (mediaType === "image") {
+        setImageFiles([file]); setImagePreviews([preview]);
+      } else {
+        setImageFiles(prev => [...prev, file]); setImagePreviews(prev => [...prev, preview]);
+      }
+    } else if (cropTarget === "portfolio") {
+      setPortfolioImages(prev => [...prev, file]); setPortfolioImagePreviews(prev => [...prev, preview]);
+    } else if (cropTarget === "store") {
+      setStoreImages(prev => [...prev, file]); setStoreImagePreviews(prev => [...prev, preview]);
     }
+
     URL.revokeObjectURL(cropQueue[cropIndex]);
     const nextIndex = cropIndex + 1;
     if (nextIndex < cropQueue.length) { setCropIndex(nextIndex); }
@@ -199,10 +209,12 @@ export default function Create() {
   // ===== PORTFOLIO HANDLERS =====
   const handlePortfolioImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    files.forEach(f => {
-      setPortfolioImages(prev => [...prev, f]);
-      setPortfolioImagePreviews(prev => [...prev, URL.createObjectURL(f)]);
-    });
+    if (files.length === 0) return;
+    const urls = files.map(f => URL.createObjectURL(f));
+    setCropTarget("portfolio");
+    setCropQueue(urls);
+    setCropIndex(0);
+    setCropperOpen(true);
     e.target.value = "";
   };
 
@@ -254,10 +266,12 @@ export default function Create() {
   // ===== STORE HANDLERS =====
   const handleStoreImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    files.forEach(f => {
-      setStoreImages(prev => [...prev, f]);
-      setStoreImagePreviews(prev => [...prev, URL.createObjectURL(f)]);
-    });
+    if (files.length === 0) return;
+    const urls = files.map(f => URL.createObjectURL(f));
+    setCropTarget("store");
+    setCropQueue(urls);
+    setCropIndex(0);
+    setCropperOpen(true);
     e.target.value = "";
   };
 
