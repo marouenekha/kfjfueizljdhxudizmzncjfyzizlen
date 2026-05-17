@@ -1,9 +1,10 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { Home, Search, MessageCircle, User, Plus, Settings, LogOut } from "lucide-react";
+import { Home, Search, MessageCircle, User, Plus, Settings, LogOut, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationsPopover } from "./NotificationsPopover";
+import { CartIcon } from "@/components/Cart/CartIcon";
 import { useTranslation } from "react-i18next";
 import {
   DropdownMenu,
@@ -59,6 +60,7 @@ export const DesktopTopNav = () => {
             <Plus className="w-4 h-4 mr-1" /> {t('post')}
           </Button>
 
+          <CartIcon />
           <NotificationsPopover />
 
           <DropdownMenu>
@@ -71,6 +73,10 @@ export const DesktopTopNav = () => {
               <DropdownMenuItem onClick={() => navigate("/settings")}>
                 <Settings className="w-4 h-4 mr-2" />
                 {t('settings')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/orders")}>
+                <Package className="w-4 h-4 mr-2" />
+                {t('myOrders')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={logout}>
                 <LogOut className="w-4 h-4 mr-2" />

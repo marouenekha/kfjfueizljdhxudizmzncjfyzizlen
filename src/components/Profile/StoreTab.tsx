@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from "react";
-import { ShoppingBag, Search, X, Plus, Edit, Trash2, Loader2, ImagePlus } from "lucide-react";
+import { ShoppingBag, Search, X, Plus, Edit, Trash2, Loader2, ImagePlus, ShoppingCart } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/hooks/useCart";
 import { AddEditProductDialog } from "@/components/Profile/AddEditProductDialog";
 
 interface Product {
@@ -26,6 +28,8 @@ interface StoreTabProps {
 export const StoreTab = ({ userId, isOwnProfile }: StoreTabProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -133,10 +137,13 @@ export const StoreTab = ({ userId, isOwnProfile }: StoreTabProps) => {
         {filtered.map((product) => (
           <div
             key={product.id}
-            className="border border-border rounded-lg overflow-hidden bg-card"
+            className="border border-border rounded-lg overflow-hidden bg-card flex flex-col"
           >
             {/* Product image */}
-            <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden">
+            <button
+              onClick={() => navigate(`/product/${product.id}`)}
+              className="aspect-square bg-muted flex items-center justify-center overflow-hidden text-left"
+            >
               {product.images && product.images.length > 0 ? (
                 <img
                   src={product.images[0]}
@@ -146,23 +153,25 @@ export const StoreTab = ({ userId, isOwnProfile }: StoreTabProps) => {
               ) : (
                 <ImagePlus className="w-8 h-8 text-muted-foreground" />
               )}
-            </div>
+            </button>
 
             {/* Product info */}
-            <div className="p-2.5 space-y-1">
-              <h4 className="text-sm font-medium truncate">{product.title}</h4>
-              {product.description && (
-                <p className="text-xs text-muted-foreground line-clamp-2">
-                  {product.description}
+            <div className="p-2.5 space-y-1 flex-1 flex flex-col">
+              <button onClick={() => navigate(`/product/${product.id}`)} className="text-left">
+                <h4 className="text-sm font-medium truncate">{product.title}</h4>
+                {product.description && (
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    {product.description}
+                  </p>
+                )}
+                <p className="text-sm font-bold text-primary mt-1">
+                  {product.price.toFixed(2)} DA
                 </p>
-              )}
-              <p className="text-sm font-bold text-primary">
-                {product.price.toFixed(2)} DA
-              </p>
+              </button>
 
               {/* Owner actions */}
-              {isOwnProfile && (
-                <div className="flex gap-1 pt-1">
+              {isOwnProfile ? (
+                <div className="flex gap-1 pt-1 mt-auto">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -182,6 +191,18 @@ export const StoreTab = ({ userId, isOwnProfile }: StoreTabProps) => {
                     {t("delete")}
                   </Button>
                 </div>
+              ) : (
+                <Button
+                  size="sm"
+                  className="h-8 text-xs mt-auto"
+                  onClick={async () => {
+                    await addToCart(product.id, 1);
+                    toast({ title: t("addedToCart") });
+                  }}
+                >
+                  <ShoppingCart className="w-3 h-3 mr-1" />
+                  {t("addToCart")}
+                </Button>
               )}
             </div>
           </div>

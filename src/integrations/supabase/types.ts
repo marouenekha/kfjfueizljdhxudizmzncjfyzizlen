@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      cart_items: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          quantity: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          quantity?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          quantity?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cart_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follows: {
         Row: {
           created_at: string
@@ -98,6 +133,98 @@ export type Database = {
           read?: boolean | null
           receiver_id?: string
           sender_id?: string
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          image_snapshot: string | null
+          order_id: string
+          price_snapshot: number
+          product_id: string | null
+          quantity: number
+          title_snapshot: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_snapshot?: string | null
+          order_id: string
+          price_snapshot: number
+          product_id?: string | null
+          quantity?: number
+          title_snapshot: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_snapshot?: string | null
+          order_id?: string
+          price_snapshot?: number
+          product_id?: string | null
+          quantity?: number
+          title_snapshot?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          address: string
+          buyer_id: string
+          commune: string
+          created_at: string
+          full_name: string
+          id: string
+          note: string | null
+          payment_method: string
+          phone: string
+          seller_id: string
+          status: string
+          total: number
+          updated_at: string
+          wilaya: string
+        }
+        Insert: {
+          address: string
+          buyer_id: string
+          commune: string
+          created_at?: string
+          full_name: string
+          id?: string
+          note?: string | null
+          payment_method?: string
+          phone: string
+          seller_id: string
+          status?: string
+          total?: number
+          updated_at?: string
+          wilaya: string
+        }
+        Update: {
+          address?: string
+          buyer_id?: string
+          commune?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          note?: string | null
+          payment_method?: string
+          phone?: string
+          seller_id?: string
+          status?: string
+          total?: number
+          updated_at?: string
+          wilaya?: string
         }
         Relationships: []
       }

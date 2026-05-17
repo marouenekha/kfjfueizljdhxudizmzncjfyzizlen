@@ -1,5 +1,6 @@
-import { Settings, LogOut } from "lucide-react";
+import { Settings, LogOut, Package } from "lucide-react";
 import { NotificationsPopover } from "./NotificationsPopover";
+import { CartIcon } from "@/components/Cart/CartIcon";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -45,6 +46,10 @@ export const Header = ({
                     <Settings className="w-4 h-4 mr-2" />
                     {t('settings')}
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/orders')}>
+                    <Package className="w-4 h-4 mr-2" />
+                    {t('myOrders')}
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={logout}>
                     <LogOut className="w-4 h-4 mr-2" />
                     {t('logout')}
@@ -55,7 +60,8 @@ export const Header = ({
             <h1 className="text-xl font-bold gradient-text">{title}</h1>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <CartIcon />
             {showNotifications && <NotificationsPopover />}
           </div>
         </div>
