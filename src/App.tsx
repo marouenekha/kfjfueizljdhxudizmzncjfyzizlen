@@ -17,6 +17,10 @@ import CreatePost from "./pages/CreatePost";
 import Create from "./pages/Create";
 import EditPost from "./pages/EditPost";
 import ResetPassword from "./pages/ResetPassword";
+import ProductDetail from "./pages/ProductDetail";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import Orders from "./pages/Orders";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -73,6 +77,26 @@ const App = () => (
             <Route path="/edit-post" element={
               <ProtectedRoute>
                 <EditPost />
+              </ProtectedRoute>
+            } />
+            <Route path="/product/:id" element={
+              <ProtectedRoute>
+                <ProductDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="/cart" element={
+              <ProtectedRoute>
+                <Cart />
+              </ProtectedRoute>
+            } />
+            <Route path="/checkout" element={
+              <ProtectedRoute>
+                <Checkout />
+              </ProtectedRoute>
+            } />
+            <Route path="/orders" element={
+              <ProtectedRoute>
+                <Orders />
               </ProtectedRoute>
             } />
             <Route path="/provider-signup" element={<ProviderSignup />} />
