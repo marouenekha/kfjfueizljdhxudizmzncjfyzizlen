@@ -469,5 +469,4 @@ export default {
   status_shipped: "Expédiée",
   status_delivered: "Livrée",
   status_cancelled: "Annulée",
-  error: "Erreur",
 };
