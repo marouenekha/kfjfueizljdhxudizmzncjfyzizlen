@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from "react";
-import { ShoppingBag, Search, X, Plus, Edit, Trash2, Loader2, ImagePlus } from "lucide-react";
+import { ShoppingBag, Search, X, Plus, Edit, Trash2, Loader2, ImagePlus, ShoppingCart } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/hooks/useCart";
 import { AddEditProductDialog } from "@/components/Profile/AddEditProductDialog";
 
 interface Product {
@@ -26,6 +28,8 @@ interface StoreTabProps {
 export const StoreTab = ({ userId, isOwnProfile }: StoreTabProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
