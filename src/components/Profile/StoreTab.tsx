@@ -112,7 +112,21 @@ export const StoreTab = ({ userId, isOwnProfile }: StoreTabProps) => {
     <div className="space-y-4">
       {/* Header with add button */}
       {isOwnProfile && (
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          {username && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const url = `${window.location.origin}/store/${username}`;
+                navigator.clipboard?.writeText(url);
+                toast({ title: t("storeLinkCopied") || "Store link copied", description: url });
+              }}
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              {t("shareMyStore") || "Share my store"}
+            </Button>
+          )}
           <Button size="sm" onClick={() => setShowAddDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
             {t("addProduct")}
