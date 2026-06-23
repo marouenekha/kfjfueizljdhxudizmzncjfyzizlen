@@ -7,6 +7,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Feed from "./pages/Feed";
+import Marketplace from "./pages/Marketplace";
 import Search from "./pages/Search";
 import Messages from "./pages/Messages";
 import Profile from "./pages/Profile";
@@ -39,6 +40,11 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Auth />} />
             <Route path="/feed" element={
+              <ProtectedRoute>
+                <Marketplace />
+              </ProtectedRoute>
+            } />
+            <Route path="/posts" element={
               <ProtectedRoute>
                 <Feed />
               </ProtectedRoute>
