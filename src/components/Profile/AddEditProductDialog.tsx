@@ -95,6 +95,7 @@ export const AddEditProductDialog = ({
       description: description.trim() || null,
       price: parseFloat(price),
       images,
+      category,
     };
 
     let error;
