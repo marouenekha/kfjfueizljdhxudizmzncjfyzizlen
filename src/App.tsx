@@ -106,6 +106,8 @@ const App = () => (
             <Route path="/provider-signup" element={<ProviderSignup />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/store/:username" element={<PublicStore />} />
+            <Route path="/store/:username/:productId" element={<PublicProduct />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
@@ -113,6 +115,7 @@ const App = () => (
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;
