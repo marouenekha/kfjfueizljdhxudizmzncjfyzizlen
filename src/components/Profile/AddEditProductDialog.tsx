@@ -23,7 +23,12 @@ interface Product {
   description: string | null;
   price: number;
   images: string[];
+  category?: string | null;
 }
+
+const CATEGORY_OPTIONS = [
+  "electronics", "clothes", "food", "handmade", "beauty", "home", "digital", "other",
+];
 
 interface AddEditProductDialogProps {
   open: boolean;
