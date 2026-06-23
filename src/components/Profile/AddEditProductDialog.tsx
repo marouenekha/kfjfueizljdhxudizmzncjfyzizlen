@@ -159,6 +159,19 @@ export const AddEditProductDialog = ({
             />
           </div>
 
+          <div>
+            <Label>Category</Label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full mt-1 h-10 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              {CATEGORY_OPTIONS.map((c) => (
+                <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+              ))}
+            </select>
+          </div>
+
           {/* Images */}
           <div>
             <Label>{t("productImages")}</Label>
