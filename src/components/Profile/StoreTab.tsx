@@ -35,9 +35,18 @@ export const StoreTab = ({ userId, isOwnProfile }: StoreTabProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProducts();
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("user_id", userId)
+        .maybeSingle();
+      setUsername((data as any)?.username ?? null);
+    })();
   }, [userId]);
 
   const fetchProducts = async () => {
