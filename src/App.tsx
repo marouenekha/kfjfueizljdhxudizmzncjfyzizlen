@@ -41,6 +41,11 @@ const App = () => (
             <Route path="/" element={<Auth />} />
             <Route path="/feed" element={
               <ProtectedRoute>
+                <Marketplace />
+              </ProtectedRoute>
+            } />
+            <Route path="/posts" element={
+              <ProtectedRoute>
                 <Feed />
               </ProtectedRoute>
             } />
