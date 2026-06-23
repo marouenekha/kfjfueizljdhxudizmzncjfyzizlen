@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ShoppingBag, Search, X, Plus, Edit, Trash2, Loader2, ImagePlus, ShoppingCart } from "lucide-react";
+import { ShoppingBag, Search, X, Plus, Edit, Trash2, Loader2, ImagePlus, ShoppingCart, Share2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,9 +35,18 @@ export const StoreTab = ({ userId, isOwnProfile }: StoreTabProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProducts();
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("user_id", userId)
+        .maybeSingle();
+      setUsername((data as any)?.username ?? null);
+    })();
   }, [userId]);
 
   const fetchProducts = async () => {
@@ -103,7 +112,21 @@ export const StoreTab = ({ userId, isOwnProfile }: StoreTabProps) => {
     <div className="space-y-4">
       {/* Header with add button */}
       {isOwnProfile && (
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          {username && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const url = `${window.location.origin}/store/${username}`;
+                navigator.clipboard?.writeText(url);
+                toast({ title: t("storeLinkCopied") || "Store link copied", description: url });
+              }}
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              {t("shareMyStore") || "Share my store"}
+            </Button>
+          )}
           <Button size="sm" onClick={() => setShowAddDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
             {t("addProduct")}

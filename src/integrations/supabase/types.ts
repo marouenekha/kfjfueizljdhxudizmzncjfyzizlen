@@ -429,6 +429,7 @@ export type Database = {
           service_types: string[] | null
           updated_at: string
           user_id: string
+          username: string | null
           verified: boolean | null
         }
         Insert: {
@@ -446,6 +447,7 @@ export type Database = {
           service_types?: string[] | null
           updated_at?: string
           user_id: string
+          username?: string | null
           verified?: boolean | null
         }
         Update: {
@@ -463,6 +465,7 @@ export type Database = {
           service_types?: string[] | null
           updated_at?: string
           user_id?: string
+          username?: string | null
           verified?: boolean | null
         }
         Relationships: []
