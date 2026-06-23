@@ -53,6 +53,7 @@ export const AddEditProductDialog = ({
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  const [category, setCategory] = useState<string>("other");
   const [saving, setSaving] = useState(false);
 
   const isEditing = !!product;
@@ -63,11 +64,13 @@ export const AddEditProductDialog = ({
       setDescription(product.description || "");
       setPrice(product.price.toString());
       setImages(product.images || []);
+      setCategory((product as any).category || "other");
     } else {
       setTitle("");
       setDescription("");
       setPrice("");
       setImages([]);
+      setCategory("other");
     }
   }, [product, open]);
 
