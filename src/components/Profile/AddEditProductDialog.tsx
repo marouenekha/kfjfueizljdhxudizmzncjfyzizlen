@@ -23,12 +23,7 @@ interface Product {
   description: string | null;
   price: number;
   images: string[];
-  category?: string | null;
 }
-
-const CATEGORY_OPTIONS = [
-  "electronics", "clothes", "food", "handmade", "beauty", "home", "digital", "other",
-];
 
 interface AddEditProductDialogProps {
   open: boolean;
@@ -53,7 +48,6 @@ export const AddEditProductDialog = ({
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [images, setImages] = useState<string[]>([]);
-  const [category, setCategory] = useState<string>("other");
   const [saving, setSaving] = useState(false);
 
   const isEditing = !!product;
@@ -64,13 +58,11 @@ export const AddEditProductDialog = ({
       setDescription(product.description || "");
       setPrice(product.price.toString());
       setImages(product.images || []);
-      setCategory((product as any).category || "other");
     } else {
       setTitle("");
       setDescription("");
       setPrice("");
       setImages([]);
-      setCategory("other");
     }
   }, [product, open]);
 
@@ -95,7 +87,6 @@ export const AddEditProductDialog = ({
       description: description.trim() || null,
       price: parseFloat(price),
       images,
-      category,
     };
 
     let error;
@@ -157,19 +148,6 @@ export const AddEditProductDialog = ({
               onChange={(e) => setPrice(e.target.value)}
               placeholder="0.00"
             />
-          </div>
-
-          <div>
-            <Label>Category</Label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full mt-1 h-10 rounded-md border border-input bg-background px-3 text-sm"
-            >
-              {CATEGORY_OPTIONS.map((c) => (
-                <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
-              ))}
-            </select>
           </div>
 
           {/* Images */}
