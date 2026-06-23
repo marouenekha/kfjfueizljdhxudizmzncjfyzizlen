@@ -21,7 +21,10 @@ import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Orders from "./pages/Orders";
+import PublicStore from "./pages/PublicStore";
+import PublicProduct from "./pages/PublicProduct";
 import NotFound from "./pages/NotFound";
+import { HelmetProvider } from "react-helmet-async";
 
 const queryClient = new QueryClient();
 
