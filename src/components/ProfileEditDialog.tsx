@@ -40,7 +40,7 @@ export const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({ open, onOp
       setName(p.name || ""); setBio(p.bio || ""); setLocation(p.location || "");
       setAvatarUrl(p.avatar_url || ""); setPhone(p.phone || "");
       setIsProvider(p.is_provider || false); setServiceTypes(p.service_types || []);
-      setProfileRole((p as any).profile_role || "provider");
+      setProfileRole((p as any).profile_role || "seller");
       if ((p as any).latitude && (p as any).longitude) {
         setSelectedLocation({ address: p.location || '', latitude: (p as any).latitude, longitude: (p as any).longitude });
       }

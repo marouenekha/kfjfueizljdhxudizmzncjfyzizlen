@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ALTER COLUMN profile_role SET DEFAULT 'seller';
