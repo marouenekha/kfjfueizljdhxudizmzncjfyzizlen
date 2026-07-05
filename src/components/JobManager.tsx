@@ -48,10 +48,17 @@ export const JobManager: React.FC<JobManagerProps> = ({ otherUserId, otherUserNa
   const [jobDescription, setJobDescription] = useState('');
   const [rating, setRating] = useState(0);
   const [reviewComment, setReviewComment] = useState('');
+  const [otherRole, setOtherRole] = useState<string>('provider');
 
   useEffect(() => {
     if (user) fetchJobs();
+    (async () => {
+      const { data } = await supabase.from('profiles').select('profile_role').eq('user_id', otherUserId).maybeSingle();
+      setOtherRole((data as any)?.profile_role || 'provider');
+    })();
   }, [user, otherUserId]);
+
+  const canRequestJob = otherRole === 'provider' || otherRole === 'both';
 
   const fetchJobs = async () => {
     if (!user) return;
