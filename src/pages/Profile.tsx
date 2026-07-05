@@ -47,30 +47,36 @@ export default function Profile() {
     bio: authUser.profile.bio || "", location: authUser.profile.location || "",
     isProvider: authUser.profile.is_provider, serviceTypes: authUser.profile.service_types || [],
     phone: authUser.profile.phone, joinedDate: new Date().toISOString(), isOnline: true,
-    profileRole: (authUser.profile as any).profile_role || "provider",
+    profileRole: (authUser.profile as any).profile_role || "seller",
   } : null) : userProfile;
 
   // Determine visible tabs based on profile role
   const getVisibleTabs = () => {
-    const role = user?.profileRole || 'provider';
+    const role = user?.profileRole || 'seller';
     const tabs: { key: string; label: string }[] = [];
 
-    // Posts always visible
+    // Seller mode: only Store + Reviews
+    if (role === 'seller') {
+      tabs.push({ key: "store", label: t("store") });
+      tabs.push({ key: "reviews", label: t("reviews") });
+      return tabs;
+    }
+
+    // Posts visible for provider/both
     if (userPosts.length > 0 || isOwnProfile) {
       tabs.push({ key: "posts", label: t("posts") });
     }
 
-    // Portfolio: visible for provider and both
+    // Portfolio: provider and both
     if (role === 'provider' || role === 'both') {
       tabs.push({ key: "portfolio", label: t("portfolio") });
     }
 
-    // Store: visible for seller and both
-    if (role === 'seller' || role === 'both') {
+    // Store: both
+    if (role === 'both') {
       tabs.push({ key: "store", label: t("store") });
     }
 
-    // Reviews always visible
     tabs.push({ key: "reviews", label: t("reviews") });
 
     return tabs;
