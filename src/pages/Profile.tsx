@@ -139,7 +139,7 @@ export default function Profile() {
         bio: data.bio || "", location: data.location || "",
         isProvider: data.is_provider, serviceTypes: data.service_types || [],
         phone: data.phone, joinedDate: data.created_at, isOnline: false,
-        profileRole: (data as any).profile_role || "provider",
+        profileRole: (data as any).profile_role || "seller",
       });
       fetchUserRating(viewingUserId); fetchFollowerCount(viewingUserId); fetchJobsCompleted(viewingUserId);
     } catch (error) { console.error('Error:', error); setUserProfile(null); }
