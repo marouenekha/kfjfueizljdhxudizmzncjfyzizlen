@@ -145,12 +145,14 @@ export const JobManager: React.FC<JobManagerProps> = ({ otherUserId, otherUserNa
   return (
     <div className="space-y-3">
       <Dialog open={showRequestDialog} onOpenChange={setShowRequestDialog}>
-        <DialogTrigger asChild>
-          <Button variant="outline" className="w-full">
-            <Briefcase className="w-4 h-4 mr-2" />
-            {t('requestJob')}
-          </Button>
-        </DialogTrigger>
+        {canRequestJob && (
+          <DialogTrigger asChild>
+            <Button variant="outline" className="w-full">
+              <Briefcase className="w-4 h-4 mr-2" />
+              {t('requestJob')}
+            </Button>
+          </DialogTrigger>
+        )}
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{t('requestJobFrom', { name: otherUserName })}</DialogTitle>
