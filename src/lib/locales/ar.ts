@@ -114,6 +114,7 @@ export default {
 
   // Feed
   feed: "الخلاصة",
+  market: "السوق",
   discoverServices: "اكتشف الخدمات",
   noPostsYet: "لا توجد منشورات بعد",
   beFirstToPost: "كن أول من ينشر طلب خدمة أو عرض!",
