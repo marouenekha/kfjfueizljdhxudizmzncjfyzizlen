@@ -114,6 +114,7 @@ export default {
 
   // Feed
   feed: "Fil d'actualité",
+  market: "Marché",
   discoverServices: "Découvrir les services",
   noPostsYet: "Pas encore de publications",
   beFirstToPost: "Soyez le premier à publier une demande ou offre de service !",
