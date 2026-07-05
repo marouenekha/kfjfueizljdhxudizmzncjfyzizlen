@@ -114,6 +114,7 @@ export default {
 
   // Feed
   feed: "Feed",
+  market: "Market",
   discoverServices: "Discover services",
   noPostsYet: "No posts yet",
   beFirstToPost: "Be the first to post a service request or offer!",
