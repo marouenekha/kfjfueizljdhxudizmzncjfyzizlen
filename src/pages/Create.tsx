@@ -30,7 +30,7 @@ export default function Create() {
   const { uploadImage, uploading } = useImageUpload("posts");
   const { uploadImage: uploadPortfolioImage, uploading: portfolioUploading } = useImageUpload("portfolio");
 
-  const profileRole = (user?.profile as any)?.profile_role || "provider";
+  const profileRole = (user?.profile as any)?.profile_role || "seller";
 
   // Determine available pages based on role
   const getAvailablePages = (): CreationPage[] => {
