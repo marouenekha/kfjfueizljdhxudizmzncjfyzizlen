@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, ShoppingCart, MessageCircle, Loader2, Zap } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/Layout/Layout";
 import { supabase } from "@/integrations/supabase/client";
@@ -176,9 +176,6 @@ const ProductDetail = () => {
         {/* Sticky action bar */}
         <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-3 z-40">
           <div className="max-w-2xl mx-auto flex gap-2">
-            <Button variant="outline" size="icon" onClick={() => seller && navigate(`/messages?to=${seller.user_id}`)}>
-              <MessageCircle className="w-5 h-5" />
-            </Button>
             <Button variant="outline" className="flex-1" onClick={handleAdd}>
               <ShoppingCart className="w-4 h-4 mr-2" />
               {t("addToCart")}

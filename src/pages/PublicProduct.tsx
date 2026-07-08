@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2, ShoppingCart, MessageCircle, Zap } from "lucide-react";
+import { ArrowLeft, Loader2, ShoppingCart, Zap } from "lucide-react";
 
 interface Product {
   id: string;
@@ -64,10 +64,6 @@ const PublicProduct = () => {
     if (!user) { navigate("/auth"); return; }
     await addToCart(product!.id, 1);
     navigate("/checkout");
-  };
-  const handleContact = () => {
-    if (!user) { navigate("/auth"); return; }
-    if (seller) navigate(`/messages?to=${seller.user_id}`);
   };
 
   if (loading) {
@@ -202,9 +198,6 @@ const PublicProduct = () => {
 
           <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-3 z-40">
             <div className="max-w-2xl mx-auto flex gap-2">
-              <Button variant="outline" size="icon" onClick={handleContact} aria-label="Contact seller">
-                <MessageCircle className="w-5 h-5" />
-              </Button>
               <Button variant="outline" className="flex-1" onClick={handleAdd}>
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Add to cart
