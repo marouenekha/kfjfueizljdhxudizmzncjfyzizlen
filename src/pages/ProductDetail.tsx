@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, ShoppingCart, MessageCircle, Loader2, Zap } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/Layout/Layout";
 import { supabase } from "@/integrations/supabase/client";
