@@ -34,9 +34,10 @@ export default function Create() {
 
   // Determine available pages based on role
   const getAvailablePages = (): CreationPage[] => {
+    if (profileRole === "provider") return ["post", "portfolio", "store"];
     if (profileRole === "both") return ["post", "portfolio", "store"];
-    // Seller and Provider both get Post + Portfolio per user request
-    return ["post", "portfolio"];
+    // Seller: post + store (no portfolio)
+    return ["post", "portfolio", "store"];
   };
 
   const availablePages = getAvailablePages();
