@@ -32,16 +32,13 @@ export default function Create() {
 
   const profileRole = (user?.profile as any)?.profile_role || "seller";
 
-  // Determine available pages based on role
+  // Store-only mode: hide Post and Portfolio for now
   const getAvailablePages = (): CreationPage[] => {
-    if (profileRole === "provider") return ["post", "portfolio", "store"];
-    if (profileRole === "both") return ["post", "portfolio", "store"];
-    // Seller: post + store (no portfolio)
-    return ["post", "portfolio", "store"];
+    return ["store"];
   };
 
   const availablePages = getAvailablePages();
-  const [activePage, setActivePage] = useState<CreationPage>("post");
+  const [activePage, setActivePage] = useState<CreationPage>("store");
   const activeIndex = availablePages.indexOf(activePage);
 
   // Swipe handling
