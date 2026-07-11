@@ -50,36 +50,12 @@ export default function Profile() {
     profileRole: (authUser.profile as any).profile_role || "seller",
   } : null) : userProfile;
 
-  // Determine visible tabs based on profile role
+  // Store-only mode: hide Posts and Portfolio for now
   const getVisibleTabs = () => {
-    const role = user?.profileRole || 'seller';
-    const tabs: { key: string; label: string }[] = [];
-
-    // Seller mode: only Store + Reviews
-    if (role === 'seller') {
-      tabs.push({ key: "store", label: t("store") });
-      tabs.push({ key: "reviews", label: t("reviews") });
-      return tabs;
-    }
-
-    // Posts visible for provider/both
-    if (userPosts.length > 0 || isOwnProfile) {
-      tabs.push({ key: "posts", label: t("posts") });
-    }
-
-    // Portfolio: provider and both
-    if (role === 'provider' || role === 'both') {
-      tabs.push({ key: "portfolio", label: t("portfolio") });
-    }
-
-    // Store: both
-    if (role === 'both') {
-      tabs.push({ key: "store", label: t("store") });
-    }
-
-    tabs.push({ key: "reviews", label: t("reviews") });
-
-    return tabs;
+    return [
+      { key: "store", label: t("store") },
+      { key: "reviews", label: t("reviews") },
+    ];
   };
 
   const visibleTabs = getVisibleTabs();
