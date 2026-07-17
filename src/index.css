@@ -3,10 +3,9 @@
 @tailwind utilities;
 
 /* ServiceHub — "Deep Blue Boutique"
-   A refined marketplace aesthetic: deep midnight blue as the primary,
-   an electric azure accent for actions and prices, and paper-white
-   surfaces. Space Grotesk for headings, DM Sans for body, JetBrains
-   Mono for prices. All colors are HSL semantic tokens. */
+   Navy primary, electric azure accent, paper-white surfaces.
+   Fonts: Archivo for headings, Work Sans for body, IBM Plex Mono
+   for prices. */
 
 @layer base {
   :root {
@@ -74,9 +73,9 @@
     --transition-slow: 450ms var(--ease-out);
 
     /* Fonts */
-    --font-display: 'Space Grotesk', system-ui, sans-serif;
-    --font-body: 'DM Sans', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --font-display: 'Archivo', system-ui, sans-serif;
+    --font-body: 'Work Sans', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
   }
 
   .dark {
@@ -251,5 +250,4 @@
   .safe-area-pb { padding-bottom: env(safe-area-inset-bottom); }
   .scrollbar-none::-webkit-scrollbar { display: none; }
   .scrollbar-none { scrollbar-width: none; }
-     }
-     
+}
