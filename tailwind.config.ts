@@ -20,7 +20,7 @@ export default {
 		extend: {
 			fontFamily: {
 				sans: ['Work Sans', 'system-ui', 'sans-serif'],
-				display: ['Archivo', 'system-ui', 'sans-serif'],
+				display: ['Fraunces', 'Georgia', 'serif'],
 				mono: ['IBM Plex Mono', 'ui-monospace', 'monospace'],
 			},
 			colors: {
