@@ -2,109 +2,108 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ServiceHub — "Market Stall" Design System
-   A local marketplace should feel like real people selling to real
-   neighbors: canvas awnings, stamped tags, hand-priced goods —
-   not a generic SaaS dashboard. */
+/* ServiceHub — "Quiet Boutique" Design System
+   Neutral, restrained, one accent used sparingly. Luxury reads as
+   calm and considered, not loud — let whitespace and typography
+   carry the weight, not color or ornament. */
 
 @layer base {
   :root {
     /* Core surfaces */
-    --background: 40 33% 97%;        /* warm paper #FBF9F5 */
-    --foreground: 30 8% 12%;         /* ink #211E1B */
+    --background: 40 14% 96%;        /* stone white #F7F6F3 */
+    --foreground: 30 6% 14%;         /* graphite #262422 */
 
-    /* Primary — Awning Green (trust, local, fresh) */
-    --primary: 165 40% 30%;          /* #2F6F5E */
-    --primary-foreground: 40 33% 97%;
-    --primary-light: 165 35% 42%;
-    --primary-dark: 165 45% 20%;
+    /* Primary — Graphite (used for nav, text, primary actions) */
+    --primary: 30 6% 14%;
+    --primary-foreground: 40 14% 96%;
+    --primary-light: 30 5% 32%;
+    --primary-dark: 30 8% 8%;
 
-    /* Secondary — Marigold (signage, CTAs, price tags) */
-    --secondary: 36 79% 57%;         /* #E8A33D */
-    --secondary-foreground: 30 8% 12%;
-    --secondary-light: 36 79% 70%;
+    /* Secondary — Brass (the one accent: price, buy, verified) */
+    --secondary: 32 33% 52%;         /* muted brass #B08D57 */
+    --secondary-foreground: 30 6% 14%;
+    --secondary-light: 32 33% 66%;
 
-    /* Accent — Brick (community, warmth, alerts-adjacent) */
-    --accent: 14 56% 47%;            /* #C1502E */
-    --accent-foreground: 40 33% 97%;
-    --accent-light: 14 56% 62%;
+    /* Accent — Stone (quiet tertiary, dividers/backgrounds only) */
+    --accent: 34 10% 60%;
+    --accent-foreground: 40 14% 96%;
+    --accent-light: 34 10% 75%;
 
-    /* Neutrals — canvas tones, not cold grays */
-    --muted: 36 24% 91%;             /* #EFEAE1 canvas */
-    --muted-foreground: 30 8% 38%;
-    --card: 40 33% 99%;
-    --card-foreground: 30 8% 12%;
-    --popover: 40 33% 99%;
-    --popover-foreground: 30 8% 12%;
+    /* Neutrals */
+    --muted: 36 12% 91%;             /* pale stone #EDEBE6 */
+    --muted-foreground: 30 6% 40%;
+    --card: 0 0% 100%;
+    --card-foreground: 30 6% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 30 6% 14%;
 
-    /* Borders & inputs */
-    --border: 34 18% 85%;
-    --input: 34 18% 85%;
-    --ring: 165 40% 30%;
+    /* Borders & inputs — hairline, not heavy */
+    --border: 34 10% 87%;
+    --input: 34 10% 87%;
+    --ring: 30 6% 14%;
 
     /* Utility colors */
-    --destructive: 6 74% 46%;
-    --destructive-foreground: 40 33% 97%;
-    --warning: 36 79% 57%;
-    --warning-foreground: 30 8% 12%;
+    --destructive: 6 55% 40%;
+    --destructive-foreground: 40 14% 96%;
+    --warning: 32 33% 52%;
+    --warning-foreground: 30 6% 14%;
 
-    /* Service category tags — muted, stamped-tag palette */
-    --service-home: 165 40% 30%;
-    --service-digital: 255 35% 45%;
-    --service-events: 340 55% 48%;
-    --service-wellness: 142 40% 35%;
-    --service-business: 14 56% 47%;
+    /* Service category tags — desaturated, tonal, no primary-color competition */
+    --service-home: 210 15% 40%;
+    --service-digital: 260 12% 42%;
+    --service-events: 340 15% 42%;
+    --service-wellness: 150 12% 38%;
+    --service-business: 32 33% 45%;
 
-    /* Shadows — warm-tinted, not pure black */
-    --shadow-sm: 0 1px 2px 0 hsl(30 8% 12% / 0.06);
-    --shadow-md: 0 3px 8px -2px hsl(30 8% 12% / 0.10), 0 1px 3px -1px hsl(30 8% 12% / 0.08);
-    --shadow-lg: 0 12px 24px -8px hsl(30 8% 12% / 0.16), 0 4px 8px -2px hsl(30 8% 12% / 0.08);
-    --shadow-tag: 0 2px 6px -1px hsl(36 79% 40% / 0.35);
+    /* Shadows — near-flat, hairline over heavy shadow */
+    --shadow-sm: 0 1px 2px 0 hsl(30 6% 14% / 0.04);
+    --shadow-md: 0 2px 6px -2px hsl(30 6% 14% / 0.08);
+    --shadow-lg: 0 8px 20px -6px hsl(30 6% 14% / 0.12);
+    --shadow-tag: none;
 
-    /* Layout */
-    --radius: 0.5rem;
+    /* Layout — tighter, more editorial */
+    --radius: 0.25rem;
     --nav-height: 4rem;
     --mobile-padding: 1rem;
     --container-max: 1200px;
 
-    /* Motion */
-    --transition-fast: 120ms ease-out;
-    --transition-normal: 200ms ease-out;
-    --transition-slow: 350ms ease-out;
+    /* Motion — subtle, unhurried */
+    --transition-fast: 150ms ease-out;
+    --transition-normal: 250ms ease-out;
+    --transition-slow: 400ms ease-out;
 
     /* Fonts */
-    --font-display: 'Archivo', system-ui, sans-serif;
+    --font-display: 'Fraunces', Georgia, serif;
     --font-body: 'Work Sans', system-ui, sans-serif;
     --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
   }
 
   .dark {
-    --background: 30 10% 9%;
-    --foreground: 40 20% 95%;
+    --background: 30 8% 9%;
+    --foreground: 40 12% 94%;
 
-    --primary: 165 38% 48%;
-    --primary-foreground: 30 10% 9%;
-    --primary-light: 165 35% 60%;
-    --primary-dark: 165 40% 32%;
+    --primary: 40 14% 94%;
+    --primary-foreground: 30 8% 9%;
+    --primary-light: 40 10% 80%;
+    --primary-dark: 40 16% 98%;
 
-    --secondary: 36 75% 60%;
-    --secondary-foreground: 30 10% 9%;
+    --secondary: 32 38% 58%;
+    --secondary-foreground: 30 8% 9%;
 
-    --accent: 14 60% 58%;
-    --accent-foreground: 30 10% 9%;
+    --accent: 34 8% 40%;
+    --accent-foreground: 40 14% 94%;
 
-    --muted: 30 10% 16%;
-    --muted-foreground: 36 12% 65%;
-    --card: 30 10% 12%;
-    --card-foreground: 40 20% 95%;
-    --popover: 30 10% 12%;
-    --popover-foreground: 40 20% 95%;
+    --muted: 30 8% 15%;
+    --muted-foreground: 36 8% 62%;
+    --card: 30 8% 12%;
+    --card-foreground: 40 12% 94%;
+    --popover: 30 8% 12%;
+    --popover-foreground: 40 12% 94%;
 
-    --border: 30 10% 22%;
-    --input: 30 10% 22%;
+    --border: 30 8% 20%;
+    --input: 30 8% 20%;
   }
 
-  /* RTL support for Arabic */
   [dir="rtl"] {
     direction: rtl;
   }
@@ -127,21 +126,22 @@
 
   h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
+    font-weight: 500;
   }
 
   h1 {
-    @apply text-2xl md:text-4xl font-bold tracking-tight;
+    @apply text-2xl md:text-4xl font-medium tracking-tight;
   }
 
   h2 {
-    @apply text-xl md:text-2xl font-bold tracking-tight;
+    @apply text-xl md:text-2xl font-medium tracking-tight;
   }
 
   h3 {
-    @apply text-lg md:text-xl font-semibold;
+    @apply text-lg md:text-xl font-medium;
   }
 
-  /* Prices and order/reference numbers read like a real price tag */
+  /* Prices and order/reference numbers */
   .price, .font-mono-num {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
@@ -164,7 +164,6 @@
     @apply bg-muted-foreground;
   }
 
-  /* Respect reduced motion */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
@@ -188,72 +187,57 @@
     @apply w-full max-w-7xl mx-auto px-8;
   }
 
-  /* Feed / product cards */
+  /* Feed / product cards — hairline border, near-flat, quiet hover lift */
   .post-card {
-    @apply relative bg-card rounded-lg border border-border shadow-sm hover:shadow-md transition-shadow duration-200;
+    @apply relative bg-card rounded border border-border shadow-sm hover:shadow-md transition-shadow duration-300;
   }
 
-  /* Signature element: price-tag corner clip, used on product cards */
+  /* Signature element: quiet brass-underlined price chip (no rotation, no clip) */
   .price-tag {
-    @apply absolute -top-2 -right-2 z-10 flex items-center gap-1 rounded-md bg-secondary px-2.5 py-1 text-secondary-foreground;
+    @apply inline-flex items-baseline gap-1 border-b border-secondary text-foreground;
     font-family: var(--font-mono);
     font-weight: 600;
-    font-size: 0.8125rem;
-    box-shadow: var(--shadow-tag);
-    transform: rotate(3deg);
+    font-size: 0.9375rem;
+    padding-bottom: 1px;
   }
 
-  .price-tag::before {
-    content: '';
-    position: absolute;
-    left: -3px;
-    top: 50%;
-    width: 6px;
-    height: 6px;
-    background: hsl(var(--background));
-    border-radius: 999px;
-    transform: translateY(-50%);
-  }
-
-  /* Category tags — stamped look, not generic pills */
+  /* Category tags — flat, tonal, small-caps letterspacing, no stamp/rotation */
   .service-badge {
-    @apply inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold uppercase tracking-wide;
-    font-family: var(--font-display);
-    transform: rotate(-1deg);
+    @apply inline-flex items-center px-2.5 py-1 rounded-sm text-[0.6875rem] font-medium tracking-widest uppercase;
   }
 
   .service-badge-home {
-    @apply bg-service-home/10 text-service-home border border-service-home/25;
+    @apply bg-service-home/10 text-service-home border border-service-home/20;
   }
 
   .service-badge-digital {
-    @apply bg-service-digital/10 text-service-digital border border-service-digital/25;
+    @apply bg-service-digital/10 text-service-digital border border-service-digital/20;
   }
 
   .service-badge-events {
-    @apply bg-service-events/10 text-service-events border border-service-events/25;
+    @apply bg-service-events/10 text-service-events border border-service-events/20;
   }
 
   .service-badge-wellness {
-    @apply bg-service-wellness/10 text-service-wellness border border-service-wellness/25;
+    @apply bg-service-wellness/10 text-service-wellness border border-service-wellness/20;
   }
 
   .service-badge-business {
-    @apply bg-service-business/10 text-service-business border border-service-business/25;
+    @apply bg-service-business/10 text-service-business border border-service-business/20;
   }
 
   /* Floating action button */
   .fab {
-    @apply fixed bottom-6 right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-105 z-50;
+    @apply fixed bottom-6 right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-105 z-50;
   }
 
   /* Message bubbles */
   .message-sent {
-    @apply bg-primary text-primary-foreground rounded-xl rounded-br-md px-4 py-2 max-w-xs ml-auto;
+    @apply bg-primary text-primary-foreground rounded rounded-br-sm px-4 py-2 max-w-xs ml-auto;
   }
 
   .message-received {
-    @apply bg-muted text-foreground rounded-xl rounded-bl-md px-4 py-2 max-w-xs mr-auto;
+    @apply bg-muted text-foreground rounded rounded-bl-sm px-4 py-2 max-w-xs mr-auto;
   }
 }
 
