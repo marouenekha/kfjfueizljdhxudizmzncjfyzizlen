@@ -2,110 +2,109 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ServiceHub - Local Services Marketplace Design System */
+/* ServiceHub — "Market Stall" Design System
+   A local marketplace should feel like real people selling to real
+   neighbors: canvas awnings, stamped tags, hand-priced goods —
+   not a generic SaaS dashboard. */
 
 @layer base {
   :root {
-    /* Core Brand Colors */
-    --background: 0 0% 100%;
-    --foreground: 220 13% 18%;
+    /* Core surfaces */
+    --background: 40 33% 97%;        /* warm paper #FBF9F5 */
+    --foreground: 30 8% 12%;         /* ink #211E1B */
 
-    /* Primary Brand - Modern Blue */
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
-    --primary-light: 217 91% 85%;
-    --primary-dark: 217 91% 40%;
+    /* Primary — Awning Green (trust, local, fresh) */
+    --primary: 165 40% 30%;          /* #2F6F5E */
+    --primary-foreground: 40 33% 97%;
+    --primary-light: 165 35% 42%;
+    --primary-dark: 165 45% 20%;
 
-    /* Secondary - Warm Orange for CTAs */
-    --secondary: 25 95% 53%;
-    --secondary-foreground: 0 0% 100%;
-    --secondary-light: 25 95% 75%;
+    /* Secondary — Marigold (signage, CTAs, price tags) */
+    --secondary: 36 79% 57%;         /* #E8A33D */
+    --secondary-foreground: 30 8% 12%;
+    --secondary-light: 36 79% 70%;
 
-    /* Accent - Success Green */
-    --accent: 142 71% 45%;
-    --accent-foreground: 0 0% 100%;
-    --accent-light: 142 71% 85%;
+    /* Accent — Brick (community, warmth, alerts-adjacent) */
+    --accent: 14 56% 47%;            /* #C1502E */
+    --accent-foreground: 40 33% 97%;
+    --accent-light: 14 56% 62%;
 
-    /* Neutral Grays */
-    --muted: 220 13% 96%;
-    --muted-foreground: 220 9% 46%;
-    --card: 0 0% 100%;
-    --card-foreground: 220 13% 18%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 13% 18%;
+    /* Neutrals — canvas tones, not cold grays */
+    --muted: 36 24% 91%;             /* #EFEAE1 canvas */
+    --muted-foreground: 30 8% 38%;
+    --card: 40 33% 99%;
+    --card-foreground: 30 8% 12%;
+    --popover: 40 33% 99%;
+    --popover-foreground: 30 8% 12%;
 
-    /* Borders & Inputs */
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 217 91% 60%;
+    /* Borders & inputs */
+    --border: 34 18% 85%;
+    --input: 34 18% 85%;
+    --ring: 165 40% 30%;
 
-    /* Utility Colors */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    /* Utility colors */
+    --destructive: 6 74% 46%;
+    --destructive-foreground: 40 33% 97%;
+    --warning: 36 79% 57%;
+    --warning-foreground: 30 8% 12%;
 
-    /* Semantic Colors for Service Categories */
-    --service-home: 210 100% 60%;      /* Blue for home services */
-    --service-digital: 270 95% 60%;    /* Purple for digital services */
-    --service-events: 315 100% 60%;    /* Pink for events */
-    --service-wellness: 142 71% 45%;   /* Green for wellness */
-    --service-business: 25 95% 53%;    /* Orange for business */
+    /* Service category tags — muted, stamped-tag palette */
+    --service-home: 165 40% 30%;
+    --service-digital: 255 35% 45%;
+    --service-events: 340 55% 48%;
+    --service-wellness: 142 40% 35%;
+    --service-business: 14 56% 47%;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 40%));
-    --gradient-secondary: linear-gradient(135deg, hsl(25 95% 53%), hsl(25 95% 40%));
-    --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(270 95% 60%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 13% 98%));
-
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(220 13% 18% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(220 13% 18% / 0.1), 0 2px 4px -1px hsl(220 13% 18% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(220 13% 18% / 0.1), 0 4px 6px -2px hsl(220 13% 18% / 0.05);
-    --shadow-glow: 0 0 20px hsl(217 91% 60% / 0.3);
+    /* Shadows — warm-tinted, not pure black */
+    --shadow-sm: 0 1px 2px 0 hsl(30 8% 12% / 0.06);
+    --shadow-md: 0 3px 8px -2px hsl(30 8% 12% / 0.10), 0 1px 3px -1px hsl(30 8% 12% / 0.08);
+    --shadow-lg: 0 12px 24px -8px hsl(30 8% 12% / 0.16), 0 4px 8px -2px hsl(30 8% 12% / 0.08);
+    --shadow-tag: 0 2px 6px -1px hsl(36 79% 40% / 0.35);
 
     /* Layout */
-    --radius: 0.75rem;
+    --radius: 0.5rem;
     --nav-height: 4rem;
     --mobile-padding: 1rem;
     --container-max: 1200px;
 
-    /* Animations */
-    --transition-fast: 150ms ease-out;
-    --transition-normal: 250ms ease-out;
-    --transition-slow: 400ms ease-out;
+    /* Motion */
+    --transition-fast: 120ms ease-out;
+    --transition-normal: 200ms ease-out;
+    --transition-slow: 350ms ease-out;
+
+    /* Fonts */
+    --font-display: 'Archivo', system-ui, sans-serif;
+    --font-body: 'Work Sans', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
   }
 
   .dark {
-    --background: 220 13% 9%;
-    --foreground: 220 13% 98%;
+    --background: 30 10% 9%;
+    --foreground: 40 20% 95%;
 
-    --primary: 217 91% 70%;
-    --primary-foreground: 220 13% 9%;
-    --primary-light: 217 91% 85%;
-    --primary-dark: 217 91% 50%;
+    --primary: 165 38% 48%;
+    --primary-foreground: 30 10% 9%;
+    --primary-light: 165 35% 60%;
+    --primary-dark: 165 40% 32%;
 
-    --secondary: 25 95% 63%;
-    --secondary-foreground: 220 13% 9%;
+    --secondary: 36 75% 60%;
+    --secondary-foreground: 30 10% 9%;
 
-    --accent: 142 71% 55%;
-    --accent-foreground: 220 13% 9%;
+    --accent: 14 60% 58%;
+    --accent-foreground: 30 10% 9%;
 
-    --muted: 220 13% 15%;
-    --muted-foreground: 220 9% 60%;
-    --card: 220 13% 12%;
-    --card-foreground: 220 13% 98%;
-    --popover: 220 13% 12%;
-    --popover-foreground: 220 13% 98%;
+    --muted: 30 10% 16%;
+    --muted-foreground: 36 12% 65%;
+    --card: 30 10% 12%;
+    --card-foreground: 40 20% 95%;
+    --popover: 30 10% 12%;
+    --popover-foreground: 40 20% 95%;
 
-    --border: 220 13% 20%;
-    --input: 220 13% 20%;
-
-    --gradient-hero: linear-gradient(135deg, hsl(217 91% 50%) 0%, hsl(270 95% 50%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(220 13% 12%), hsl(220 13% 15%));
+    --border: 30 10% 22%;
+    --input: 30 10% 22%;
   }
 
-  /* RTL Support for Arabic */
+  /* RTL support for Arabic */
   [dir="rtl"] {
     direction: rtl;
   }
@@ -121,24 +120,34 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body);
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Mobile-first responsive typography */
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+  }
+
   h1 {
     @apply text-2xl md:text-4xl font-bold tracking-tight;
   }
 
   h2 {
-    @apply text-xl md:text-2xl font-semibold tracking-tight;
+    @apply text-xl md:text-2xl font-bold tracking-tight;
   }
 
   h3 {
     @apply text-lg md:text-xl font-semibold;
   }
 
-  /* Custom scrollbar */
+  /* Prices and order/reference numbers read like a real price tag */
+  .price, .font-mono-num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
   ::-webkit-scrollbar {
     width: 6px;
   }
@@ -154,10 +163,19 @@
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-muted-foreground;
   }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {
-  /* Mobile-first container */
   .container-mobile {
     @apply w-full max-w-sm mx-auto px-4;
   }
@@ -170,42 +188,66 @@
     @apply w-full max-w-7xl mx-auto px-8;
   }
 
-  /* Feed post cards */
+  /* Feed / product cards */
   .post-card {
-    @apply bg-card rounded-xl border border-border shadow-md hover:shadow-lg transition-all duration-300;
+    @apply relative bg-card rounded-lg border border-border shadow-sm hover:shadow-md transition-shadow duration-200;
   }
 
-  /* Service category badges */
+  /* Signature element: price-tag corner clip, used on product cards */
+  .price-tag {
+    @apply absolute -top-2 -right-2 z-10 flex items-center gap-1 rounded-md bg-secondary px-2.5 py-1 text-secondary-foreground;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    box-shadow: var(--shadow-tag);
+    transform: rotate(3deg);
+  }
+
+  .price-tag::before {
+    content: '';
+    position: absolute;
+    left: -3px;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    background: hsl(var(--background));
+    border-radius: 999px;
+    transform: translateY(-50%);
+  }
+
+  /* Category tags — stamped look, not generic pills */
   .service-badge {
-    @apply px-3 py-1 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-2.5 py-1 rounded text-xs font-semibold uppercase tracking-wide;
+    font-family: var(--font-display);
+    transform: rotate(-1deg);
   }
 
   .service-badge-home {
-    @apply bg-service-home/10 text-service-home border border-service-home/20;
+    @apply bg-service-home/10 text-service-home border border-service-home/25;
   }
 
   .service-badge-digital {
-    @apply bg-service-digital/10 text-service-digital border border-service-digital/20;
+    @apply bg-service-digital/10 text-service-digital border border-service-digital/25;
   }
 
   .service-badge-events {
-    @apply bg-service-events/10 text-service-events border border-service-events/20;
+    @apply bg-service-events/10 text-service-events border border-service-events/25;
   }
 
   .service-badge-wellness {
-    @apply bg-service-wellness/10 text-service-wellness border border-service-wellness/20;
+    @apply bg-service-wellness/10 text-service-wellness border border-service-wellness/25;
   }
 
   .service-badge-business {
-    @apply bg-service-business/10 text-service-business border border-service-business/20;
+    @apply bg-service-business/10 text-service-business border border-service-business/25;
   }
 
   /* Floating action button */
   .fab {
-    @apply fixed bottom-6 right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-50;
+    @apply fixed bottom-6 right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-105 z-50;
   }
 
-  /* Message bubble styles */
+  /* Message bubbles */
   .message-sent {
     @apply bg-primary text-primary-foreground rounded-xl rounded-br-md px-4 py-2 max-w-xs ml-auto;
   }
@@ -216,7 +258,6 @@
 }
 
 @layer utilities {
-  /* Animation utilities */
   .animate-fade-in {
     animation: fadeIn var(--transition-normal) ease-out;
   }
@@ -225,12 +266,8 @@
     animation: slideUp var(--transition-normal) ease-out;
   }
 
-  .animate-bounce-in {
-    animation: bounceIn var(--transition-slow) ease-out;
-  }
-
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
@@ -239,32 +276,7 @@
     to { transform: translateY(0); }
   }
 
-  @keyframes bounceIn {
-    0% { transform: scale(0.3); opacity: 0; }
-    50% { transform: scale(1.05); }
-    70% { transform: scale(0.9); }
-    100% { transform: scale(1); opacity: 1; }
-  }
-
-  /* Utility classes */
   .glass-effect {
     @apply bg-background/80 backdrop-blur-md border border-border/50;
-  }
-
-  .gradient-text {
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
   }
 }
