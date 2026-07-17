@@ -2,69 +2,68 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ServiceHub — "Blue & Gold"
-   Confident blue as the trustworthy, category-neutral base; a muted
-   gold reserved only for price, CTA, and add-to-cart — warm without
-   the "urgent sale" pull of bright orange. Fonts: Archivo for
-   headings, Work Sans for body, IBM Plex Mono for prices. */
+/* ServiceHub — Original Palette
+   Modern blue primary, warm orange for CTAs — the palette from the
+   original project, restored. Fonts: Archivo for headings, Work
+   Sans for body, IBM Plex Mono for prices. */
 
 @layer base {
   :root {
     /* Core surfaces */
-    --background: 210 20% 98%;
-    --foreground: 222 30% 12%;
+    --background: 0 0% 100%;
+    --foreground: 220 13% 18%;
 
-    /* Primary — Confident blue (nav, text, primary actions) */
-    --primary: 221 83% 45%;
+    /* Primary — Modern blue */
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 221 70% 60%;
-    --primary-dark: 222 60% 28%;
+    --primary-light: 217 91% 85%;
+    --primary-dark: 217 91% 40%;
 
-    /* Secondary — Muted gold (price, CTA, add-to-cart only) */
-    --secondary: 38 70% 50%;
-    --secondary-foreground: 30 30% 12%;
-    --secondary-light: 38 65% 65%;
+    /* Secondary — Warm orange (CTAs) */
+    --secondary: 25 95% 53%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-light: 25 95% 75%;
 
     /* Accent — Soft blue tint (subtle highlights, hover states) */
-    --accent: 221 40% 95%;
-    --accent-foreground: 221 83% 30%;
-    --accent-light: 221 50% 97%;
+    --accent: 217 70% 95%;
+    --accent-foreground: 217 91% 40%;
+    --accent-light: 217 70% 97%;
 
     /* Neutrals */
-    --muted: 210 16% 94%;
-    --muted-foreground: 222 12% 42%;
+    --muted: 220 13% 96%;
+    --muted-foreground: 220 9% 46%;
     --card: 0 0% 100%;
-    --card-foreground: 222 30% 12%;
+    --card-foreground: 220 13% 18%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 30% 12%;
+    --popover-foreground: 220 13% 18%;
 
-    /* Borders & inputs — hairline */
-    --border: 210 14% 88%;
-    --input: 210 14% 88%;
-    --ring: 221 83% 45%;
+    /* Borders & inputs */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 217 91% 60%;
 
     /* Utility colors */
-    --destructive: 0 72% 48%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --success: 152 55% 36%;
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 70% 50%;
-    --warning-foreground: 30 30% 12%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
 
     /* Signature gradients — used sparingly, not as default surfaces */
-    --gradient-brand: linear-gradient(135deg, hsl(222 60% 28%), hsl(221 83% 45%));
-    --gradient-hero: linear-gradient(180deg, hsl(210 20% 98%), hsl(221 40% 95%));
-    --gradient-accent: linear-gradient(135deg, hsl(38 70% 50%), hsl(38 60% 58%));
+    --gradient-brand: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 40%));
+    --gradient-hero: linear-gradient(180deg, hsl(0 0% 100%), hsl(217 70% 95%));
+    --gradient-accent: linear-gradient(135deg, hsl(25 95% 53%), hsl(25 95% 40%));
 
     /* Shadows — flatter, more considered than luminous */
-    --shadow-xs: 0 1px 2px 0 hsl(222 30% 12% / 0.04);
-    --shadow-sm: 0 1px 3px -1px hsl(222 30% 12% / 0.06);
-    --shadow-md: 0 4px 12px -4px hsl(222 30% 12% / 0.08);
-    --shadow-lg: 0 12px 24px -8px hsl(222 30% 12% / 0.12);
-    --shadow-glow: 0 6px 20px -6px hsl(221 83% 45% / 0.25);
+    --shadow-xs: 0 1px 2px 0 hsl(220 13% 18% / 0.05);
+    --shadow-sm: 0 1px 3px -1px hsl(220 13% 18% / 0.07);
+    --shadow-md: 0 4px 12px -4px hsl(220 13% 18% / 0.10);
+    --shadow-lg: 0 12px 24px -8px hsl(220 13% 18% / 0.14);
+    --shadow-glow: 0 6px 20px -6px hsl(217 91% 60% / 0.3);
 
     /* Layout */
-    --radius: 0.625rem;
+    --radius: 0.75rem;
     --nav-height: 4rem;
 
     /* Motion */
@@ -80,30 +79,30 @@
   }
 
   .dark {
-    --background: 222 35% 8%;
-    --foreground: 210 20% 96%;
+    --background: 220 13% 9%;
+    --foreground: 220 13% 98%;
 
-    --primary: 221 75% 62%;
-    --primary-foreground: 222 35% 8%;
-    --primary-light: 221 65% 74%;
-    --primary-dark: 221 60% 42%;
+    --primary: 217 91% 70%;
+    --primary-foreground: 220 13% 9%;
+    --primary-light: 217 91% 85%;
+    --primary-dark: 217 91% 50%;
 
-    --secondary: 38 65% 58%;
-    --secondary-foreground: 222 35% 8%;
+    --secondary: 25 95% 63%;
+    --secondary-foreground: 220 13% 9%;
 
-    --accent: 222 30% 16%;
-    --accent-foreground: 210 20% 96%;
+    --accent: 220 25% 16%;
+    --accent-foreground: 220 13% 98%;
 
-    --muted: 222 25% 14%;
-    --muted-foreground: 210 12% 65%;
-    --card: 222 32% 11%;
-    --card-foreground: 210 20% 96%;
-    --popover: 222 32% 11%;
-    --popover-foreground: 210 20% 96%;
+    --muted: 220 13% 15%;
+    --muted-foreground: 220 9% 60%;
+    --card: 220 13% 12%;
+    --card-foreground: 220 13% 98%;
+    --popover: 220 13% 12%;
+    --popover-foreground: 220 13% 98%;
 
-    --border: 222 25% 18%;
-    --input: 222 25% 18%;
-    --ring: 221 75% 62%;
+    --border: 220 13% 20%;
+    --input: 220 13% 20%;
+    --ring: 217 91% 70%;
   }
 
   [dir="rtl"] { direction: rtl; }
@@ -251,5 +250,4 @@
   .safe-area-pb { padding-bottom: env(safe-area-inset-bottom); }
   .scrollbar-none::-webkit-scrollbar { display: none; }
   .scrollbar-none { scrollbar-width: none; }
-     }
-       
+}
