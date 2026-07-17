@@ -156,49 +156,43 @@ export const StoreTab = ({ userId, isOwnProfile }: StoreTabProps) => {
       )}
 
       {/* Product grid */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
         {filtered.map((product) => (
-          <div
+          <article
             key={product.id}
-            className="border border-border rounded-lg overflow-hidden bg-card flex flex-col"
+            className="product-card group cursor-pointer flex flex-col"
+            onClick={() => navigate(`/product/${product.id}`)}
           >
-            {/* Product image */}
-            <button
-              onClick={() => navigate(`/product/${product.id}`)}
-              className="aspect-square bg-muted flex items-center justify-center overflow-hidden text-left"
-            >
+            <div className="relative aspect-square bg-muted overflow-hidden">
               {product.images && product.images.length > 0 ? (
-                <img
-                  src={product.images[0]}
-                  alt={product.title}
-                  className="w-full h-full object-cover"
-                />
+                <img src={product.images[0]} alt={product.title} className="w-full h-full object-cover" loading="lazy" />
               ) : (
-                <ImagePlus className="w-8 h-8 text-muted-foreground" />
+                <div className="w-full h-full flex items-center justify-center">
+                  <ImagePlus className="w-8 h-8 text-muted-foreground" />
+                </div>
               )}
-            </button>
+            </div>
 
-            {/* Product info */}
-            <div className="p-2.5 space-y-1 flex-1 flex flex-col">
-              <button onClick={() => navigate(`/product/${product.id}`)} className="text-left">
+            <div className="p-3 space-y-2 flex-1 flex flex-col">
+              <div>
                 <h4 className="text-sm font-medium truncate">{product.title}</h4>
                 {product.description && (
-                  <p className="text-xs text-muted-foreground line-clamp-2">
+                  <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
                     {product.description}
                   </p>
                 )}
-                <p className="text-sm font-bold text-primary mt-1">
-                  {product.price.toFixed(2)} DA
-                </p>
-              </button>
+              </div>
+              <div className="price-chip text-base text-secondary">
+                {product.price.toFixed(2)}
+                <span className="currency ml-1">DA</span>
+              </div>
 
-              {/* Owner actions */}
               {isOwnProfile ? (
-                <div className="flex gap-1 pt-1 mt-auto">
+                <div className="flex gap-1 pt-1 mt-auto" onClick={(e) => e.stopPropagation()}>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 text-xs"
+                    className="h-8 px-2 text-xs flex-1"
                     onClick={() => setEditingProduct(product)}
                   >
                     <Edit className="w-3 h-3 mr-1" />
@@ -207,30 +201,31 @@ export const StoreTab = ({ userId, isOwnProfile }: StoreTabProps) => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 text-xs text-destructive hover:text-destructive"
+                    className="h-8 px-2 text-xs text-destructive hover:text-destructive"
                     onClick={() => handleDelete(product.id)}
                   >
-                    <Trash2 className="w-3 h-3 mr-1" />
-                    {t("delete")}
+                    <Trash2 className="w-3 h-3" />
                   </Button>
                 </div>
               ) : (
                 <Button
                   size="sm"
-                  className="h-8 text-xs mt-auto"
-                  onClick={async () => {
+                  className="h-9 text-xs mt-auto rounded-full"
+                  onClick={async (e) => {
+                    e.stopPropagation();
                     await addToCart(product.id, 1);
                     toast({ title: t("addedToCart") });
                   }}
                 >
-                  <ShoppingCart className="w-3 h-3 mr-1" />
+                  <ShoppingCart className="w-3.5 h-3.5 mr-1.5" />
                   {t("addToCart")}
                 </Button>
               )}
             </div>
-          </div>
+          </article>
         ))}
       </div>
+
 
       {filtered.length === 0 && searchQuery && (
         <p className="text-center text-sm text-muted-foreground py-8">

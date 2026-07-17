@@ -19,9 +19,9 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				sans: ['Work Sans', 'system-ui', 'sans-serif'],
-				display: ['Fraunces', 'Georgia', 'serif'],
-				mono: ['IBM Plex Mono', 'ui-monospace', 'monospace'],
+				sans: ['DM Sans', 'system-ui', 'sans-serif'],
+				display: ['Space Grotesk', 'system-ui', 'sans-serif'],
+				mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
