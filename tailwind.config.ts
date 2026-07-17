@@ -18,6 +18,11 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Work Sans', 'system-ui', 'sans-serif'],
+				display: ['Archivo', 'system-ui', 'sans-serif'],
+				mono: ['IBM Plex Mono', 'ui-monospace', 'monospace'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -72,6 +77,13 @@ export default {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			boxShadow: {
+				sm: 'var(--shadow-sm)',
+				DEFAULT: 'var(--shadow-md)',
+				md: 'var(--shadow-md)',
+				lg: 'var(--shadow-lg)',
+				tag: 'var(--shadow-tag)'
 			},
 			keyframes: {
 				'accordion-down': {
