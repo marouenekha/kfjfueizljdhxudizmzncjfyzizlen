@@ -32,9 +32,8 @@ export default function Create() {
 
   const profileRole = (user?.profile as any)?.profile_role || "seller";
 
-  // Store-only mode: hide Post and Portfolio for now
   const getAvailablePages = (): CreationPage[] => {
-    return ["store"];
+    return ["portfolio", "store"];
   };
 
   const availablePages = getAvailablePages();
