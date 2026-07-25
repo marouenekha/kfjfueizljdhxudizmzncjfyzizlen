@@ -41,6 +41,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { SharePostDialog } from "./SharePostDialog";
 import { toast } from "sonner";
+import { WhatsAppIcon } from "@/components/ui/whatsapp-icon";
+import { openWhatsApp } from "@/lib/whatsapp";
 
 interface Post {
   id: string;
