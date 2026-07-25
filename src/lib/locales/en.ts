@@ -164,6 +164,7 @@ export default {
   following: "Following",
   rate: "Rate",
   message: "Message",
+  whatsapp: "WhatsApp",
   provider: "Provider",
   joined: "Joined",
   followers: "Followers",

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bell, UserPlus, Star, MessageCircle } from "lucide-react";
+import { Bell, UserPlus, Star } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale/ar";
 import { fr } from "date-fns/locale/fr";
@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 
-interface Notification { id: string; type: "follow" | "rating" | "message"; actorName: string; actorAvatar: string | null; actorId: string; message: string; createdAt: string; }
+interface Notification { id: string; type: "follow" | "rating"; actorName: string; actorAvatar: string | null; actorId: string; message: string; createdAt: string; }
 
 export const NotificationsPopover = () => {
   const { user } = useAuth();
@@ -29,15 +29,13 @@ export const NotificationsPopover = () => {
     try {
       const { data: follows } = await supabase.from("follows").select("id, follower_id, created_at").eq("following_id", user.id).order("created_at", { ascending: false }).limit(20);
       const { data: ratings } = await supabase.from("ratings").select("id, rater_id, rating, created_at").eq("rated_id", user.id).order("created_at", { ascending: false }).limit(20);
-      const { data: messages } = await supabase.from("messages").select("id, sender_id, content, created_at").eq("receiver_id", user.id).order("created_at", { ascending: false }).limit(20);
       const actorIds = new Set<string>();
-      follows?.forEach(f => actorIds.add(f.follower_id)); ratings?.forEach(r => actorIds.add(r.rater_id)); messages?.forEach(m => actorIds.add(m.sender_id));
+      follows?.forEach(f => actorIds.add(f.follower_id)); ratings?.forEach(r => actorIds.add(r.rater_id));
       const { data: profiles } = await supabase.from("profiles").select("user_id, name, avatar_url").in("user_id", Array.from(actorIds));
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
       const all: Notification[] = [];
       follows?.forEach(f => { const p = profileMap.get(f.follower_id); all.push({ id: `follow-${f.id}`, type: "follow", actorName: p?.name || "Someone", actorAvatar: p?.avatar_url || null, actorId: f.follower_id, message: t('startedFollowingYou'), createdAt: f.created_at }); });
       ratings?.forEach(r => { const p = profileMap.get(r.rater_id); all.push({ id: `rating-${r.id}`, type: "rating", actorName: p?.name || "Someone", actorAvatar: p?.avatar_url || null, actorId: r.rater_id, message: t('ratedYouStars', { rating: r.rating }), createdAt: r.created_at }); });
-      messages?.forEach(m => { const p = profileMap.get(m.sender_id); all.push({ id: `msg-${m.id}`, type: "message", actorName: p?.name || "Someone", actorAvatar: p?.avatar_url || null, actorId: m.sender_id, message: m.content.length > 40 ? m.content.slice(0, 40) + "…" : m.content, createdAt: m.created_at }); });
       all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setNotifications(all.slice(0, 30));
     } catch (error) { console.error("Error fetching notifications:", error); }
@@ -47,10 +45,10 @@ export const NotificationsPopover = () => {
   useEffect(() => { if (open) fetchNotifications(); }, [open, user?.id]);
 
   const getIcon = (type: Notification["type"]) => {
-    switch (type) { case "follow": return <UserPlus className="w-4 h-4 text-primary" />; case "rating": return <Star className="w-4 h-4 text-yellow-500" />; case "message": return <MessageCircle className="w-4 h-4 text-primary" />; }
+    switch (type) { case "follow": return <UserPlus className="w-4 h-4 text-primary" />; case "rating": return <Star className="w-4 h-4 text-yellow-500" />; }
   };
 
-  const handleClick = (notif: Notification) => { setOpen(false); navigate(notif.type === "message" ? `/messages?user=${notif.actorId}` : `/profile?user=${notif.actorId}`); };
+  const handleClick = (notif: Notification) => { setOpen(false); navigate(`/profile?user=${notif.actorId}`); };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

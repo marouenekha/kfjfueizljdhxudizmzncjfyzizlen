@@ -164,6 +164,7 @@ export default {
   following: "Suivi",
   rate: "Évaluer",
   message: "Message",
+  whatsapp: "WhatsApp",
   provider: "Prestataire",
   joined: "Inscrit",
   followers: "Abonnés",

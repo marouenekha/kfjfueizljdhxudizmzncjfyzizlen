@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { Home, Search, MessageCircle, User, Plus, Settings, LogOut } from "lucide-react";
+import { Home, Search, User, Plus, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,7 +13,6 @@ export const DesktopSidebar = () => {
   const navItems = [
     { to: "/feed", icon: Home, label: t('home') },
     { to: "/search", icon: Search, label: t('search') },
-    { to: "/messages", icon: MessageCircle, label: t('messages') },
     { to: "/profile", icon: User, label: t('profile') },
     { to: "/settings", icon: Settings, label: t('settings') },
   ];

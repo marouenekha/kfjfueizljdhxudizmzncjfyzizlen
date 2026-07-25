@@ -8,7 +8,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Feed from "./pages/Feed";
 import Search from "./pages/Search";
-import Messages from "./pages/Messages";
+
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
@@ -46,11 +46,6 @@ const App = () => (
             <Route path="/search" element={
               <ProtectedRoute>
                 <Search />
-              </ProtectedRoute>
-            } />
-            <Route path="/messages" element={
-              <ProtectedRoute>
-                <Messages />
               </ProtectedRoute>
             } />
             <Route path="/profile" element={

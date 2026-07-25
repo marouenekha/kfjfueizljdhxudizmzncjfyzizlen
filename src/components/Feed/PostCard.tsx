@@ -41,6 +41,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { SharePostDialog } from "./SharePostDialog";
 import { toast } from "sonner";
+import { WhatsAppIcon } from "@/components/ui/whatsapp-icon";
+import { openWhatsApp } from "@/lib/whatsapp";
 
 interface Post {
   id: string;
@@ -179,8 +181,10 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
     setShowDeleteDialog(false);
   };
 
-  const handleContact = () => {
-    if (post.user_id) navigate(`/messages?user=${post.user_id}`);
+  const handleContact = async () => {
+    if (!post.user_id) return;
+    const { data } = await supabase.from("profiles").select("phone, name").eq("user_id", post.user_id).maybeSingle();
+    openWhatsApp(data?.phone, `Hi ${data?.name || ""}!`);
   };
 
   const contentTruncated = post.content && post.content.length > 120 && !expanded;
@@ -350,8 +354,8 @@ export function PostCard({ post, onPostUpdated, onPostDeleted }: PostCardProps) 
               <Share2 className="w-6 h-6 text-foreground" />
             </Button>
           </div>
-          <Button variant="ghost" size="sm" className="text-primary text-xs font-semibold gap-1" onClick={handleContact}>
-            <Send className="w-4 h-4" /> {t('contact')}
+          <Button variant="ghost" size="sm" className="text-[#25D366] text-xs font-semibold gap-1" onClick={handleContact}>
+            <WhatsAppIcon size={16} /> {t('whatsapp')}
           </Button>
         </div>
 

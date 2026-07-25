@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { Edit, Star, MapPin, Calendar, Award, Users, MessageCircle, FileText, Loader2, UserPlus, UserCheck, Trash2, ShoppingBag } from "lucide-react";
+import { Edit, Star, MapPin, Calendar, Award, Users, FileText, Loader2, UserPlus, UserCheck, Trash2, ShoppingBag } from "lucide-react";
+import { WhatsAppIcon } from "@/components/ui/whatsapp-icon";
+import { openWhatsApp } from "@/lib/whatsapp";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale/ar";
 import { fr } from "date-fns/locale/fr";
@@ -54,6 +56,7 @@ export default function Profile() {
   const getVisibleTabs = () => {
     return [
       { key: "store", label: t("store") },
+      { key: "portfolio", label: t("portfolio") },
       { key: "reviews", label: t("reviews") },
     ];
   };
@@ -229,7 +232,7 @@ export default function Profile() {
                         {isFollowing ? t('following') : t('follow')}
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => setShowRatingModal(true)}><Star className="w-4 h-4 mr-2" />{t('rate')}</Button>
-                      <Button size="sm" variant="outline" onClick={() => navigate(`/messages?user=${user?.id}`)}><MessageCircle className="w-4 h-4 mr-2" />{t('message')}</Button>
+                      <Button size="sm" variant="outline" onClick={() => openWhatsApp(user?.phone, `Hi ${user?.name}!`)}><WhatsAppIcon size={16} className="mr-2 text-[#25D366]" />{t('whatsapp')}</Button>
                     </>
                   )}
                 </div>
