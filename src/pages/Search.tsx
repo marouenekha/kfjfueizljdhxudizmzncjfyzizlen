@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search as SearchIcon, MapPin, Filter, MessageCircle } from "lucide-react";
+import { Search as SearchIcon, MapPin, Filter } from "lucide-react";
+import { WhatsAppIcon } from "@/components/ui/whatsapp-icon";
+import { openWhatsApp } from "@/lib/whatsapp";
 import { useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/Layout/Layout";
 import { Input } from "@/components/ui/input";
@@ -109,8 +111,8 @@ export default function Search() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" className="flex-1 text-xs sm:text-sm" onClick={() => { if (!user) { navigate('/auth'); return; } navigate(`/messages?user=${profile.user_id}`); }}>
-                      <MessageCircle className="w-4 h-4 mr-2" /> {t('message')}
+                    <Button size="sm" className="flex-1 text-xs sm:text-sm bg-[#25D366] hover:bg-[#20bd5a] text-white" onClick={() => { if (!user) { navigate('/auth'); return; } openWhatsApp(profile.phone, `Hi ${profile.name || ''}!`); }}>
+                      <WhatsAppIcon size={16} className="mr-2" /> {t('whatsapp')}
                     </Button>
                     <Button variant="outline" size="sm" className="flex-1 text-xs sm:text-sm" onClick={() => navigate(`/profile?user=${profile.user_id}`)}>
                       {t('viewProfile')}
