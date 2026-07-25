@@ -164,6 +164,7 @@ export default {
   following: "متابَع",
   rate: "تقييم",
   message: "رسالة",
+  whatsapp: "واتساب",
   provider: "مقدم خدمة",
   joined: "انضم",
   followers: "متابعون",
