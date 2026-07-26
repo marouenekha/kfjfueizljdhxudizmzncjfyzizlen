@@ -38,7 +38,7 @@ export const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({ open, onOp
     if (open && user?.profile) {
       const p = user.profile;
       setName(p.name || ""); setBio(p.bio || ""); setLocation(p.location || "");
-      setAvatarUrl(p.avatar_url || ""); setPhone(p.phone || "");
+      setAvatarUrl(p.avatar_url || ""); setPhone(p.phone || "+216");
       setIsProvider(p.is_provider || false); setServiceTypes(p.service_types || []);
       setProfileRole((p as any).profile_role || "seller");
       if ((p as any).latitude && (p as any).longitude) {
@@ -114,7 +114,7 @@ export const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({ open, onOp
                   <svg viewBox="0 0 32 32" width="14" height="14" className="text-[#25D366]"><path fill="currentColor" d="M16 .4C7.4.4.4 7.4.4 16c0 2.8.7 5.5 2.1 7.9L.3 31.6l7.9-2.1c2.3 1.3 4.9 1.9 7.6 1.9h.1c8.6 0 15.6-7 15.6-15.6C31.6 7.4 24.6.4 16 .4z"/></svg>
                   {t('whatsappNumber')}
                 </Label>
-                <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+213 555 12 34 56" />
+                <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+216 12 345 678" />
                 <p className="text-xs text-muted-foreground mt-1">{t('whatsappHint')}</p>
               </div>
               
