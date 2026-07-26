@@ -38,7 +38,7 @@ export const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({ open, onOp
     if (open && user?.profile) {
       const p = user.profile;
       setName(p.name || ""); setBio(p.bio || ""); setLocation(p.location || "");
-      setAvatarUrl(p.avatar_url || ""); setPhone(p.phone || "");
+      setAvatarUrl(p.avatar_url || ""); setPhone(p.phone || "+216");
       setIsProvider(p.is_provider || false); setServiceTypes(p.service_types || []);
       setProfileRole((p as any).profile_role || "seller");
       if ((p as any).latitude && (p as any).longitude) {
