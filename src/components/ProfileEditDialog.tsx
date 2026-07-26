@@ -109,7 +109,14 @@ export const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({ open, onOp
                   <Button type="button" variant="outline" onClick={() => setShowLocationSelector(true)}><MapPin className="w-4 h-4" /></Button>
                 </div>
               </div>
-              <div><Label htmlFor="phone">{t('phone')}</Label><Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={t('yourPhoneNumber')} /></div>
+              <div>
+                <Label htmlFor="phone" className="flex items-center gap-2">
+                  <svg viewBox="0 0 32 32" width="14" height="14" className="text-[#25D366]"><path fill="currentColor" d="M16 .4C7.4.4.4 7.4.4 16c0 2.8.7 5.5 2.1 7.9L.3 31.6l7.9-2.1c2.3 1.3 4.9 1.9 7.6 1.9h.1c8.6 0 15.6-7 15.6-15.6C31.6 7.4 24.6.4 16 .4z"/></svg>
+                  {t('whatsappNumber')}
+                </Label>
+                <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+213 555 12 34 56" />
+                <p className="text-xs text-muted-foreground mt-1">{t('whatsappHint')}</p>
+              </div>
               
               {/* Profile Role Selection */}
               <div className="space-y-2">
