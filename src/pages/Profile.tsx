@@ -240,6 +240,13 @@ export default function Profile() {
             </div>
           </div>
 
+          {isOwnProfile && !user?.phone && (
+            <button onClick={() => setShowEditDialog(true)} className="w-full text-left rounded-lg border border-[#25D366]/30 bg-[#25D366]/5 hover:bg-[#25D366]/10 transition-colors px-3 py-2 text-sm flex items-center gap-2">
+              <WhatsAppIcon size={16} className="text-[#25D366] shrink-0" />
+              <span className="flex-1">{t('addWhatsappPrompt')}</span>
+              <span className="text-xs font-medium text-[#25D366]">{t('addWhatsappCta')}</span>
+            </button>
+          )}
           {user?.bio && <p className="text-sm leading-relaxed">{user.bio}</p>}
           {user?.serviceTypes && user.serviceTypes.length > 0 && (user?.profileRole === 'provider' || user?.profileRole === 'both') && (
             <div className="flex flex-wrap gap-2">{user.serviceTypes.map((s: string) => <Badge key={s} variant="outline" className="text-xs">{s}</Badge>)}</div>
