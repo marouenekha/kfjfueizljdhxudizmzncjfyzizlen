@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting...</title>
+    <script type="text/javascript">
+      const repoPath = "/kfjfueizljdhxudizmzncjfyzizlen";
+      const path = window.location.pathname;
+      const query = window.location.search || "";
+      const hash = window.location.hash || "";
+
+      if (path.startsWith(repoPath)) {
+        const relativePath = path.slice(repoPath.length) || "/";
+        window.location.replace(`${repoPath}/index.html?redirect=${encodeURIComponent(relativePath)}${query}${hash}`);
+      } else {
+        window.location.replace(`${repoPath}/index.html?redirect=${encodeURIComponent(path)}${query}${hash}`);
+      }
+    </script>
+  </head>
+  <body></body>
+</html>

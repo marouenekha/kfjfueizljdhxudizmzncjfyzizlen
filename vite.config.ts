@@ -3,8 +3,10 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// https://vitejs.dev/config/
+const repoName = "kfjfueizljdhxudizmzncjfyzizlen";
+
 export default defineConfig(({ mode }) => ({
+  base: `/${repoName}/`,
   server: {
     host: "::",
     port: 8080,
