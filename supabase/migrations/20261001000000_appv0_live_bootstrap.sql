@@ -29,13 +29,16 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Profiles are viewable by everyone"
+DROP POLICY IF EXISTS "Profiles are viewable by everyone" ON public.profiles;
+CREATE POLICY "Profiles are viewable by everyone"
 ON public.profiles FOR SELECT USING (true);
 
-CREATE POLICY IF NOT EXISTS "Users can update their own profile"
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
+CREATE POLICY "Users can update their own profile"
 ON public.profiles FOR UPDATE USING (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can insert their own profile"
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
+CREATE POLICY "Users can insert their own profile"
 ON public.profiles FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 CREATE TRIGGER update_profiles_updated_at
@@ -65,16 +68,20 @@ CREATE TABLE IF NOT EXISTS public.posts (
 
 ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Posts are viewable by everyone"
+DROP POLICY IF EXISTS "Posts are viewable by everyone" ON public.posts;
+CREATE POLICY "Posts are viewable by everyone"
 ON public.posts FOR SELECT USING (true);
 
-CREATE POLICY IF NOT EXISTS "Users can create their own posts"
+DROP POLICY IF EXISTS "Users can create their own posts" ON public.posts;
+CREATE POLICY "Users can create their own posts"
 ON public.posts FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can update their own posts"
+DROP POLICY IF EXISTS "Users can update their own posts" ON public.posts;
+CREATE POLICY "Users can update their own posts"
 ON public.posts FOR UPDATE USING (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can delete their own posts"
+DROP POLICY IF EXISTS "Users can delete their own posts" ON public.posts;
+CREATE POLICY "Users can delete their own posts"
 ON public.posts FOR DELETE USING (auth.uid() = user_id);
 
 CREATE TRIGGER update_posts_updated_at
@@ -93,13 +100,16 @@ CREATE TABLE IF NOT EXISTS public.messages (
 
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Users can view their own messages"
+DROP POLICY IF EXISTS "Users can view their own messages" ON public.messages;
+CREATE POLICY "Users can view their own messages"
 ON public.messages FOR SELECT USING (auth.uid() = sender_id OR auth.uid() = receiver_id);
 
-CREATE POLICY IF NOT EXISTS "Users can send messages"
+DROP POLICY IF EXISTS "Users can send messages" ON public.messages;
+CREATE POLICY "Users can send messages"
 ON public.messages FOR INSERT WITH CHECK (auth.uid() = sender_id);
 
-CREATE POLICY IF NOT EXISTS "Users can update their received messages"
+DROP POLICY IF EXISTS "Users can update their received messages" ON public.messages;
+CREATE POLICY "Users can update their received messages"
 ON public.messages FOR UPDATE USING (auth.uid() = receiver_id);
 
 CREATE TABLE IF NOT EXISTS public.jobs (
@@ -118,13 +128,16 @@ CREATE TABLE IF NOT EXISTS public.jobs (
 
 ALTER TABLE public.jobs ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Jobs are viewable by participants"
+DROP POLICY IF EXISTS "Jobs are viewable by participants" ON public.jobs;
+CREATE POLICY "Jobs are viewable by participants"
 ON public.jobs FOR SELECT USING (auth.uid() = requester_id OR auth.uid() = provider_id);
 
-CREATE POLICY IF NOT EXISTS "Users can create job requests"
+DROP POLICY IF EXISTS "Users can create job requests" ON public.jobs;
+CREATE POLICY "Users can create job requests"
 ON public.jobs FOR INSERT WITH CHECK (auth.uid() = requester_id);
 
-CREATE POLICY IF NOT EXISTS "Participants can update jobs"
+DROP POLICY IF EXISTS "Participants can update jobs" ON public.jobs;
+CREATE POLICY "Participants can update jobs"
 ON public.jobs FOR UPDATE USING (auth.uid() = requester_id OR auth.uid() = provider_id);
 
 CREATE TRIGGER update_jobs_updated_at
@@ -142,13 +155,16 @@ CREATE TABLE IF NOT EXISTS public.follows (
 
 ALTER TABLE public.follows ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Follows are viewable by everyone"
+DROP POLICY IF EXISTS "Follows are viewable by everyone" ON public.follows;
+CREATE POLICY "Follows are viewable by everyone"
 ON public.follows FOR SELECT USING (true);
 
-CREATE POLICY IF NOT EXISTS "Users can create follows"
+DROP POLICY IF EXISTS "Users can create follows" ON public.follows;
+CREATE POLICY "Users can create follows"
 ON public.follows FOR INSERT WITH CHECK (auth.uid() = follower_id AND follower_id != following_id);
 
-CREATE POLICY IF NOT EXISTS "Users can delete their own follows"
+DROP POLICY IF EXISTS "Users can delete their own follows" ON public.follows;
+CREATE POLICY "Users can delete their own follows"
 ON public.follows FOR DELETE USING (auth.uid() = follower_id);
 
 CREATE TABLE IF NOT EXISTS public.ratings (
@@ -164,16 +180,20 @@ CREATE TABLE IF NOT EXISTS public.ratings (
 
 ALTER TABLE public.ratings ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Ratings are viewable by everyone"
+DROP POLICY IF EXISTS "Ratings are viewable by everyone" ON public.ratings;
+CREATE POLICY "Ratings are viewable by everyone"
 ON public.ratings FOR SELECT USING (true);
 
-CREATE POLICY IF NOT EXISTS "Users can create ratings"
+DROP POLICY IF EXISTS "Users can create ratings" ON public.ratings;
+CREATE POLICY "Users can create ratings"
 ON public.ratings FOR INSERT WITH CHECK (auth.uid() = rater_id AND rater_id != rated_id);
 
-CREATE POLICY IF NOT EXISTS "Users can update their own ratings"
+DROP POLICY IF EXISTS "Users can update their own ratings" ON public.ratings;
+CREATE POLICY "Users can update their own ratings"
 ON public.ratings FOR UPDATE USING (auth.uid() = rater_id);
 
-CREATE POLICY IF NOT EXISTS "Users can delete their own ratings"
+DROP POLICY IF EXISTS "Users can delete their own ratings" ON public.ratings;
+CREATE POLICY "Users can delete their own ratings"
 ON public.ratings FOR DELETE USING (auth.uid() = rater_id);
 
 CREATE TRIGGER update_ratings_updated_at
@@ -194,16 +214,20 @@ CREATE TABLE IF NOT EXISTS public.portfolio_items (
 
 ALTER TABLE public.portfolio_items ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Portfolio items are viewable by everyone"
+DROP POLICY IF EXISTS "Portfolio items are viewable by everyone" ON public.portfolio_items;
+CREATE POLICY "Portfolio items are viewable by everyone"
 ON public.portfolio_items FOR SELECT USING (true);
 
-CREATE POLICY IF NOT EXISTS "Users can create their own portfolio items"
+DROP POLICY IF EXISTS "Users can create their own portfolio items" ON public.portfolio_items;
+CREATE POLICY "Users can create their own portfolio items"
 ON public.portfolio_items FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can update their own portfolio items"
+DROP POLICY IF EXISTS "Users can update their own portfolio items" ON public.portfolio_items;
+CREATE POLICY "Users can update their own portfolio items"
 ON public.portfolio_items FOR UPDATE USING (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can delete their own portfolio items"
+DROP POLICY IF EXISTS "Users can delete their own portfolio items" ON public.portfolio_items;
+CREATE POLICY "Users can delete their own portfolio items"
 ON public.portfolio_items FOR DELETE USING (auth.uid() = user_id);
 
 CREATE TRIGGER update_portfolio_items_updated_at
@@ -221,13 +245,16 @@ CREATE TABLE IF NOT EXISTS public.post_likes (
 
 ALTER TABLE public.post_likes ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Likes are viewable by everyone"
+DROP POLICY IF EXISTS "Likes are viewable by everyone" ON public.post_likes;
+CREATE POLICY "Likes are viewable by everyone"
 ON public.post_likes FOR SELECT USING (true);
 
-CREATE POLICY IF NOT EXISTS "Users can like posts"
+DROP POLICY IF EXISTS "Users can like posts" ON public.post_likes;
+CREATE POLICY "Users can like posts"
 ON public.post_likes FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can unlike posts"
+DROP POLICY IF EXISTS "Users can unlike posts" ON public.post_likes;
+CREATE POLICY "Users can unlike posts"
 ON public.post_likes FOR DELETE USING (auth.uid() = user_id);
 
 CREATE TABLE IF NOT EXISTS public.post_comments (
@@ -242,13 +269,16 @@ CREATE TABLE IF NOT EXISTS public.post_comments (
 
 ALTER TABLE public.post_comments ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Comments are viewable by everyone"
+DROP POLICY IF EXISTS "Comments are viewable by everyone" ON public.post_comments;
+CREATE POLICY "Comments are viewable by everyone"
 ON public.post_comments FOR SELECT USING (true);
 
-CREATE POLICY IF NOT EXISTS "Users can create comments"
+DROP POLICY IF EXISTS "Users can create comments" ON public.post_comments;
+CREATE POLICY "Users can create comments"
 ON public.post_comments FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can delete their own comments"
+DROP POLICY IF EXISTS "Users can delete their own comments" ON public.post_comments;
+CREATE POLICY "Users can delete their own comments"
 ON public.post_comments FOR DELETE USING (auth.uid() = user_id);
 
 CREATE TABLE IF NOT EXISTS public.products (
@@ -264,16 +294,20 @@ CREATE TABLE IF NOT EXISTS public.products (
 
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Products are viewable by everyone"
+DROP POLICY IF EXISTS "Products are viewable by everyone" ON public.products;
+CREATE POLICY "Products are viewable by everyone"
 ON public.products FOR SELECT USING (true);
 
-CREATE POLICY IF NOT EXISTS "Users can create their own products"
+DROP POLICY IF EXISTS "Users can create their own products" ON public.products;
+CREATE POLICY "Users can create their own products"
 ON public.products FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can update their own products"
+DROP POLICY IF EXISTS "Users can update their own products" ON public.products;
+CREATE POLICY "Users can update their own products"
 ON public.products FOR UPDATE USING (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can delete their own products"
+DROP POLICY IF EXISTS "Users can delete their own products" ON public.products;
+CREATE POLICY "Users can delete their own products"
 ON public.products FOR DELETE USING (auth.uid() = user_id);
 
 CREATE TRIGGER update_products_updated_at
@@ -293,38 +327,50 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('posts', 'posts', true)
 ON CONFLICT (id) DO NOTHING;
 
-CREATE POLICY IF NOT EXISTS "Avatar images are publicly accessible"
+DROP POLICY IF EXISTS "Avatar images are publicly accessible" ON storage.objects;
+CREATE POLICY "Avatar images are publicly accessible"
 ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
 
-CREATE POLICY IF NOT EXISTS "Users can upload their own avatar"
+DROP POLICY IF EXISTS "Users can upload their own avatar" ON storage.objects;
+CREATE POLICY "Users can upload their own avatar"
 ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
 
-CREATE POLICY IF NOT EXISTS "Users can update their own avatar"
+DROP POLICY IF EXISTS "Users can update their own avatar" ON storage.objects;
+CREATE POLICY "Users can update their own avatar"
 ON storage.objects FOR UPDATE USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
 
-CREATE POLICY IF NOT EXISTS "Users can delete their own avatar"
+DROP POLICY IF EXISTS "Users can delete their own avatar" ON storage.objects;
+CREATE POLICY "Users can delete their own avatar"
 ON storage.objects FOR DELETE USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
 
-CREATE POLICY IF NOT EXISTS "Portfolio images are publicly accessible"
+DROP POLICY IF EXISTS "Portfolio images are publicly accessible" ON storage.objects;
+CREATE POLICY "Portfolio images are publicly accessible"
 ON storage.objects FOR SELECT USING (bucket_id = 'portfolio');
 
-CREATE POLICY IF NOT EXISTS "Users can upload their own portfolio"
+DROP POLICY IF EXISTS "Users can upload their own portfolio" ON storage.objects;
+CREATE POLICY "Users can upload their own portfolio"
 ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'portfolio' AND auth.uid()::text = (storage.foldername(name))[1]);
 
-CREATE POLICY IF NOT EXISTS "Users can update their own portfolio"
+DROP POLICY IF EXISTS "Users can update their own portfolio" ON storage.objects;
+CREATE POLICY "Users can update their own portfolio"
 ON storage.objects FOR UPDATE USING (bucket_id = 'portfolio' AND auth.uid()::text = (storage.foldername(name))[1]);
 
-CREATE POLICY IF NOT EXISTS "Users can delete their own portfolio"
+DROP POLICY IF EXISTS "Users can delete their own portfolio" ON storage.objects;
+CREATE POLICY "Users can delete their own portfolio"
 ON storage.objects FOR DELETE USING (bucket_id = 'portfolio' AND auth.uid()::text = (storage.foldername(name))[1]);
 
-CREATE POLICY IF NOT EXISTS "Post images are publicly accessible"
+DROP POLICY IF EXISTS "Post images are publicly accessible" ON storage.objects;
+CREATE POLICY "Post images are publicly accessible"
 ON storage.objects FOR SELECT USING (bucket_id = 'posts');
 
-CREATE POLICY IF NOT EXISTS "Users can upload their own post images"
+DROP POLICY IF EXISTS "Users can upload their own post images" ON storage.objects;
+CREATE POLICY "Users can upload their own post images"
 ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'posts' AND auth.uid()::text = (storage.foldername(name))[1]);
 
-CREATE POLICY IF NOT EXISTS "Users can update their own post images"
+DROP POLICY IF EXISTS "Users can update their own post images" ON storage.objects;
+CREATE POLICY "Users can update their own post images"
 ON storage.objects FOR UPDATE USING (bucket_id = 'posts' AND auth.uid()::text = (storage.foldername(name))[1]);
 
-CREATE POLICY IF NOT EXISTS "Users can delete their own post images"
+DROP POLICY IF EXISTS "Users can delete their own post images" ON storage.objects;
+CREATE POLICY "Users can delete their own post images"
 ON storage.objects FOR DELETE USING (bucket_id = 'posts' AND auth.uid()::text = (storage.foldername(name))[1]);
