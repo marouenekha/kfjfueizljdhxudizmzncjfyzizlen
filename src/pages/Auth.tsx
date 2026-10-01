@@ -25,7 +25,36 @@ const Auth = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [forgotLoading, setForgotLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [confirmationRequired, setConfirmationRequired] = useState(() => {
+    const hashParams = new URLSearchParams(window.location.hash.slice(1));
+    return hashParams.get('error_code') === 'otp_expired';
+  });
   const { toast } = useToast();
+
+  const handleResendConfirmation = async () => {
+    if (!formData.email || !validateEmail(formData.email)) {
+      setErrors({ email: formData.email ? t('emailInvalid') : t('emailRequired') });
+      return;
+    }
+
+    setResendLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: formData.email,
+        options: { emailRedirectTo: `${window.location.origin}${import.meta.env.BASE_URL}` },
+      });
+      if (error) throw error;
+      setConfirmationRequired(false);
+      window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+      toast({ title: t('confirmationEmailSent'), description: t('confirmationEmailSentDescription') });
+    } catch (error: any) {
+      toast({ title: t('confirmationEmailError'), description: error.message, variant: 'destructive' });
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   const handleForgotPassword = async () => {
     if (!formData.email) {
@@ -72,9 +101,14 @@ const Auth = () => {
     if (!validateForm()) return;
     setLoading(true);
     try {
-      if (isLogin) { await login(formData.email, formData.password); }
-      else { await signup({ email: formData.email, password: formData.password, name: formData.name, isProvider: formData.isProvider }); }
-      navigate('/feed');
+      if (isLogin) {
+        await login(formData.email, formData.password);
+        navigate('/feed');
+      } else {
+        const needsConfirmation = await signup({ email: formData.email, password: formData.password, name: formData.name, isProvider: formData.isProvider });
+        if (needsConfirmation) setConfirmationRequired(true);
+        else navigate('/feed');
+      }
     } catch (error) { /* handled in auth context */ }
     finally { setLoading(false); }
   };
@@ -127,6 +161,17 @@ const Auth = () => {
             </CardHeader>
 
             <CardContent className="space-y-4 px-4 sm:px-6">
+              {confirmationRequired && (
+                <Alert>
+                  <AlertDescription className="space-y-3">
+                    <p>{t('confirmationRequired')}</p>
+                    <Button type="button" variant="outline" className="w-full" onClick={handleResendConfirmation} disabled={resendLoading}>
+                      {resendLoading ? t('resendingConfirmation') : t('resendConfirmation')}
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              )}
+
               <div className="grid grid-cols-2 gap-3">
                 <Button variant="outline" onClick={() => handleSocialLogin('google')} disabled={loading}><Chrome className="w-4 h-4 mr-2" /> Google</Button>
                 <Button variant="outline" onClick={() => handleSocialLogin('facebook')} disabled={loading}><Facebook className="w-4 h-4 mr-2" /> Facebook</Button>

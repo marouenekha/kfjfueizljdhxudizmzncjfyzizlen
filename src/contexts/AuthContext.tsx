@@ -30,7 +30,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (userData: { email: string; password: string; name?: string; isProvider?: boolean }) => Promise<void>;
+  signup: (userData: { email: string; password: string; name?: string; isProvider?: boolean }) => Promise<boolean>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
 }
@@ -135,7 +135,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await supabase.auth.signOut({ scope: "global" } as any);
       } catch {}
 
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}${import.meta.env.BASE_URL}`;
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
@@ -157,6 +157,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       toast.success("Account created!", { description: "Please check your email to verify your account." });
+      return !data.session;
     } catch (error: any) {
       console.error("Signup failed:", error);
       toast.error("Signup failed", { description: error.message || "An error occurred during signup" });
